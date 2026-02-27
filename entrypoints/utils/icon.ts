@@ -1,4 +1,4 @@
-// 失败时展示的图标
+// Biểu tượng hiển thị khi thất bại
 import { sendErrorMessage } from "./tip";
 import "element-plus/es/components/message/style/css";
 import {
@@ -18,52 +18,52 @@ const icon = {
 </svg>`,
 };
 
-// 插入失败提示并处理错误
+// Chèn lời nhắc lỗi và xử lý lỗi
 export function insertFailedTip(
   node: HTMLElement,
   errMsg: string,
   spinner: HTMLElement
 ) {
-  spinner?.remove(); // 取消转圈动画
+  spinner?.remove(); // Hủy hoạt ảnh vòng tròn
 
-  // 创建包装元素
+  // Tạo các phần tử gói
   const wrapper = document.createElement("span");
   wrapper.classList.add("fluent-read-retry-wrapper");
 
-  // 创建重试按钮
+  // Tạo nút thử lại
   const retryBtn = document.createElement("span");
-  retryBtn.innerText = "重试";
+  retryBtn.innerText = "Thử lại";
   retryBtn.classList.add("fluent-read-retry");
   retryBtn.addEventListener("click", handleRetryClick(node, wrapper));
 
-  // 添加失败标记
+  // Thêm dấu hiệu thất bại
   node.classList.add("fluent-read-failure");
 
-  // 创建错误信息提示按钮
+  // Tạo nút thông báo lỗi
   const errorTip = document.createElement("span");
-  errorTip.innerText = "错误原因";
+  errorTip.innerText = "Nguyên nhân lỗi";
   errorTip.classList.add("fluent-read-reason");
   errorTip.addEventListener("click", handleErrorClick(errMsg));
 
-  // 创建图标元素
+  // Tạo các yếu tố biểu tượng
   const retryElement = createIconElement(icon.retry);
   const warnElement = createIconElement(icon.warn);
 
-  // 将所有元素批量添加到 wrapper
+  // Thêm hàng loạt tất cả các phần tử vào trình bao bọc
   wrapper.append(retryElement, retryBtn, warnElement, errorTip);
   node.appendChild(wrapper);
 }
 
-// 处理重试按钮点击事件
+// Xử lý sự kiện nhấn nút thử lại
 function handleRetryClick(node: HTMLElement, wrapper: HTMLElement) {
   return (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
 
-    wrapper.remove(); // 移除错误提示元素，重新翻译
-    node.classList.remove("fluent-read-failure"); // 移除失败标记
+    wrapper.remove(); // Xóa các thành phần thông báo lỗi và dịch lại
+    node.classList.remove("fluent-read-failure"); // Xóa dấu thất bại
 
-    // 根据当前配置的翻译模式决定使用哪种翻译方式
+    // Quyết định sử dụng phương pháp dịch nào dựa trên Chế độ dịch hiện được định cấu hình
     if (config.display === styles.bilingualTranslation) {
       handleBilingualTranslation(node, false);
     } else {
@@ -72,58 +72,58 @@ function handleRetryClick(node: HTMLElement, wrapper: HTMLElement) {
   };
 }
 
-// 处理错误提示按钮点击事件
+// Xử lý sự kiện bấm nút lỗi
 function handleErrorClick(errMsg: string) {
   return (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
 
     const message = getErrorMessage(errMsg);
-    sendErrorMessage(message); // 发送错误提示
+    sendErrorMessage(message); // Gửi thông báo lỗi
   };
 }
 
-// 根据错误信息返回错误提示
+// Trả về thông báo lỗi dựa trên thông báo lỗi
 function getErrorMessage(errMsg: string): string {
   if (errMsg.includes("auth failed") || errMsg.includes("API key")) {
-    return "Token 似乎有点问题，请前往设置页面重新配置后再试。";
+    return "Có vẻ token đang có vấn đề, vui lòng vào trang cài đặt cấu hình lại rồi thử lại.";
   } else if (errMsg.includes("quota") || errMsg.includes("limit")) {
     const service = options.services.find((s: { value: string; label: string }) => s.value === config.service);
-    return "你的请求频率过高，被【" + (service?.label || config.service) + "】拒绝了，请稍后再试吧~";
+    return "Tần suất yêu cầu của bạn quá cao, bị 【" + (service?.label || config.service) + "】 từ chối, vui lòng thử lại sau ~";
   } else if (errMsg.includes("network error")) {
-    return "网络连接好像不稳定，请检查网络后再试。";
+    return "Kết nối mạng có vẻ không ổn định, vui lòng kiểm tra mạng rồi thử lại.";
   } else if (errMsg.includes("model")) {
-    return "模型配置可能有误，请前往设置页面进行检查和调整。";
+    return "Cấu hình mô hình có thể chưa đúng, vui lòng vào trang cài đặt để kiểm tra và điều chỉnh.";
   } else if (errMsg.includes("timeout")) {
-    return "请求超时啦，请稍后再试一次。";
+    return "Yêu cầu đã hết thời gian chờ, vui lòng thử lại sau.";
   } else {
-    return errMsg || "出现了未知错误，请前往开源社区联系开发者吧~";
+    return errMsg || "Đã xảy ra lỗi không xác định, vui lòng liên hệ nhà phát triển qua cộng đồng mã nguồn mở ~";
   }
 }
 
-// 创建图标元素
+// Tạo các yếu tố biểu tượng
 function createIconElement(iconContent: string): HTMLElement {
   const iconElement = document.createElement("div");
   iconElement.innerHTML = iconContent;
   return iconElement;
 }
 
-// 插入加载动画
+// Chèn hoạt ảnh đang tải
 export function insertLoadingSpinner(
   node: HTMLElement,
   isCache: boolean = false
 ): HTMLElement {
   const spinner = document.createElement("span");
   spinner.className = "fluent-read-loading";
-  if (isCache) spinner.style.borderTop = "3px solid green"; // 存在缓存时改为绿色
+  if (isCache) spinner.style.borderTop = "3px solid green"; // Thay đổi sang màu xanh khi tồn tại bộ đệm
   
-  // 异步检查动画配置
+  // Kiểm tra cấu hình hoạt ảnh không đồng bộ
   import('@/entrypoints/utils/config').then(({ config }) => {
     if (!config.animations && !spinner.classList.contains('static')) {
       spinner.classList.add('static');
     }
   }).catch(() => {
-    // 忽略错误，使用默认动画
+    // Bỏ qua lỗi và sử dụng hoạt ảnh mặc định
   });
   
   node.appendChild(spinner);

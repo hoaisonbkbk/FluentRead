@@ -8,7 +8,7 @@ async function gemini(message: any) {
 
     let model = config.model[config.service] === customModelString ? config.customModel[config.service] : config.model[config.service]
 
-    // 判断是否使用代理
+    // Xác định xem có nên sử dụng proxy hay không
     let url: string = config.proxy[config.service] ?
         config.proxy[config.service] : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.token[config.service]}`;
 
@@ -22,7 +22,7 @@ async function gemini(message: any) {
         return result.candidates[0].content.parts[0].text;
     } else {
         console.log(resp)
-        throw new Error(`翻译失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+        throw new Error(`Dịch thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
     }
 }
 

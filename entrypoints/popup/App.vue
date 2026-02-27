@@ -19,7 +19,7 @@ import Header from '../../components/Header.vue';
 import Main from "../../components/Main.vue";
 import Footer from "../../components/Footer.vue";
 import '../../styles/theme.css';
-// Element Plus 基础与暗色变量
+// Thông tin cơ bản về Element Plus và các biến thể tối
 import 'element-plus/theme-chalk/base.css';
 import 'element-plus/theme-chalk/dark/css-vars.css';
 

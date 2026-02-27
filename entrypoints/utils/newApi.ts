@@ -5,15 +5,15 @@ import { storage } from '@wxt-dev/storage';
 let containerEl: HTMLElement | null = null;
 
 /**
- * 挂载New API 组件
+ * Gắn kết thành phần API mới
  */
 export function mountNewApiComponent() {
-  // 如果已存在实例或配置禁用了此功能，则不创建
+  // Nếu một phiên bản đã tồn tại hoặc Tắt được định cấu hình với tính năng này, nó sẽ không được tạo
   if (containerEl) {
     return;
   }
 
-  // 创建容器元素
+  // Tạo phần tử vùng chứa
   const container = document.createElement('div');
   container.id = 'fluent-new-api-container';
   document.body.appendChild(container);
@@ -25,15 +25,15 @@ export function mountNewApiComponent() {
 
     const id = payload.id || '';
 
-    if (id !== 'new-api') return; // 只处理 New API 的事件
+    if (id !== 'new-api') return; // Chỉ xử lý các sự kiện API mới
 
     const baseUrl = payload.baseUrl || '';
     const apiKey = payload.apiKey || '';
     const model = payload.model || '';
-    const maskedKey = apiKey ? apiKey.slice(0, 3) + '***' + apiKey.slice(-3) : '(空)';
+    const maskedKey = apiKey ? apiKey.slice(0, 3) + '***' + apiKey.slice(-3) : '(trống)';
 
     const confirmed = window.confirm(
-      `检测到 New API 配置：\n- 接口地址: ${baseUrl || '(空)'}\n- API Key: ${maskedKey}\n- 模型: ${model || '(空)'}\n\n是否应用该配置并切换到 New API？`
+      `Phát hiện cấu hình New API:\n- Địa chỉ API: ${baseUrl || '(trống)'}\n- API Key: ${maskedKey}\n- Mô hình: ${model || '(trống)'}\n\nBạn có muốn áp dụng cấu hình này và chuyển sang New API không?`
     );
     if (!confirmed) return;
 
@@ -57,7 +57,7 @@ export function mountNewApiComponent() {
 }
 
 /**
- * 卸载New API 组件
+ * Gỡ cài đặt thành phần API mới
  */
 export function unmountNewApiComponent() {
   const container = document.getElementById('fluent-new-api-container');

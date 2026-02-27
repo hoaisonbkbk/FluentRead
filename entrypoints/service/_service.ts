@@ -26,7 +26,7 @@ type ServiceFunction = (message: any) => Promise<any>;
 type ServiceMap = {[key: string]: ServiceFunction;};
 
 export const _service: ServiceMap = {
-    // 传统机器翻译
+    // Dịch máy truyền thống
     [services.microsoft]: microsoft,
     [services.deepL]: deepl,
     [services.deeplx]: deeplx,
@@ -36,7 +36,7 @@ export const _service: ServiceMap = {
     [services.tencent]: tencent,
     [services.chromeTranslator]: chromeTranslator,
 
-    // 大模型翻译
+    // dịch mô hình lớn
     [services.custom]: custom,
     [services.tongyi]: tongyi,
     [services.zhipu]: zhipu,

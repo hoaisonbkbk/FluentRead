@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         流畅阅读
+// @name         FluentRead
 // @license      GPL-3.0 license
 // @namespace    https://fr.unmeta.cn/
 // @version      1.31
-// @description  基于上下文语境的人工智能翻译引擎，为部分网站提供精准翻译，让所有人都能够拥有基于母语般的阅读体验。程序Github开源：https://github.com/Bistutu/FluentRead，欢迎 star。
+// @description  Tiện ích dịch mã nguồn mở trên trình duyệt, giúp mọi người đọc mượt như tiếng mẹ đẻ.程序Github开源：https://github.com/Bistutu/FluentRead，欢迎 star。
 // @author       ThinkStu
 // @match        *://*/*
 // @icon         data:image/png;base64,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
@@ -146,26 +146,26 @@ const LLM = new Set(
 
 // 翻译模型名称
 const transModelName = {
-    ['machine']: '---【机器翻译】---',
-    [transModel.microsoft]: '微软翻译（推荐）',
-    [transModel.deepL]: 'DeepL翻译(需令牌)',
-    ['llm']: '---【AI翻译】---',
+    ['machine']: '---【Dịch Máy】---',
+    [transModel.microsoft]: 'Microsoft Dịch (Khuyên dùng)',
+    [transModel.deepL]: 'DeepL Dịch (Cần Token)',
+    ['llm']: '---【Dịch AI】---',
     [transModel.moonshot]: 'Moonshot',
-    [transModel.zhipu]: '智谱清言',
-    [transModel.tongyi]: '通义千问',
-    [transModel.yiyan]: '文心一言',
+    [transModel.zhipu]: 'Zhipu Qingyan',
+    [transModel.tongyi]: 'Alibaba Tongyi',
+    [transModel.yiyan]: 'Baidu ERNIE',
     [transModel.openai]: 'ChatGPT',
     [transModel.gemini]: 'Gemini',
-    ['native']: '---【本地大模型】---',
+    ['native']: '---【Mô hình Cục bộ】---',
     [transModel.ollama]: 'ollama',
 }
 
 // 错误类型
 const errorManager = {
-    unknownError: "未知错误",
-    netError: "网络超时，请稍后重试",
-    authFailed: "认证失败，请检查 token 是否正确",
-    quota: "每分钟翻译次数已达上限，请稍后再试",
+    unknownError: "Lỗi không xác định",
+    netError: "Mạng hết thời gian, vui lòng thử lại sau",
+    authFailed: "Xác thực thất bại, vui lòng kiểm tra xem token đã đúng chưa",
+    quota: "Số lần dịch mỗi phút đã đạt giới hạn tối đa, vui lòng thử lại sau",
 }
 
 // 模型类型
@@ -228,7 +228,7 @@ let LLMFormat = {
             'messages': [
                 {'role': 'system', 'content': chatMgs.getSystemMsg()},
                 {'role': 'user', 'content': chatMgs.getUserMsg('hello')},
-                {'role': "assistant", 'content': '你好'},
+                {'role': "assistant", 'content': 'Xin chào'},
                 {'role': 'user', 'content': origin}
             ]
         })
@@ -332,7 +332,7 @@ const toast = Swal.mixin({
     }
 });
 
-// 多语言管理对象
+// 多管理对象
 const langManager = {
     auto: '自动检测',  // 自动检测
     zh: 'zh-Hans',    // 简体中文
@@ -353,10 +353,10 @@ const langManager = {
     ar: 'ar',         // 阿拉伯语
     hi: 'hi',         // 印地语
     per: 'fa',        // 波斯语
-    // from、to 源语言、目标语言
+    // from、to 源、目标
     from: {auto: '自动检测'},
-    to: {'zh-Hans': '简体中文', 'en': '英语',},
-    // 解析语言种类
+    to: {'vi': 'Tiếng Việt', 'zh-Hans': 'Tiếng Trung', 'en': 'Tiếng Anh',},
+    // 解析种类
     parseLanguage(language) {
         return langManager[language] || language || 'en';
     },
@@ -369,7 +369,7 @@ const langManager = {
         return GM_getValue('from', 'auto')
     },
     getTo() {
-        return GM_getValue('to', 'zh-Hans')
+        return GM_getValue('to', 'vi')
     }
 }
 
@@ -411,7 +411,7 @@ const settingManager = {
     generateOptions(options, selectedValue) {
         return Object.entries(options).map(([key, value]) => {
             // 检查是否为需要禁用的选项
-            const isDisabled = ['---【机器翻译】---', '---【AI翻译】---', '---【本地大模型】---'].includes(value);
+            const isDisabled = ['---【Dịch Máy】---', '---【Dịch AI】---', '---【Mô hình Cục bộ】---'].includes(value);
             return `<option value="${key}" ${selectedValue === key ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}>${value}</option>`;
         }).join('');
     },
@@ -422,9 +422,9 @@ const settingManager = {
         const dom = `
   <div style="font-size: 1em;" xmlns="http://www.w3.org/1999/html">
     <label class="instant-setting-label">快捷键<select id="fluent-read-hotkey" class="instant-setting-common">${this.generateOptions(shortcutManager.hotkeyOptions, util.getValue('hotkey'))}</select></label>
-    <label class="instant-setting-label">翻译源语言<select id="fluent-read-from" class="instant-setting-common">${this.generateOptions(langManager.from, langManager.getFrom())}</select></label>
-    <label class="instant-setting-label">翻译目标语言<select id="fluent-read-to" class="instant-setting-common">${this.generateOptions(langManager.to, langManager.getTo())}</select></label>
-    <label class="instant-setting-label">翻译服务<select id="fluent-read-model" class="instant-setting-select">${this.generateOptions(transModelName, util.getValue('model'))}</select></label>
+    <label class="instant-setting-label">Ngôn ngữ nguồn<select id="fluent-read-from" class="instant-setting-common">${this.generateOptions(langManager.from, langManager.getFrom())}</select></label>
+    <label class="instant-setting-label">Ngôn ngữ đích<select id="fluent-read-to" class="instant-setting-common">${this.generateOptions(langManager.to, langManager.getTo())}</select></label>
+    <label class="instant-setting-label">Dịch vụ dịch thuật<select id="fluent-read-model" class="instant-setting-select">${this.generateOptions(transModelName, util.getValue('model'))}</select></label>
     
     <!--支持 ollama 等自定义模型名称-->
     <label class="instant-setting-label" id="fluent-read-custom-type-label" style="display: none;">
@@ -459,11 +459,11 @@ const settingManager = {
     <label class="instant-setting-label" id="fluent-read-sk-label" style="display: none;">sk令牌<input type="text" class="instant-setting-input" id="fluent-read-sk" value="" ></label>
     <!-- 添加的输入区域 -->
     <label class="instant-setting-label" id="fluent-read-system-label" style="display: none;">
-        <span class="fluent-read-tooltip">system角色设定<span class="fluent-read-tooltiptext">模型角色设定，如：你是一名专业的翻译家</span></span>
+        <span class="fluent-read-tooltip">Thiết lập vai trò (system)<span class="fluent-read-tooltiptext">Thiết lập vai trò mô hình, ví dụ: Bạn là một nhà dịch thuật chuyên nghiệp</span></span>
         <textarea class="instant-setting-textarea" id="fluent-read-system-message">${chatMgs.getSystemMsg()}</textarea>
     </label>
     <label class="instant-setting-label" id="fluent-read-user-label" style="display: none;">
-        <span class="fluent-read-tooltip">user消息模板<span class="fluent-read-tooltiptext">用户对话内容，如：请你翻译 Hello</br>注意：{{text}} 是你需要翻译的原文，不可缺少。</span></span>
+        <span class="fluent-read-tooltip">Mẫu tin nhắn người dùng (user)<span class="fluent-read-tooltiptext">用户对话内容，如：请你翻译 Hello</br>注意：{{text}} 是你需要翻译的原文，不可缺少。</span></span>
         <textarea class="instant-setting-textarea" id="fluent-read-user-message">${chatMgs.getOriginUserMsg()}</textarea>
     </label>
   </div>`;
@@ -485,18 +485,18 @@ const settingManager = {
                         if (!ok) {
                             toast.fire({
                                 icon: 'error',
-                                title: '自定义地址不合法，请检查后重试！'
+                                title: '自定义地址不合法，请检查后Thử lại！'
                             });
                             return
                         }
                     }
 
-                    // 1、设置语言
+                    // 1、设置
                     util.setValue('from', util.getElementValue('fluent-read-from'));
                     util.setValue('to', util.getElementValue('fluent-read-to'));
                     // 2、设置快捷键
                     util.setValue('hotkey', util.getElementValue('fluent-read-hotkey'));
-                    // 3、设置翻译服务
+                    // 3、设置Dịch vụ dịch thuật
                     util.setValue('model', model);
                     // 4、设置模型类型
                     if (model === transModel.ollama) {
@@ -532,7 +532,7 @@ const settingManager = {
         if (LLM.has(model) || model === transModel.deepL) {
             this.showHidden(model);
         }
-        // 监听“翻译服务”选择框
+        // 监听“Dịch vụ dịch thuật”选择框
         document.getElementById('fluent-read-model').addEventListener('change', e => {
             const model = e.currentTarget.value;
             this.showHidden(model);
@@ -648,8 +648,8 @@ const settingManager = {
             inputOptions: langManager.to,
         }
         Swal.fire({
-            title: args.notion + '语言设置',
-            text: '请选择翻译' + args.notion + '语言',
+            title: args.notion + '设置',
+            text: 'Vui lòng chọn ngôn ngữ dịch ' + args.notion + '',
             input: 'select',
             inputValue: args.inputValue,
             inputOptions: args.inputOptions,
@@ -660,7 +660,7 @@ const settingManager = {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 langManager.setFromTo(langManager.getFrom(), result.value);
-                toast.fire({icon: 'success', title: args.notion + '语言设置成功！'});
+                toast.fire({icon: 'success', title: args.notion + '设置成功！'});
                 history.go(0); // 刷新页面
             }
         });
@@ -726,7 +726,7 @@ const settingManager = {
             });
         });
         observer.observe(document.body, {childList: true, subtree: true});
-        // 2、手动开启一次解析 DOM 树
+        // 2、手动开启一 lần解析 DOM 树
         handleDOMUpdate(document.body);
     });
 
@@ -734,8 +734,8 @@ const settingManager = {
         // F2 清空当前页面所有翻译缓存
         if (event.key === 'F2') {
             localStorage.clear()
-            // toast.fire({icon: 'success', title: '当前页面翻译缓存清空成功！'});
-            console.log('当前页面翻译缓存清空成功！')
+            // toast.fire({icon: 'success', title: 'Đã xóa thành công bộ đệm dịch cho trang hiện tại!'});
+            console.log('Đã xóa thành công bộ đệm dịch cho trang hiện tại!')
         }
 
         // 快捷键 F1，清空所有缓存
@@ -892,7 +892,7 @@ function detectChildMeta(parent) {
 // region 通用翻译处理模块
 const chatMgs = {
     system: `You are a professional, authentic translation engine, only returns translations.`,
-    user_pre: `Please translate them into {{to}}, `,    // 隐藏前半部分（语言选择），显示用户自定义的后半部分
+    user_pre: `Please translate them into {{to}}, `,    // 隐藏前半部分（选择），显示用户自定义的后半部分
     user_post: `please do not explain my original text.:
 
 {{origin}}`,
@@ -920,9 +920,9 @@ function translate(node) {
 
     if (!node.innerText.trim()) return; // 空文本，跳过
 
-    // 检测语言类型，如果是中文则不翻译
+    // 检测类型，如果是中文则不翻译
     baiduDetectLang(node.innerText).then(lang => {
-        if (lang === langManager.getTo()) return;   // 与目标语言相同，不翻译
+        if (lang === langManager.getTo()) return;   // 与目标相同，不翻译
 
         // 如果是机器翻译，则翻译 outerHTML，否则递归获取文本
         let origin = isMachineTrans(model) ? node.outerHTML : getTextWithNode(node);
@@ -932,14 +932,14 @@ function translate(node) {
             createFailedTip(node, new Error(errorManager.netError).toString(), spinner);
         }, 60000);
 
-        // 调用翻译服务
+        // 调用Dịch vụ dịch thuật
         transModelFn[model](origin).then(text => {
 
             clearTimeout(timeout) // 取消超时
             spinner.remove()      // 移除 spinner
 
-            // console.log("翻译前的句子：", origin);
-            // console.log("翻译后的句子：", text);
+            // console.log("Câu trước khi dịch:", origin);
+            // console.log("Câu sau khi dịch:", text);
 
             if (!text || origin === text) return;
 
@@ -1225,7 +1225,7 @@ function gemini(origin) {
                     },
                     {
                         "role": "model",
-                        "parts": [{"text": "你好"}]
+                        "parts": [{"text": "Xin chào"}]
                     },
                     {
                         "role": "user",
@@ -1277,7 +1277,7 @@ function moonshot(origin) {
 
 // endregion
 
-// region 文心一言
+// region Baidu ERNIE
 
 function yiyan(origin) {
     return new Promise((resolve, reject) => {
@@ -1296,7 +1296,7 @@ function yiyan(origin) {
                     'disable_search': true, // 禁用搜索
                     'messages': [
                         {"role": "user", "content": chatMgs.getUserMsg("hello")},
-                        {"role": "assistant", "content": "你好"},
+                        {"role": "assistant", "content": "Xin chào"},
                         {"role": "user", "content": origin}
                     ],
                 }),
@@ -1352,7 +1352,7 @@ function getYiyanToken() {
 
 // endregion
 
-// region 通义千问
+// region Alibaba Tongyi
 // 文档：https://help.aliyun.com/zh/dashscope/developer-reference/tongyi-thousand-questions-metering-and-billing
 function tongyi(origin) {
     return new Promise((resolve, reject) => {
@@ -1374,7 +1374,7 @@ function tongyi(origin) {
                     "messages": [
                         {"role": "system", "content": chatMgs.getSystemMsg()},
                         {"role": "user", "content": chatMgs.getUserMsg("hello")},
-                        {"role": "assistant", "content": "你好"},
+                        {"role": "assistant", "content": "Xin chào"},
                         {"role": "user", "content": origin}
                     ]
                 },
@@ -1491,7 +1491,7 @@ function isMachineTrans(model) {
     return [transModel.microsoft, transModel.deepL].includes(model);
 }
 
-// 检测语言类型
+// 检测类型
 function baiduDetectLang(text) {
     return new Promise((resolve, reject) => {
         // 数据参数
@@ -1534,9 +1534,9 @@ function createFailedTip(node, errorMsg, spinner) {
     const wrapper = document.createElement('span');
     wrapper.classList.add('retry-error-wrapper');
 
-    // 创建重试按钮
+    // 创建Thử lại按钮
     const retryButton = document.createElement('span');
-    retryButton.innerText = '重试';
+    retryButton.innerText = 'Thử lại';
     retryButton.classList.add('retry-error-button');
     retryButton.addEventListener('click', function () {
         // 移除错误提示元素，重新翻译
@@ -1546,7 +1546,7 @@ function createFailedTip(node, errorMsg, spinner) {
 
     // 创建错误提示元素
     const errorTip = document.createElement('span');
-    errorTip.innerText = '错误原因';
+    errorTip.innerText = 'Nguyên nhân lỗi';
     errorTip.classList.add('retry-error-tip');
     errorTip.addEventListener('click', function () {
         if (errorMsg.includes("auth failed")) {
@@ -1567,7 +1567,7 @@ function createFailedTip(node, errorMsg, spinner) {
     node.appendChild(wrapper);
 }
 
-// 重试 svg
+// Thử lại svg
 function createRetrySvgIcon() {
     return createSvgIcon(`M35.9387 5.48805C35.9166 4.60421 35.2434 4.04719 34.279 4.0675C33.3131 4.0878 32.8154 4.67712 32.6567 5.56132C32.5745 6.01985 32.601 6.49957 32.5962 6.96997C32.5881 7.77251 32.594 8.5752 32.594 9.3779C32.4685 9.43478 32.343 9.4917 32.2175 9.54866C31.7961 9.14366 31.3817 8.73102 30.9521 8.33488C27.0799 4.76502 22.4856 3.43605 17.3405 4.22591C10.0761 5.34107 4.69388 11.3891 4.06231 18.939C3.46983 26.0213 8.03881 32.8643 14.897 35.1663C21.8348 37.495 29.5543 34.7845 33.4563 28.6429C33.7074 28.2475 33.9685 27.8417 34.1218 27.4045C34.4194 26.5555 34.2699 25.765 33.4312 25.3113C32.6231 24.8743 31.8573 25.0498 31.2835 25.7915C30.9966 26.1625 30.7785 26.5856 30.5106 26.9724C28.0914 30.4658 24.7682 32.3693 20.5158 32.5766C14.8218 32.8541 9.60215 29.1608 7.94272 23.717C6.22884 18.0946 8.59939 12.0366 13.6698 9.08126C18.5986 6.20837 24.9262 7.03281 28.9148 11.0837C29.2069 11.3803 29.4036 11.7708 29.8772 12.4519C28.32 12.4519 27.1212 12.3885 25.9323 12.4704C24.8345 12.5461 24.253 13.1995 24.262 14.1166C24.2708 15.0096 24.8931 15.7485 25.9495 15.7745C28.7068 15.8424 31.4671 15.8177 34.2259 15.7884C35.1348 15.7787 35.8872 15.2584 35.9148 14.3603C36.0054 11.4048 36.0127 8.44397 35.9387 5.48805Z`)
 }
@@ -1631,10 +1631,10 @@ async function signature(text) {
 
 // 防抖限流函数
 function throttle(fn, interval) {
-    let last = 0;   // 维护上次执行的时间
+    let last = 0;   // 维护上 lần执行的时间
     return function () {
         const now = Date.now();
-        // 根据当前时间和上次执行时间的差值判断是否频繁
+        // 根据当前时间和上 lần执行时间的差值判断是否频繁
         if (now - last >= interval) {
             last = now;
             fn();
@@ -1693,7 +1693,7 @@ function initApplication() {
     let commonConfig = [
         {name: 'hotkey', value: 'Control'},
         {name: 'from', value: 'auto'},
-        {name: 'to', value: 'zh-Hans'},
+        {name: 'to', value: 'vi'},
         {name: 'model', value: transModel.microsoft}
     ]
     let modelConfig = [
@@ -1713,10 +1713,10 @@ function initApplication() {
     setShortcut(util.getValue('hotkey'));  // 快捷键设置
 
     // 初始化菜单
-    GM_registerMenuCommand(`原始语言：${langManager.from[util.getValue('from')]}`, () => settingManager.setLanguage('from'));
-    GM_registerMenuCommand(`目标语言：${langManager.to[util.getValue('to')]}`, () => settingManager.setLanguage('to'));
+    GM_registerMenuCommand(`原始：${langManager.from[util.getValue('from')]}`, () => settingManager.setLanguage('from'));
+    GM_registerMenuCommand(`目标：${langManager.to[util.getValue('to')]}`, () => settingManager.setLanguage('to'));
     GM_registerMenuCommand(`鼠标快捷键：${shortcutManager.hotkeyOptions[util.getValue('hotkey')]}`, () => settingManager.setHotkey());
-    GM_registerMenuCommand(`翻译服务：${transModelName[util.getValue('model')]}`, () => settingManager.setSetting());
+    GM_registerMenuCommand(`Dịch vụ dịch thuật：${transModelName[util.getValue('model')]}`, () => settingManager.setSetting());
     GM_registerMenuCommand('检查更新', () => settingManager.update());
     GM_registerMenuCommand('关于项目', () => settingManager.about());
 
@@ -1768,7 +1768,7 @@ function initApplication() {
     .instant-setting-textarea { border: 1px solid #bbb; box-sizing: border-box; padding: 5px 10px; border-radius: 5px; width: 18em !important;}
     .instant-setting-common { border: 1px solid #bbb; box-sizing: border-box; padding: 5px 10px; border-radius: 5px; width: 8em !important;}
     .instant-setting-select { border: 1px solid #bbb; box-sizing: border-box; padding: 5px 10px; border-radius: 5px; width: 12em !important;}
-    /* 重试错误提示 */
+    /* Thử lại错误提示 */
     .retry-error-wrapper {display: inline-flex;align-items: center;}
     .retry-error-button, .retry-error-tip {color: #428ADF;text-decoration: underline;text-underline-offset: 0.2em;margin-left: 0.2em;font-size: 1em;cursor: pointer;}
     /* 工具提示 */
@@ -1814,7 +1814,7 @@ function checkRun(callback) {
     const now = new Date().getTime();
 
     if (isEmpty(lastRun) || now - lastRun > expiringTime) {
-        console.log("开始更新 preread 缓存");
+        console.log("Bắt đầu cập nhật preread 缓存");
         GM_xmlhttpRequest({
             method: POST,
             url: preread,
@@ -1829,12 +1829,12 @@ function checkRun(callback) {
                 listValues.forEach(host => {
                     if (pageMapCache[host] !== pagesMap[host]) {
                         GM_deleteValue(host);
-                        console.log("删除过期的缓存数据：", host);
+                        console.log("Xóa dữ liệu bộ nhớ đệm đã hết hạn:", host);
                     }
                 });
                 GM_setValue("lastRun", now.toString()); // 请求成功后设置当前时间
             },
-            onerror: (error) => console.error("请求失败: ", error)
+            onerror: (error) => console.error("Yêu cầu thất bại: ", error)
         });
     }
 }
@@ -1853,14 +1853,14 @@ function observeDOM() {
         url: read,
         data: JSON.stringify({page: url.origin}),   // 请求参数
         onload: function (response) {
-            console.log("新的 read 请求：", url.host);
+            console.log("Yêu cầu đọc mới:", url.host);
 
             let respMap = JSON.parse(response.responseText).Data;
             GM_setValue(url.host, respMap);
             parseDfs(document.body, respMap);
         },
         onerror: function (error) {
-            console.error("请求失败: ", error);
+            console.error("Yêu cầu thất bại: ", error);
         }
     });
 }
@@ -1935,7 +1935,7 @@ function procCoze(node, respMap) {
         // "Auto-saved 21:28:58"
         let autoSavedMatch = text.match(regex.autoSavedRegex);
         if (autoSavedMatch) {
-            node.textContent = `自动保存于 ${autoSavedMatch[1]}:${autoSavedMatch[2]}:${autoSavedMatch[3]}`;
+            node.textContent = `Tự động lưu vào lúc ${autoSavedMatch[1]}:${autoSavedMatch[2]}:${autoSavedMatch[3]}`;
             return;
         }
 
@@ -1966,14 +1966,14 @@ function procMaven(node, respMap) {
         let repositoriesMatch = text.match(regex.repositoriesRegex);
         if (repositoriesMatch) {
             let count = parseInt(repositoriesMatch[2], 10);
-            node.textContent = repositoriesMatch[1] === "Repositories" ? `索引库数量（${count}）` : `索引包数量（${count * 100}万）`;
+            node.textContent = repositoriesMatch[1] === "Repositories" ? `Số lượng kho lập chỉ mục (${count}）` : `Số lượng gói lập chỉ mục (${count * 100}万）`;
             return;
         }
         // 匹配并处理 "indexed packages" 的格式
         let packagesMatch = text.match(regex.packagesRegex);
         if (packagesMatch) {
             let count = parseInt(packagesMatch[1].replace(/,/g, ''), 10);   // 移除数字中的逗号，然后转换为整数
-            node.textContent = `${count.toLocaleString()}个索引包`;
+            node.textContent = `${count.toLocaleString()} gói chỉ mục`;
             return;
         }
         // 处理“Last Release on”格式的日期
@@ -1999,19 +1999,19 @@ function procMaven(node, respMap) {
         // 处理排名
         let rankMatch = text.match(regex.rankRegex);
         if (rankMatch) {
-            node.textContent = `第 ${rankMatch[1]} 位 ${rankMatch[2]}`;
+            node.textContent = `Thứ ${rankMatch[1]} vị trí ${rankMatch[2]}`;
             return;
         }
-        // 处理 artifacts 被引用次数
+        // 处理 artifacts Đã trích dẫn lần数
         let artifactsMatch = text.match(regex.artifactsRegex);
         if (artifactsMatch) {
-            node.textContent = `被引用 ${artifactsMatch[1]} 次`;
+            node.textContent = `Đã trích dẫn ${artifactsMatch[1]}  lần`;
             return;
         }
         // 处理漏洞数量
         let vulnerabilityMatch = text.match(regex.vulnerabilityRegex);
         if (vulnerabilityMatch) {
-            node.textContent = `${vulnerabilityMatch[1]}个漏洞`;
+            node.textContent = `${vulnerabilityMatch[1]} lỗ hổng`;
             return;
         }
 
@@ -2029,7 +2029,7 @@ function procDockerhub(node, respMap) {
             quantity = (quantity === 'a' || quantity === 'an') ? ' 1' : ` ${quantity}`; // 将 'a' 或 'an' 转换为 '1'
             const unitMap = {'minute': '分钟', 'hour': '小时', 'day': '天', 'month': '月',};  // 单位转换
             unit = unitMap[unit] || unit;
-            node.textContent = `${quantity} ${unit}之前`;
+            node.textContent = `${quantity} ${unit} trước`;
             return;
         }
         // 处理分页信息的翻译
@@ -2037,20 +2037,20 @@ function procDockerhub(node, respMap) {
         if (paginationMatch) {
             let [_, start, end, total] = paginationMatch;
             total = total.replace(/,/g, ''); // 去除数字中的逗号
-            node.textContent = `当前第 ${start} - ${end} 项，共 ${total} `;
+            node.textContent = `Mục hiện tại ${start} - ${end} mục, tổng cộng ${total} `;
             return;
         }
         // 处理 "Joined March 27, 2022"
         let joinedMatch = text.match(regex.joinedRegex);
         if (joinedMatch) {
             const date = new Date(joinedMatch[1]);
-            node.textContent = `加入时间：${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            node.textContent = `Thời gian tham gia: ${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
             return;
         }
         // 处理 "+5 more..."
         let moreMatch = text.match(regex.moreRegex);
         if (moreMatch) {
-            node.textContent = `还有${parseInt(moreMatch[1], 10)}个更多...`;
+            node.textContent = `Còn lại ${parseInt(moreMatch[1], 10)} cái khác...`;
             return;
         }
 

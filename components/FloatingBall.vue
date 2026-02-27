@@ -32,12 +32,12 @@
 
         <div class="check-mark" v-if="isTranslating"></div>
         
-        <!-- 添加快捷键提示 -->
+        <!-- Thêm mẹo phím tắt -->
         <div class="shortcut-tooltip" v-if="showShortcutTooltip">
           {{ shortcutTip }}
         </div>
         
-        <!-- 波纹效果容器 -->
+        <!-- Hộp đựng hiệu ứng gợn sóng -->
         <div class="ripple-container" ref="rippleContainer"></div>
       </div>
     </div>
@@ -103,7 +103,7 @@ const floatingBall = ref<HTMLElement | null>(null);
 const rippleContainer = ref<HTMLElement | null>(null);
 const isAnimating = ref(false);
 const showShortcutTooltip = ref(false);
-const shortcutTip = ref('快捷键: Alt+T');
+const shortcutTip = ref('Phím tắt: Alt+T');
 
 const currentDisplayPosition = computed(() => internalPosition.value || props.position);
 
@@ -167,7 +167,7 @@ const drag = (event: MouseEvent) => {
   const newX = rect.left + offsetX;
   const newY = rect.top + offsetY;
 
-  // 确保悬浮球不会超出屏幕边界
+  // Đảm bảo quả bóng nổi không vượt quá ranh giới của màn hình
   const maxX = window.innerWidth - rect.width;
   const maxY = window.innerHeight - rect.height;
 
@@ -203,7 +203,7 @@ const stopDrag = (event: MouseEvent) => {
   draggedY.value = finalY;
   internalPosition.value = newPosition;
 
-  // 无论位置是否变化，都通知父组件，以便触发拖动状态更新
+  // Bất kể vị trí có thay đổi hay không, thành phần chính đều được thông báo để có thể kích hoạt cập nhật trạng thái kéo.
   props.onPositionChanged(newPosition);
 
   nextTick(() => {
@@ -221,7 +221,7 @@ const handleSettingsClick = (event: MouseEvent) => {
   props.onSettingsClick(event);
 };
 
-// 新增：添加波纹效果
+// Mới: Thêm hiệu ứng gợn sóng
 const addRippleEffect = (color: string = '#4caf50') => {
   if (!rippleContainer.value) return;
   
@@ -231,11 +231,11 @@ const addRippleEffect = (color: string = '#4caf50') => {
   
   rippleContainer.value.appendChild(ripple);
   
-  // 触发波纹动画
+  // Kích hoạt hoạt hình gợn sóng
   setTimeout(() => {
     ripple.classList.add('active');
     
-    // 动画结束后移除波纹元素
+    // Xóa phần tử gợn sóng sau khi hoạt ảnh kết thúc
     setTimeout(() => {
       if (rippleContainer.value?.contains(ripple)) {
         rippleContainer.value.removeChild(ripple);
@@ -244,35 +244,35 @@ const addRippleEffect = (color: string = '#4caf50') => {
   }, 10);
 };
 
-// 新增：触发动画效果
+// Mới: Kích hoạt ứng dụng
 const triggerAnimation = (type: 'translate' | 'restore') => {
   isAnimating.value = true;
   
-  // 添加波纹效果
+  // Thêm hiệu ứng gợn sóng
   addRippleEffect(type === 'translate' ? '#4285f4' : '#4caf50');
   
-  // 显示快捷键提示
+  // Hiển thị mẹo phím
   showShortcutTooltip.value = true;
   
-  // 2秒后隐藏提示
+  // Ẩn lời nhắc sau 2 giây
   setTimeout(() => {
     showShortcutTooltip.value = false;
   }, 2000);
   
-  // 动画结束后重置状态
+  // Đặt lại trạng thái sau khi hoạt ảnh kết thúc
   setTimeout(() => {
     isAnimating.value = false;
   }, 500);
 };
 
-// 修改原有的toggleTranslation函数
+// Sửa đổi chức năng chuyển đổi ban đầu
 const toggleTranslation = (event: MouseEvent) => {
   const dragDuration = Date.now() - dragStartTime.value;
   const movedX = Math.abs(event.clientX - startX.value);
   const movedY = Math.abs(event.clientY - startY.value);
   const isDragEndClick = dragDuration > 150 || movedX > 5 || movedY > 5;
 
-  // 如果是拖动结束的点击，或者当前正在拖动中，则不触发翻译
+  // Nếu nhấp chuột kết thúc quá trình kéo hoặc hiện đang được kéo thì bản dịch sẽ không được kích hoạt.
   if (isDragEndClick || isDragging.value) {
     return;
   }
@@ -280,7 +280,7 @@ const toggleTranslation = (event: MouseEvent) => {
   isTranslating.value = !isTranslating.value;
   triggerAnimation(isTranslating.value ? 'translate' : 'restore');
   
-  // 触发自定义事件
+  // Kích hoạt sự kiện tùy chỉnh
   if (isTranslating.value) {
     document.dispatchEvent(new CustomEvent('fluentread-translation-started'));
   } else {
@@ -293,22 +293,22 @@ const toggleTranslation = (event: MouseEvent) => {
   props.onTranslationToggle(isTranslating.value);
 };
 
-// 新增：响应自定义事件，从外部触发切换
+// Mới: phản hồi các sự kiện tùy chỉnh và kích hoạt chuyển đổi từ bên ngoài
 const handleExternalToggle = () => {
-  // 切换状态
+  // Chuyển trạng thái
   isTranslating.value = !isTranslating.value;
   
-  // 触发动画
+  // kích hoạt hoạt hình
   triggerAnimation(isTranslating.value ? 'translate' : 'restore');
   
-  // 触发自定义事件
+  // Kích hoạt sự kiện tùy chỉnh
   if (isTranslating.value) {
     document.dispatchEvent(new CustomEvent('fluentread-translation-started'));
   } else {
     document.dispatchEvent(new CustomEvent('fluentread-translation-ended'));
   }
   
-  // 通知父组件
+  // Thông báo cho thành phần cha mẹ
   props.onTranslationToggle(isTranslating.value);
 };
 
@@ -332,10 +332,10 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside);
   document.addEventListener('mousemove', handleMouseMove);
   
-  // 监听自定义事件
+  // Nghe các sự kiện tùy chỉnh
   document.addEventListener('fluentread-toggle-translation', handleExternalToggle);
   
-  // 使组件暴露给父组件
+  // Tạo một thành phần tiếp xúc với thành phần cha mẹ
   if (floatingBall.value) {
     (floatingBall.value as any).element = floatingBall.value;
     (floatingBall.value as any).isTranslating = isTranslating.value;
@@ -349,7 +349,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
   document.removeEventListener('mousemove', handleMouseMove);
   
-  // 移除自定义事件监听
+  // Xóa trình xử lý sự kiện tùy chỉnh
   document.removeEventListener('fluentread-toggle-translation', handleExternalToggle);
 });
 
@@ -434,7 +434,7 @@ watch(() => props.position, (newPosition) => {
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
-/* 动画相关样式 */
+/* Kiểu hoạt hình Tắt giai đoạn */
 .animating.is-translating .floating-ball-icon {
   animation: pulse-green 0.5s ease;
 }
@@ -443,7 +443,7 @@ watch(() => props.position, (newPosition) => {
   animation: pulse-blue 0.5s ease;
 }
 
-/* 静态模式样式 */
+/* Kiểu chế độ tĩnh */
 .static-mode .floating-ball-icon {
   animation: none !important;
 }
@@ -492,7 +492,7 @@ watch(() => props.position, (newPosition) => {
   }
 }
 
-/* 波纹效果 */
+/* hiệu ứng gợn sóng */
 .ripple-container {
   position: absolute;
   top: 0;
@@ -504,7 +504,7 @@ watch(() => props.position, (newPosition) => {
   pointer-events: none;
 }
 
-/* 快捷键提示 */
+/* Mẹo sử dụng phím tắt */
 .shortcut-tooltip {
   position: absolute;
   bottom: -40px;

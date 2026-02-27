@@ -7,30 +7,28 @@ import { autoTranslateEnglishPage, restoreOriginalContent } from '@/entrypoints/
 
 let floatingBallInstance: any = null;
 let app: any = null;
-let isTranslated = false; // 添加状态变量跟踪翻译状态
+let isTranslated = false; // Thêm biến trạng thái để theo dõi trạng thái dịch
 
 /**
- * 创建并挂载悬浮球
- * @param position 悬浮球位置 'left' | 'right'，如果不传入则使用配置中的值
- * @returns 
+ * Tạo và gắn kết quả bóng nổi  * @param vị trí bóng nổi vị trí 'trái' | 'đúng', nếu không được chuyển vào, hãy sử dụng giá trị trong cấu hình  * @returns 
  */
 export function mountFloatingBall(position?: 'left' | 'right') {
-  // 如果配置禁用了悬浮球或已存在实例，则不创建
+  // Nếu cấu hình vô hiệu hóa quả bóng nổi hoặc một phiên bản đã tồn tại thì nó sẽ không được tạo.
   if (config.disableFloatingBall || floatingBallInstance) {
     return;
   }
 
-  // 使用传入的位置参数或配置中的位置
+  // Sử dụng tham số vị trí được truyền vào hoặc vị trí từ cấu hình
   const ballPosition = position || config.floatingBallPosition || 'right';
-  // 更新配置
+  // Cập nhật cấu hình
   config.floatingBallPosition = ballPosition;
 
-  // 创建容器元素
+  // Tạo phần tử vùng chứa
   const container = document.createElement('div');
   container.id = 'fluent-read-floating-ball-container';
   document.body.appendChild(container);
 
-  // 创建 Vue 应用实例
+  // Tạo một phiên bản ứng dụng Vue
   app = createApp(FloatingBall, {
     position: ballPosition,
     showMenu: true,
@@ -39,113 +37,110 @@ export function mountFloatingBall(position?: 'left' | 'right') {
     onSettingsClick: () => {
       browser.runtime.sendMessage({ type: 'openOptionsPage' });
     },
-    // 添加位置变化事件监听
+    // Thêm tính năng nghe sự kiện thay đổi vị trí
     onPositionChanged: (newPosition: 'left' | 'right') => {
-      // 保存位置到配置
+      // Lưu vị trí vào cấu hình
       config.floatingBallPosition = newPosition;
       
-      // 保存配置到存储
+      // Lưu cấu hình vào bộ nhớ
       saveConfig();
 
     },
-    // 添加翻译状态变化事件监听
+    // Thêm giám sát sự kiện thay đổi trạng thái dịch
     onTranslationToggle: (isTranslating: boolean) => {
       if (isTranslating && !isTranslated) {
-        // 触发翻译开始事件
+        // Sự kiện bắt đầu dịch kích hoạt
         document.dispatchEvent(new CustomEvent('fluentread-translation-started'));
 
-        // 触发即时翻译
+        // Kích hoạt dịch tức thì
         autoTranslateEnglishPage();
         isTranslated = true;
       } else if (!isTranslating && isTranslated) {
-        // 触发翻译结束事件
+        // Sự kiện kết thúc dịch kích hoạt
         document.dispatchEvent(new CustomEvent('fluentread-translation-ended'));
         
-        // 恢复原文
+        // Khôi phục văn bản gốc
         restoreOriginalContent();
         isTranslated = false;
         
-        // 恢复后确保状态同步
+        // Đảm bảo trạng thái được đồng bộ hóa sau khi khôi phục
         floatingBallInstance.$el.classList.remove('is-translating');
       }
     }
   });
 
-  // 挂载应用
+  // Gắn kết ứng dụng
   floatingBallInstance = app.mount(container);
   
-  // 监听自定义事件，用于通过快捷键触发悬浮球
+  // Nghe các sự kiện tùy chỉnh để kích hoạt quả bóng nổi thông qua phím tắt
   document.addEventListener('fluentread-toggle-translation', toggleFloatingBallTranslation);
 
   return floatingBallInstance;
 }
 
 /**
- * 切换悬浮球翻译状态
- * 通过键盘快捷键触发时使用
- */
+ * Chuyển trạng thái dịch bóng nổi  * Được sử dụng khi được kích hoạt bằng phím tắt  */
 export function toggleFloatingBallTranslation() {
   if (!floatingBallInstance) return;
 
   const currentState = floatingBallInstance.isTranslating;
   const newState = !currentState;
   
-  // 触发对应的自定义事件
+  // Kích hoạt sự kiện tùy chỉnh tương ứng
   if (newState) {
     document.dispatchEvent(new CustomEvent('fluentread-translation-started'));
   } else {
     document.dispatchEvent(new CustomEvent('fluentread-translation-ended'));
   }
   
-  // 更新悬浮球状态
+  // Cập nhật trạng thái bóng nổi
   floatingBallInstance.isTranslating = newState;
   
-  // 更新UI状态 - 使用Vue实例的$el属性
+  // Cập nhật trạng thái giao diện người dùng - sử dụng thuộc tính $el của phiên bản Vue
   if (floatingBallInstance.$el) {
     if (newState) {
       floatingBallInstance.$el.classList.add('fluent-read-floating-ball-active');
-      // 开始翻译
+      // Bắt đầu dịch
       autoTranslateEnglishPage();
     } else {
       floatingBallInstance.$el.classList.remove('fluent-read-floating-ball-active');
-      // 恢复原文
+      // Khôi phục văn bản gốc
       restoreOriginalContent();
     }
   }
 }
 
 /**
- * 处理悬浮球点击事件
- */
+ * Xử lý sự kiện nhấp bóng nổi  */
 function handleFloatingBallClick() {
   if (!floatingBallInstance) return;
   
-  // 切换悬浮球翻译状态
+  // Chuyển trạng thái dịch bóng nổi
   const newState = !floatingBallInstance.isTranslating;
   floatingBallInstance.isTranslating = newState;
   
-  // 触发对应的自定义事件
+  // Kích hoạt sự kiện tùy chỉnh tương ứng
   if (newState) {
     document.dispatchEvent(new CustomEvent('fluentread-translation-started'));
   } else {
     document.dispatchEvent(new CustomEvent('fluentread-translation-ended'));
   }
   
-  // 更新UI状态 - 使用Vue实例的$el属性
+  // Cập nhật trạng thái giao diện người dùng - sử dụng thuộc tính $el của phiên bản Vue
   if (floatingBallInstance.$el) {
     if (newState) {
       floatingBallInstance.$el.classList.add('fluent-read-floating-ball-active');
-      // 开始翻译
+      // Bắt đầu dịch
       autoTranslateEnglishPage();
     } else {
       floatingBallInstance.$el.classList.remove('fluent-read-floating-ball-active');
-      // 恢复原文
+      // Khôi phục văn bản gốc
       restoreOriginalContent();
     }
   }
 }
 
-// 悬浮球动画效果
+// Hiệu ứng hoạt hình bóng treo
 function addFloatingBallAnimation(type: 'translate' | 'restore') {
   if (!floatingBallInstance) return;
   
@@ -153,30 +148,30 @@ function addFloatingBallAnimation(type: 'translate' | 'restore') {
   const originalBackground = ball.style.background;
   const originalTransition = ball.style.transition;
   
-  // 设置过渡效果
+  // Đặt hiệu ứng chuyển tiếp
   ball.style.transition = 'all 0.3s ease';
   
-  // 根据类型设置不同动画
+  // Đặt hình ảnh động khác nhau dựa trên loại
   if (type === 'translate') {
-    // 翻译激活动画
+    // Hoạt hình kích hoạt dịch
     ball.style.transform = 'scale(1.2)';
     ball.style.boxShadow = '0 0 15px rgba(0, 128, 255, 0.8)';
     ball.style.background = '#4285f4';
   } else {
-    // 恢复原文动画
+    // Khôi phục hoạt ảnh gốc
     ball.style.transform = 'scale(1.2)';
     ball.style.boxShadow = '0 0 15px rgba(76, 175, 80, 0.8)';
     ball.style.background = '#4caf50';
   }
   
-  // 恢复原状
+  // Phục hồi
   setTimeout(() => {
     if (!floatingBallInstance) return;
     ball.style.transform = '';
     ball.style.boxShadow = '';
     ball.style.background = originalBackground;
     
-    // 恢复原来的过渡设置
+    // Khôi phục cài đặt chuyển tiếp ban đầu
     setTimeout(() => {
       if (floatingBallInstance) {
         ball.style.transition = originalTransition;
@@ -186,32 +181,30 @@ function addFloatingBallAnimation(type: 'translate' | 'restore') {
 }
 
 /**
- * 保存配置到存储
- */
+ * Lưu cấu hình vào bộ nhớ  */
 function saveConfig() {
-  // 使用插件提供的存储 API 保存配置
+  // Lưu cấu hình bằng API lưu trữ do plugin cung cấp
   storage.setItem('local:config', JSON.stringify(config)).catch((error) => {
     console.error('Failed to save config:', error);
   });
 }
 
 /**
- * 卸载悬浮球
- */
+ * Gỡ bỏ bóng nổi  */
 export function unmountFloatingBall() {
   if (floatingBallInstance && app) {
-    // 移除事件监听
+    // Xóa trình xử lý sự kiện
     document.removeEventListener('fluentread-toggle-translation', toggleFloatingBallTranslation);
     
-    // 获取容器
+    // Nhận container
     const container = document.getElementById('fluent-read-floating-ball-container');
     
-    // 卸载 Vue 应用
+    // Gỡ cài đặt ứng dụng Vue
     app.unmount();
     floatingBallInstance = null;
     app = null;
     
-    // 移除容器
+    // Xóa vùng chứa
     if (container) {
       container.remove();
     }
@@ -219,8 +212,7 @@ export function unmountFloatingBall() {
 }
 
 /**
- * 切换悬浮球可见性
- */
+ * Chuyển đổi khả năng hiển thị của quả bóng nổi  */
 export function toggleFloatingBall() {
   if (floatingBallInstance) {
     unmountFloatingBall();
@@ -230,13 +222,12 @@ export function toggleFloatingBall() {
     mountFloatingBall();
   }
   
-  // 保存配置到存储
+  // Lưu cấu hình vào bộ nhớ
   saveConfig();
 }
 
 /**
- * 切换悬浮球位置
- */
+ * Chuyển đổi vị trí của quả bóng nổi  */
 export function toggleFloatingBallPosition() {
   const newPosition = config.floatingBallPosition === 'left' ? 'right' : 'left';
   if (floatingBallInstance) {
@@ -247,6 +238,6 @@ export function toggleFloatingBallPosition() {
     config.floatingBallPosition = newPosition;
   }
   
-  // 保存配置到存储
+  // Lưu cấu hình vào bộ nhớ
   saveConfig();
 } 

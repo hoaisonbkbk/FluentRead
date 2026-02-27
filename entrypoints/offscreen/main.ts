@@ -1,9 +1,7 @@
 /**
- * Chrome Translation API Offscreen 文档
- * 在 offscreen 环境中处理 Chrome Translation API 调用
- */
+ * Tài liệu ngoài màn hình API dịch của Chrome  * Xử lý lệnh gọi API dịch Chrome trong môi trường ngoài màn hình  */
 
-// 语言代码映射
+// Ánh xạ mã ngôn ngữ
 const languageMap: { [key: string]: string } = {
     'zh-Hans': 'zh',
     'zh-Hant': 'zh-TW',
@@ -25,9 +23,9 @@ const languageMap: { [key: string]: string } = {
     'tr': 'tr'
 };
 
-// 检查是否支持 Chrome Translation API
+// Kiểm tra xem API dịch Chrome có được hỗ trợ không
 function isChromeTranslationSupported(): boolean {
-    console.log('检查 Translation API 支持:', {
+    console.log('Kiểm tra hỗ trợ Translation API:', {
         hasTranslation: 'translation' in self,
         hasTranslator: 'Translator' in self,
         hasLanguageDetector: 'LanguageDetector' in self,
@@ -35,12 +33,12 @@ function isChromeTranslationSupported(): boolean {
         selfType: typeof self
     });
     
-    // 检查新的 API
+    // Kiểm tra API mới
     if ('translation' in self && 'createTranslator' in (self as any).translation) {
         return true;
     }
     
-    // 检查旧的 API
+    // Kiểm tra API cũ
     if ('Translator' in self && 'LanguageDetector' in self) {
         return true;
     }
@@ -48,31 +46,31 @@ function isChromeTranslationSupported(): boolean {
     return false;
 }
 
-// 检测文本语言
+// Phát hiện ngôn ngữ văn bản
 async function detectLanguage(text: string): Promise<string> {
     try {
-        // 尝试使用新的 API
+        // Hãy thử API mới
         if ('translation' in self && 'createDetector' in (self as any).translation) {
             const detector = await (self as any).translation.createDetector();
             const results = await detector.detect(text);
             const detected = results.length > 0 ? results[0].detectedLanguage : 'en';
-            console.log('新 API 检测结果:', detected);
+            console.log('Kết quả nhận diện API mới:', detected);
             return detected;
         }
         
-        // 尝试使用旧的 API
+        // Hãy thử sử dụng API cũ
         if ('LanguageDetector' in self) {
             const detector = await (self as any).LanguageDetector.create();
             const results = await detector.detect(text);
             const detected = results.length > 0 ? results[0].detectedLanguage : 'en';
-            console.log('旧 API 检测结果:', detected);
+            console.log('Kết quả nhận diện API cũ:', detected);
             return detected;
         }
     } catch (error) {
         console.warn('Language detection failed:', error);
     }
     
-    // 回退到简单检测
+    // Dự phòng để phát hiện đơn giản
     const chineseRegex = /[\u4e00-\u9fff]/;
     const japaneseRegex = /[\u3040-\u309f\u30a0-\u30ff]/;
     const koreanRegex = /[\uac00-\ud7af]/;
@@ -88,58 +86,58 @@ async function detectLanguage(text: string): Promise<string> {
     }
 }
 
-// 执行翻译
+// Thực hiện dịch thuật
 async function performTranslation(text: string, fromLang: string, toLang: string): Promise<string> {
-    console.log('开始翻译:', { text: text.substring(0, 50) + '...', fromLang, toLang });
+    console.log('Bắt đầu dịch:', { text: text.substring(0, 50) + '...', fromLang, toLang });
     
     try {
         let translator;
         
-        // 尝试使用新的 API
+        // Hãy thử API mới
         if ('translation' in self && 'createTranslator' in (self as any).translation) {
-            console.log('使用新的 translation API');
+            console.log('Đang dùng translation API mới');
             translator = await (self as any).translation.createTranslator({
                 sourceLanguage: fromLang,
                 targetLanguage: toLang
             });
         }
-        // 尝试使用旧的 API
+        // Hãy thử sử dụng API cũ
         else if ('Translator' in self) {
-            console.log('使用旧的 Translator API');
+            console.log('Đang dùng Translator API cũ');
             translator = await (self as any).Translator.create({
                 sourceLanguage: fromLang,
                 targetLanguage: toLang
             });
         } else {
-            throw new Error('没有可用的翻译 API');
+            throw new Error('Không có API dịch khả dụng');
         }
 
         let translatedText = '';
         
-        // 检查是否支持流式翻译
+        // Kiểm tra xem bản dịch trực tuyến có được hỗ trợ không
         if (translator.translateStreaming) {
-            console.log('使用流式翻译');
+            console.log('Đang dùng dịch dạng stream');
             const stream = translator.translateStreaming(text);
             for await (const chunk of stream) {
                 translatedText += chunk;
             }
         } else if (translator.translate) {
-            console.log('使用普通翻译');
+            console.log('Đang dùng dịch thường');
             translatedText = await translator.translate(text);
         } else {
-            throw new Error('翻译器不支持翻译方法');
+            throw new Error('Trình dịch không hỗ trợ phương thức dịch');
         }
 
-        console.log('翻译完成:', translatedText.substring(0, 50) + '...');
+        console.log('Hoàn tất dịch:', translatedText.substring(0, 50) + '...');
         return translatedText;
         
     } catch (error) {
-        console.error('翻译执行失败:', error);
+        console.error('Thực thi dịch thất bại:', error);
         throw error;
     }
 }
 
-// 处理翻译请求
+// Xử lý các yêu cầu dịch thuật
 async function handleTranslationRequest(data: any): Promise<string> {
     const { text, from, to } = data;
     
@@ -147,47 +145,47 @@ async function handleTranslationRequest(data: any): Promise<string> {
         return ""
     }
 
-    // 检查是否支持 Chrome Translation API
+    // Kiểm tra xem API dịch Chrome có được hỗ trợ không
     if (!isChromeTranslationSupported()) {
-        throw new Error('当前浏览器不支持 Chrome Translation API，请确保使用 Google Chrome 浏览器 v138 stable 或更高版本。');
+        throw new Error('Trình duyệt hiện tại không hỗ trợ Chrome Translation API. Vui lòng dùng Google Chrome bản ổn định v138 hoặc cao hơn.');
     }
 
-    // 声明变量以便在 catch 块中使用
+    // Khai báo các biến để sử dụng trong khối bắt
     let detectedLang = from;
     let fromLang = from;
     let toLang = to;
     
     try {
-        // 检测源语言
+        // Phát hiện ngôn ngữ nguồn
         if (from === 'auto') {
             detectedLang = await detectLanguage(text);
-            console.log('自动检测到的语言:', detectedLang);
+            console.log('Ngôn ngữ tự nhận diện:', detectedLang);
         }
         
-        // 映射语言代码 - 确保使用 Chrome API 支持的格式
+        // Ánh xạ mã ngôn ngữ - Đảm bảo bạn sử dụng định dạng được API Chrome hỗ trợ
         fromLang = languageMap[detectedLang] || detectedLang;
         toLang = languageMap[to] || to;
 
-        console.log('语言映射:', { 
+        console.log('Ánh xạ ngôn ngữ:', { 
             original: { from, to }, 
             detected: detectedLang,
             mapped: { fromLang, toLang }
         });
 
-        // 如果源语言和目标语言相同，不需要翻译
+        // Nếu ngôn ngữ nguồn giống với ngôn ngữ đích thì không cần dịch
         if (fromLang === toLang) {
-            console.log('源语言和目标语言相同，返回原文');
+            console.log('Ngôn ngữ nguồn và đích giống nhau, trả về nguyên văn');
             return text;
         }
 
-        // 执行翻译
+        // Thực hiện dịch thuật
         return await performTranslation(text, fromLang, toLang);
 
     } catch (error) {
         console.error('Chrome Translation API error:', error);
-        console.error('错误详情:', {
+        console.error('Chi tiết lỗi:', {
             error: error,
-            message: error instanceof Error ? error.message : '未知错误',
+            message: error instanceof Error ? error.message : 'Lỗi không xác định',
             from: from,
             to: to,
             detectedLang: detectedLang,
@@ -195,42 +193,42 @@ async function handleTranslationRequest(data: any): Promise<string> {
             toLang: toLang
         });
         
-        // 提供更友好的错误信息
+        // Cung cấp thông báo lỗi thân thiện hơn
         if (error instanceof Error) {
             if (error.message.includes('not available') || error.message.includes('not ready')) {
-                throw new Error('Chrome Translation API 暂时不可用。可能需要下载语言模型，请稍后重试。');
+                throw new Error('Chrome Translation API tạm thời không khả dụng. Có thể cần tải mô hình ngôn ngữ, vui lòng thử lại sau.');
             } else if (error.message.includes('language') || error.message.includes('not supported')) {
-                throw new Error(`不支持的语言组合：${fromLang} -> ${toLang}。请尝试其他语言对或检查浏览器版本。`);
+                throw new Error(`Cặp ngôn ngữ không được hỗ trợ: ${fromLang} -> ${toLang}. Vui lòng thử cặp ngôn ngữ khác hoặc kiểm tra phiên bản trình duyệt.`);
             } else if (error.message.includes('model')) {
-                throw new Error('翻译模型未就绪，请稍后重试或检查网络连接。');
+                throw new Error('Mô hình dịch chưa sẵn sàng, vui lòng thử lại sau hoặc kiểm tra kết nối mạng.');
             }
         }
         
-        throw new Error(`翻译失败：${error instanceof Error ? error.message : '未知错误'}`);
+        throw new Error(`Dịch thất bại: ${error instanceof Error ? error.message : 'Lỗi không xác định'}`);
     }
 }
 
-// 监听来自 background script 的消息
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // console.log('Offscreen 收到消息:', message);
+// Nghe tin nhắn từ tập lệnh nền
+chrome.runtime.onMessage.addListener((message: any, _sender: any, sendResponse: (response: any) => void) => {
+    // console.log('Tin nhắn đã nhận ngoài màn hình:', message);
     
     if (message.type === 'CHROME_TRANSLATE_OFFSCREEN') {
         handleTranslationRequest(message.data)
             .then(result => {
-                // console.log('Offscreen 翻译成功:', result.substring(0, 50) + '...');
+                // console.log('Offscreen Dịch thành công:', result.substring(0, 50) + '...');
                 sendResponse({ success: true, result });
             })
             .catch(error => {
-                console.error('Offscreen 翻译失败:', error);
+                console.error('Dịch Offscreen thất bại:', error);
                 sendResponse({ success: false, error: error.message });
             });
         
-        return true; // 保持消息通道开放以支持异步响应
+        return true; // Giữ kênh tin nhắn Kích hoạt mở để hỗ trợ phản hồi không đồng bộ
     }
     
     return false;
 });
 
-// 初始化检查
-console.log('Chrome Translation Offscreen 初始化');
-console.log('Translation API 支持状态:', isChromeTranslationSupported());
+// Kiểm tra khởi tạo
+console.log('Khởi tạo Chrome Translation Offscreen');
+console.log('Trạng thái hỗ trợ Translation API:', isChromeTranslationSupported());

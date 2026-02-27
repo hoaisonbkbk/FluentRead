@@ -3,10 +3,10 @@ import {services} from "../utils/option";
 import {config} from "@/entrypoints/utils/config";
 
 async function deepl(message: any) {
-    // deepl 不支持 zh-Hans，需要转换为 zh
+    // deepl không hỗ trợ zh-Hans và cần được chuyển đổi sang zh
     let targetLang = config.to === 'zh-Hans' ? 'zh' : config.to;
 
-    // 判断是否使用代理
+    // Xác định xem có nên sử dụng proxy hay không
     let url: string = config.proxy[config.service] ? config.proxy[config.service] : urls[services.deepL]
 
     const resp = await fetch(url, {
@@ -19,7 +19,7 @@ async function deepl(message: any) {
             text: [message.origin],
             target_lang: targetLang,
             tag_handling: 'html',
-            context: message.context,  // 添加上下文辅助信息
+            context: message.context,  // Thêm hỗ trợ theo ngữ cảnh
             preserve_formatting: true
         })
     });
@@ -29,7 +29,7 @@ async function deepl(message: any) {
         return result.translations[0].text
     } else {
         console.log(resp)
-        throw new Error(`翻译失败: ${resp.status} ${resp.statusText} 请检查 token 是否正确`);
+        throw new Error(`Dịch thất bại: ${resp.status} ${resp.statusText} vui lòng kiểm tra token có chính xác không`);
     }
 }
 

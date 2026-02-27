@@ -1,46 +1,46 @@
 <template>
-  <!-- 开关 -->
+  <!-- BậtTắt -->
   <el-row class="margin-bottom margin-left-2em">
     <el-col :span="20" class="lightblue rounded-corner">
-      <span class="popup-text popup-vertical-left">插件状态</span>
+      <span class="popup-text popup-vertical-left">Trạng thái tiện ích</span>
     </el-col>
 
     <el-col :span="4" class="flex-end">
-      <el-switch v-model="config.on" inline-prompt active-text="开" inactive-text="关" @change="handlePluginStateChange" />
+      <el-switch v-model="config.on" inline-prompt active-text="Bật" inactive-text="Tắt" @change="handlePluginStateChange" />
     </el-col>
   </el-row>
 
-  <!-- 占位符 -->
+  <!-- phần giữ chỗ -->
   <div v-if="!config.on">
-    <el-empty description="插件处于禁用状态" />
+    <el-empty description="Tiện ích đang bị tắt" />
   </div>
 
   <div v-show="config.on">
-    <!--    翻译模式-->
+    <!--    Chế độ dịch-->
     <el-row class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <span class="popup-text popup-vertical-left">翻译模式</span>
+        <span class="popup-text popup-vertical-left">Chế độ dịch</span>
       </el-col>
       <el-col :span="12">
-        <el-select v-model="config.display" placeholder="请选择翻译模式">
+        <el-select v-model="config.display" placeholder="Chọn chế độ dịch">
           <el-option class="select-left" v-for="item in options.display" :key="item.value" :label="item.label"
             :value="item.value" />
         </el-select>
       </el-col>
     </el-row>
 
-    <!--    译文样式选择器-->
+    <!--    Kiểu hiển thị bộ chọn dịch-->
     <el-row v-show="config.display === 1" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="选择双语模式下译文的显示样式，提供多种美观的效果" placement="top-start"
+        <el-tooltip class="box-item" effect="dark" content="Chọn kiểu hiển thị bản dịch trong chế độ song ngữ với nhiều hiệu ứng đẹp mắt" placement="top-start"
           :show-after="500">
-          <span class="popup-text popup-vertical-left">译文样式<el-icon class="icon-margin">
+          <span class="popup-text popup-vertical-left">Kiểu hiển thị bản dịch<el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-select v-model="config.style" placeholder="请选择译文显示样式">
+        <el-select v-model="config.style" placeholder="Chọn kiểu hiển thị bản dịch">
           <el-option-group v-for="group in styleGroups" :key="group.value" :label="group.label">
             <el-option v-for="item in group.options" :key="item.value" :label="item.label" :value="item.value"
               :class="item.class" />
@@ -49,19 +49,19 @@
       </el-col>
     </el-row>
 
-    <!-- 翻译服务 -->
+    <!-- Dịch vụ dịch -->
     <el-row class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="机器翻译：快速稳定，适合日常使用；AI翻译：更自然流畅，需要配置令牌" placement="top-start"
+        <el-tooltip class="box-item" effect="dark" content="Dịch máy: nhanh và ổn định, phù hợp hằng ngày; Dịch AI: tự nhiên hơn, cần cấu hình token" placement="top-start"
           :show-after="500">
-          <span class="popup-text popup-vertical-left">翻译服务<el-icon class="icon-margin">
+          <span class="popup-text popup-vertical-left">Dịch vụ dịch<el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
         </el-tooltip>
       </el-col>
       <el-col :span="12">
         <b>
-          <el-select v-model="config.service" placeholder="请选择翻译服务">
+          <el-select v-model="config.service" placeholder="Chọn dịch vụ dịch">
             <el-option class="select-left" v-for="item in compute.filteredServices" :key="item.value"
               :label="item.label" :value="item.value" :disabled="item.disabled"
               :class="{ 'select-divider': item.disabled }" />
@@ -70,13 +70,13 @@
       </el-col>
     </el-row>
 
-    <!-- 目标语言 -->
+    <!-- Ngôn ngữ đích -->
     <el-row class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <span class="popup-text popup-vertical-left">目标语言</span>
+        <span class="popup-text popup-vertical-left">Ngôn ngữ đích</span>
       </el-col>
       <el-col :span="12">
-        <el-select v-model="config.to" placeholder="请选择目标语言">
+        <el-select v-model="config.to" placeholder="Chọn ngôn ngữ đích">
           <el-option class="select-left" v-for="item in options.to" :key="item.value" :label="item.label"
             :value="item.value" />
         </el-select>
@@ -85,12 +85,12 @@
 
 
 
-    <!-- 鼠标悬浮快捷键 -->
+    <!-- Phím tắt rê chuột -->
     <el-row class="margin-bottom margin-left-2em" :class="{ 'custom-hotkey-row': config.hotkey === 'custom' }">
       <el-col :span="14" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="按住指定快捷键并悬停在文本上进行翻译" placement="top-start" :show-after="500">
+        <el-tooltip class="box-item" effect="dark" content="Giữ phím tắt đã chọn và rê chuột lên văn bản để dịch" placement="top-start" :show-after="500">
         <span class="popup-text popup-vertical-left">
-          鼠标悬浮快捷键
+          Phím tắt rê chuột
           <el-icon class="icon-margin">
             <ChatDotRound />
           </el-icon>
@@ -101,7 +101,7 @@
         <div class="hotkey-config">
           <el-select 
             v-model="config.hotkey" 
-            placeholder="请选择快捷键" 
+            placeholder="Chọn phím tắt" 
             size="small" 
             style="width: 100%"
             @change="handleMouseHotkeyChange"
@@ -109,13 +109,13 @@
             <el-option v-for="item in options.keys" :key="item.value" :label="item.label" :value="item.value" :disabled="item.disabled" :class="{ 'select-divider': item.disabled }" />
           </el-select>
           
-          <!-- 自定义快捷键显示（选择自定义时总是显示） -->
+          <!-- Phím tắt hiển thị tùy chỉnh (luôn hiển thị khi tùy chỉnh được chọn) -->
           <div v-if="config.hotkey === 'custom'" class="custom-hotkey-display">
             <span class="hotkey-text" v-if="config.customHotkey">
               {{ getCustomMouseHotkeyDisplayName() }}
             </span>
             <span class="hotkey-text placeholder-text" v-else>
-              点击设置自定义快捷键
+              Nhấn để đặt phím tắt tùy chỉnh
             </span>
             <el-button size="small" type="text" @click="openCustomMouseHotkeyDialog" class="edit-button">
               <el-icon><Edit /></el-icon>
@@ -125,13 +125,13 @@
       </el-col>
     </el-row>
 
-    <!-- 全文翻译快捷键选择 -->
+    <!-- Phím tắt toàn bộ lựa chọn dịch vụ -->
     <el-row v-if="config.on" class="margin-bottom margin-left-2em margin-top-1em" :class="{ 'custom-hotkey-row': config.floatingBallHotkey === 'custom' }">
       <el-col :span="14" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="（测试版）设置快捷键以便快速切换全文翻译状态，无需鼠标点击悬浮球" placement="top-start" :show-after="500">
+        <el-tooltip class="box-item" effect="dark" content="(Bản thử nghiệm) Cài phím tắt để bật/tắt dịch toàn trang nhanh mà không cần bấm bóng nổi" placement="top-start" :show-after="500">
         <span class="popup-text popup-vertical-left">
-          <!-- <span class="new-feature-badge">新</span> -->
-          全文翻译快捷键
+          <!-- <span class="new-feature-badge">Mới</span> -->
+          Phím tắt dịch toàn trang
           <el-icon class="icon-margin">
             <ChatDotRound />
           </el-icon>
@@ -142,7 +142,7 @@
         <div class="hotkey-config">
           <el-select 
             v-model="config.floatingBallHotkey" 
-            placeholder="选择快捷键" 
+            placeholder="Chọn phím tắt" 
             size="small" 
             style="width: 100%"
             @change="handleHotkeyChange"
@@ -150,13 +150,13 @@
             <el-option v-for="item in options.floatingBallHotkeys" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
           
-          <!-- 自定义快捷键显示（选择自定义时总是显示） -->
+          <!-- Phím tắt hiển thị tùy chỉnh (luôn hiển thị khi tùy chỉnh được chọn) -->
           <div v-if="config.floatingBallHotkey === 'custom'" class="custom-hotkey-display">
             <span class="hotkey-text" v-if="config.customFloatingBallHotkey">
               {{ getCustomHotkeyDisplayName() }}
             </span>
             <span class="hotkey-text placeholder-text" v-else>
-              点击设置自定义快捷键
+              Nhấn để đặt phím tắt tùy chỉnh
             </span>
             <el-button size="small" type="text" @click="openCustomHotkeyDialog" class="edit-button">
               <el-icon><Edit /></el-icon>
@@ -167,13 +167,13 @@
     </el-row>
 
 
-    <!-- 划词翻译模式选择 -->
+    <!-- Chọn chữ Chế độ dịch -->
     <el-row v-if="config.on" class="margin-bottom margin-left-2em margin-top-1em">
       <el-col :span="14" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="选中文本后显示红点，鼠标移到红点上查看翻译结果。可选择关闭、双语显示或只显示译文" placement="top-start" :show-after="500">
+        <el-tooltip class="box-item" effect="dark" content="Sau khi bôi chọn văn bản sẽ hiện chấm đỏ; rê chuột vào chấm đỏ để xem bản dịch. Có thể tắt, hiển thị song ngữ hoặc chỉ hiển thị bản dịch" placement="top-start" :show-after="500">
       <span class="popup-text popup-vertical-left">
-        <!-- <span class="new-feature-badge">新</span> -->
-        划词翻译
+        <!-- <span class="new-feature-badge">Mới</span> -->
+        Dịch khi bôi chọn
         <el-icon class="icon-margin">
           <ChatDotRound />
         </el-icon>
@@ -181,10 +181,10 @@
         </el-tooltip>
       </el-col>
       <el-col :span="10" class="flex-end">
-        <el-select v-model="config.selectionTranslatorMode" placeholder="选择模式" size="small" style="width: 100%">
-          <el-option label="关闭" value="disabled" />
-          <el-option label="双语显示" value="bilingual" />
-          <el-option label="只显示译文" value="translation-only" />
+        <el-select v-model="config.selectionTranslatorMode" placeholder="Chọn chế độ" size="small" style="width: 100%">
+          <el-option label="Tắt" value="disabled" />
+          <el-option label="Hiển thị song ngữ" value="bilingual" />
+          <el-option label="Chỉ hiển thị bản dịch" value="translation-only" />
         </el-select>
       </el-col>
     </el-row>
@@ -193,25 +193,25 @@
     <el-row v-show="compute.showToken" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
         <el-tooltip class="box-item" effect="dark"
-          content="API访问令牌仅保存在本地，用于访问翻译服务。获取方式请参考对应服务的官方文档；翻译服务为 ollama 时，token 可为任意值" placement="top-start"
+          content="Token API chỉ lưu cục bộ để truy cập dịch vụ dịch. Cách lấy token vui lòng xem tài liệu chính thức của từng dịch vụ; khi dùng Ollama, token có thể là bất kỳ giá trị nào" placement="top-start"
           :show-after="500">
-          <span class="popup-text popup-vertical-left">访问令牌<el-icon class="icon-margin">
+          <span class="popup-text popup-vertical-left">Token truy cập<el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.token[config.service]" type="password" show-password placeholder="请输入API访问令牌" />
+        <el-input v-model="config.token[config.service]" type="password" show-password placeholder="Nhập token API" />
       </el-col>
     </el-row>
 
-    <!-- Azure OpenAI 端点配置 -->
+    <!-- Cấu hình điểm cuối Azure OpenAI -->
     <el-row v-show="compute.showAzureOpenaiEndpoint" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
         <el-tooltip class="box-item" effect="dark"
-          content="Azure OpenAI 服务端点地址，必须包含完整的部署信息。格式：https://your-resource-name.openai.azure.com/openai/deployments/your-deployment-name/chat/completions?api-version=2024-02-15-preview" placement="top-start"
+          content="Địa chỉ endpoint Azure OpenAI phải chứa đầy đủ thông tin triển khai. Định dạng: https://your-resource-name.openai.azure.com/openai/deployments/your-deployment-name/chat/completions?api-version=2024-02-15-preview" placement="top-start"
           :show-after="500">
-          <span class="popup-text popup-vertical-left">Azure 端点<el-icon class="icon-margin">
+          <span class="popup-text popup-vertical-left">Endpoint Azure<el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
         </el-tooltip>
@@ -223,18 +223,18 @@
           :class="{ 'input-error': config.azureOpenaiEndpoint && !isValidAzureEndpoint(config.azureOpenaiEndpoint) }"
         />
         <div v-if="config.azureOpenaiEndpoint && !isValidAzureEndpoint(config.azureOpenaiEndpoint)" class="error-text">
-          端点地址格式不正确，请确保包含 openai.azure.com 域名和 /chat/completions 路径
+          Định dạng endpoint không đúng, cần chứa tên miền openai.azure.com và đường dẫn /chat/completions
         </div>
       </el-col>
     </el-row>
 
-    <!-- DeepLX URL 配置-->
+    <!-- Cấu hình URL DeepLX-->
     <el-row v-show="compute.showDeepLX" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
         <el-tooltip class="box-item" effect="dark"
-          content="DeepLX API 服务地址，默认为本地地址。如果使用远程 DeepLX 服务，请修改为对应的服务地址" placement="top-start"
+          content="Địa chỉ API DeepLX, mặc định là địa chỉ cục bộ. Nếu dùng DeepLX từ xa, hãy đổi sang địa chỉ dịch vụ tương ứng" placement="top-start"
           :show-after="500">
-          <span class="popup-text popup-vertical-left">服务地址</span>
+          <span class="popup-text popup-vertical-left">Địa chỉ dịch vụ</span>
         </el-tooltip>
       </el-col>
       <el-col :span="12">
@@ -242,10 +242,10 @@
       </el-col>
     </el-row>
 
-    <!-- 使用AkSk -->
+    <!-- Sử dụng AkSk -->
     <el-row v-show="compute.showAkSk" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="百度文心一言API密钥对，用于访问翻译服务" placement="top-start"
+        <el-tooltip class="box-item" effect="dark" content="Cặp khóa API Baidu ERNIE, dùng để truy cập dịch vụ dịch" placement="top-start"
           :show-after="500">
           <span class="popup-text popup-vertical-left">API Key<el-icon class="icon-margin">
               <ChatDotRound />
@@ -253,12 +253,12 @@
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.ak" placeholder="请输入Access Key" />
+        <el-input v-model="config.ak" placeholder="Nhập Access Key" />
       </el-col>
     </el-row>
     <el-row v-show="compute.showAkSk" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="百度文心一言API密钥对，用于访问翻译服务" placement="top-start"
+        <el-tooltip class="box-item" effect="dark" content="Cặp khóa API Baidu ERNIE, dùng để truy cập dịch vụ dịch" placement="top-start"
           :show-after="500">
           <span class="popup-text popup-vertical-left">Secret Key<el-icon class="icon-margin">
               <ChatDotRound />
@@ -266,14 +266,14 @@
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.sk" type="password" placeholder="请输入Secret Key" />
+        <el-input v-model="config.sk" type="password" placeholder="Nhập Secret Key" />
       </el-col>
     </el-row>
 
-    <!-- 有道翻译配置 -->
+    <!-- Cấu hình Youdao Dịch -->
     <el-row v-show="compute.showYoudao" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="有道智云翻译API应用ID，用于访问有道翻译服务。可在有道智云控制台获取" placement="top-start"
+        <el-tooltip class="box-item" effect="dark" content="App ID API Youdao Zhiyun, dùng để truy cập dịch vụ dịch Youdao. Có thể lấy trong bảng điều khiển Youdao Zhiyun" placement="top-start"
           :show-after="500">
           <span class="popup-text popup-vertical-left">App Key<el-icon class="icon-margin">
               <ChatDotRound />
@@ -281,12 +281,12 @@
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.youdaoAppKey" placeholder="有道 AppKey" />
+        <el-input v-model="config.youdaoAppKey" placeholder="Youdao AppKey" />
       </el-col>
     </el-row>
     <el-row v-show="compute.showYoudao" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="有道智云翻译API应用密钥，用于访问有道翻译服务。可在有道智云控制台获取" placement="top-start"
+        <el-tooltip class="box-item" effect="dark" content="App Secret API Youdao Zhiyun, dùng để truy cập dịch vụ dịch Youdao. Có thể lấy trong bảng điều khiển Youdao Zhiyun" placement="top-start"
           :show-after="500">
           <span class="popup-text popup-vertical-left">App Secret<el-icon class="icon-margin">
               <ChatDotRound />
@@ -294,14 +294,14 @@
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.youdaoAppSecret" type="password" show-password placeholder="有道 AppSecret" />
+        <el-input v-model="config.youdaoAppSecret" type="password" show-password placeholder="Youdao AppSecret" />
       </el-col>
     </el-row>
 
-    <!-- 腾讯云机器翻译配置 -->
+    <!-- Cấu hình máy dịch vụ Tencent Cloud -->
     <el-row v-show="compute.showTencent" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="腾讯云API访问密钥ID，用于访问腾讯云机器翻译服务。可在腾讯云控制台的访问管理中获取" placement="top-start"
+        <el-tooltip class="box-item" effect="dark" content="Secret ID API Tencent Cloud, dùng cho dịch vụ dịch máy Tencent Cloud. Lấy trong mục Quản lý truy cập của Tencent Cloud" placement="top-start"
           :show-after="500">
           <span class="popup-text popup-vertical-left">Secret ID<el-icon class="icon-margin">
               <ChatDotRound />
@@ -309,12 +309,12 @@
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.tencentSecretId" placeholder="腾讯云 SecretId" />
+        <el-input v-model="config.tencentSecretId" placeholder="Tencent Cloud SecretId" />
       </el-col>
     </el-row>
     <el-row v-show="compute.showTencent" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="腾讯云API访问密钥，用于访问腾讯云机器翻译服务。可在腾讯云控制台的访问管理中获取" placement="top-start"
+        <el-tooltip class="box-item" effect="dark" content="Secret Key API Tencent Cloud, dùng cho dịch vụ dịch máy Tencent Cloud. Lấy trong mục Quản lý truy cập của Tencent Cloud" placement="top-start"
           :show-after="500">
           <span class="popup-text popup-vertical-left">Secret Key<el-icon class="icon-margin">
               <ChatDotRound />
@@ -322,61 +322,61 @@
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.tencentSecretKey" type="password" show-password placeholder="腾讯云 SecretKey" />
+        <el-input v-model="config.tencentSecretKey" type="password" show-password placeholder="Tencent Cloud SecretKey" />
       </el-col>
     </el-row>
 
-    <!--  Coze需显示 robot_id -->
+    <!--  Coze cần hiển thị robot_id -->
     <el-row v-show="compute.showRobotId" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="Coze机器人ID，可在Coze开发者文档中查看获取方式" placement="top-start"
+        <el-tooltip class="box-item" effect="dark" content="ID bot Coze, xem cách lấy trong tài liệu nhà phát triển Coze" placement="top-start"
           :show-after="500">
-          <span class="popup-text popup-vertical-left">机器人ID<el-icon class="icon-margin">
+          <span class="popup-text popup-vertical-left">ID bot<el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.robot_id[config.service]" placeholder="请输入Coze机器人ID" />
+        <el-input v-model="config.robot_id[config.service]" placeholder="Nhập ID bot Coze" />
       </el-col>
     </el-row>
 
-    <!-- 本地大模型配置 -->
+    <!-- Cấu hình Mô hình lớn cục bộ -->
     <el-row v-show="compute.showCustom" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="目前仅支持OpenAI格式的请求接口，如http://localhost:3000/v1/chat/completions，其中 localhost:11434 可更换为任意值。
-                     ollama 配置请参考：https://fluent.thinkstu.com/guide/faq.html" placement="top-start" :show-after="500">
-          <span class="popup-text popup-vertical-left">自定义接口<el-icon class="icon-margin">
+        <el-tooltip class="box-item" effect="dark" content="Hiện chỉ hỗ trợ API theo định dạng OpenAI, ví dụ: http://localhost:3000/v1/chat/completions; trong đó localhost:11434 có thể thay bằng bất kỳ địa chỉ nào.
+                     Tham khảo cấu hình Ollama tại: https://fluent.thinkstu.com/guide/faq.html" placement="top-start" :show-after="500">
+          <span class="popup-text popup-vertical-left">API tùy chỉnh<el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.custom" placeholder="请输入自定义接口地址" />
+        <el-input v-model="config.custom" placeholder="Nhập địa chỉ API tùy chỉnh" />
       </el-col>
     </el-row>
 
-    <!-- NewAPI 配置 -->
+    <!-- Cấu hình API mới -->
     <el-row v-show="compute.showNewAPI" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <el-tooltip class="box-item" effect="dark" content="填写 New API 的访问地址，如：http://localhost:3000" placement="top-start" :show-after="500">
-          <span class="popup-text popup-vertical-left">NewAPI接口<el-icon class="icon-margin">
+        <el-tooltip class="box-item" effect="dark" content="Nhập địa chỉ truy cập New API, ví dụ: http://localhost:3000" placement="top-start" :show-after="500">
+          <span class="popup-text popup-vertical-left">API NewAPI<el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.newApiUrl" placeholder="请输入您的New API接口地址" />
+        <el-input v-model="config.newApiUrl" placeholder="Nhập địa chỉ New API của bạn" />
       </el-col>
     </el-row>
 
-    <!--  模型 -->
+    <!--  Mô hình -->
     <el-row v-show="compute.showModel" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
-        <span class="popup-text popup-vertical-left">模型</span>
+        <span class="popup-text popup-vertical-left">Mô hình</span>
       </el-col>
       <el-col :span="12">
-        <el-select v-model="config.model[config.service]" placeholder="请选择模型">
+        <el-select v-model="config.model[config.service]" placeholder="Chọn mô hình">
           <el-option class="select-left" v-for="item in compute.model" :key="item" :label="item" :value="item" />
         </el-select>
       </el-col>
@@ -385,58 +385,58 @@
     <el-row v-show="compute.showCustomModel" class="margin-bottom margin-left-2em">
       <el-col :span="12" class="lightblue rounded-corner">
         <el-tooltip class="box-item" effect="dark"
-          :content="config.service === 'doubao' ? '豆包的model为接入点，获取方式见官方文档：https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint' : '注意：自定义模型名称需要与服务商提供的模型名称一致，否则无法使用！'"
+          :content="config.service === 'doubao' ? 'Với Doubao, trường model là endpoint, xem tài liệu chính thức: https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint' : 'Lưu ý: tên mô hình tùy chỉnh phải trùng với tên do nhà cung cấp đưa ra, nếu không sẽ không dùng được!'"
           placement="top-start" :show-after="500">
-          <span class="popup-text popup-vertical-left">{{ config.service === 'doubao' ? '接入点' : '自定义模型' }}<el-icon
+          <span class="popup-text popup-vertical-left">{{ config.service === 'doubao' ? 'Endpoint' : 'Mô hình tùy chỉnh' }}<el-icon
               class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
         </el-tooltip>
       </el-col>
       <el-col :span="12">
-        <el-input v-model="config.customModel[config.service]" placeholder="例如：gemma:7b" />
+        <el-input v-model="config.customModel[config.service]" placeholder="Ví dụ: gemma:7b" />
       </el-col>
     </el-row>
 
-    <!-- 高级选项-->
+    <!-- Tùy chọn nâng cao-->
     <el-collapse class="margin-left-2em margin-bottom">
-      <el-collapse-item title="高级选项">
+      <el-collapse-item title="Tùy chọn nâng cao">
 
-        <!-- 主题设置 -->
+        <!-- Giao diện -->
         <el-row class="margin-bottom margin-left-2em margin-top-2em">
           <el-col :span="12" class="lightblue rounded-corner">
-            <span class="popup-text popup-vertical-left">主题设置</span>
+            <span class="popup-text popup-vertical-left">Giao diện</span>
           </el-col>
           <el-col :span="12">
-            <el-select v-model="config.theme" placeholder="请选择主题模式">
+            <el-select v-model="config.theme" placeholder="Chọn chế độ giao diện">
               <el-option class="select-left" v-for="item in options.theme" :key="item.value" :label="item.label"
                          :value="item.value" />
             </el-select>
           </el-col>
         </el-row>
 
-        <!-- 缓存开关 -->
+        <!-- Kích hoạt bộ nhớ đệm -->
         <el-row class="margin-bottom margin-left-2em">
           <el-col :span="20" class="lightblue rounded-corner">
-            <el-tooltip class="box-item" effect="dark" content="开启缓存可以提高翻译速度，减少重复请求，但可能导致翻译结果不是最新的" placement="top-start" :show-after="500">
-        <span class="popup-text popup-vertical-left">缓存翻译结果<el-icon class="icon-margin">
+            <el-tooltip class="box-item" effect="dark" content="Bật bộ nhớ đệm giúp dịch nhanh hơn và giảm yêu cầu lặp lại, nhưng có thể khiến kết quả không phải mới nhất" placement="top-start" :show-after="500">
+        <span class="popup-text popup-vertical-left">Lưu đệm kết quả dịch<el-icon class="icon-margin">
             <ChatDotRound />
           </el-icon></span>
             </el-tooltip>
           </el-col>
 
           <el-col :span="4" class="flex-end">
-            <el-switch v-model="config.useCache" inline-prompt active-text="启用" inactive-text="禁用"/>
+            <el-switch v-model="config.useCache" inline-prompt active-text="Bật" inactive-text="Tắt"/>
           </el-col>
         </el-row>
 
-        <!-- 悬浮球开关 -->
+        <!-- Bóng lơ lửng BậtTắt -->
       <el-row v-if="config.on" class="margin-bottom margin-left-2em margin-top-1em">
         <el-col :span="20" class="lightblue rounded-corner">
-          <el-tooltip class="box-item" effect="dark" content="（测试版）控制是否显示屏幕边缘的即时翻译悬浮球，用于对整个网页进行翻译" placement="top-start" :show-after="500">
+          <el-tooltip class="box-item" effect="dark" content="(Bản thử nghiệm) Bật/tắt bóng nổi dịch tức thời ở mép màn hình để dịch toàn bộ trang" placement="top-start" :show-after="500">
           <span class="popup-text popup-vertical-left">
-            <!-- <span class="new-feature-badge">新</span> -->
-            全文翻译悬浮球
+            <!-- <span class="new-feature-badge">Mới</span> -->
+            Bóng nổi dịch toàn trang
             <el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon>
@@ -445,81 +445,81 @@
         </el-col>
 
         <el-col :span="4" class="flex-end">
-          <el-switch v-model="floatingBallEnabled" inline-prompt active-text="启用" inactive-text="禁用" />
+          <el-switch v-model="floatingBallEnabled" inline-prompt active-text="Bật" inactive-text="Tắt" />
         </el-col>
       </el-row>
 
 
-        <!-- 翻译进度面板 -->
+        <!-- Bảng tiến độ dịch -->
         <el-row class="margin-bottom margin-left-2em">
           <el-col :span="20" class="lightblue rounded-corner">
             <el-tooltip class="box-item" effect="dark"
-                        content="翻译进度面板（默认关）：关闭后将不再显示右下角的全文翻译进度面板，适合移动端或希望更少打扰的用户。"
+                        content="Bảng tiến độ dịch (mặc định tắt): khi tắt sẽ không hiển thị bảng tiến độ ở góc dưới phải, phù hợp thiết bị di động hoặc người muốn ít bị làm phiền."
                         placement="top-start" :show-after="500">
-          <span class="popup-text popup-vertical-left">翻译进度面板<el-icon class="icon-margin">
+          <span class="popup-text popup-vertical-left">Bảng tiến độ dịch<el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
             </el-tooltip>
           </el-col>
           <el-col :span="4" class="flex-end">
-          <el-switch v-model="config.translationStatus" inline-prompt active-text="启动" inactive-text="禁用" />
+          <el-switch v-model="config.translationStatus" inline-prompt active-text="Bật" inactive-text="Tắt" />
           </el-col>
         </el-row>
 
-        <!-- 禁用动画设置 -->
+        <!-- Tắt cài đặt hoạt ảnh -->
         <el-row class="margin-bottom margin-left-2em">
           <el-col :span="20" class="lightblue rounded-corner">
             <el-tooltip class="box-item" effect="dark"
-                        content="动画效果（默认开）：禁用后将关闭加载/悬浮等动画，以节省GPU资源和电量。适合低配置设备或希望节省资源的用户。"
+                        content="Hiệu ứng động (mặc định bật): khi tắt sẽ bỏ các hiệu ứng tải/di chuột để tiết kiệm GPU và pin, phù hợp máy cấu hình thấp hoặc muốn tiết kiệm tài nguyên."
                         placement="top-start" :show-after="500">
-              <span class="popup-text popup-vertical-left">动画效果<el-icon class="icon-margin">
+              <span class="popup-text popup-vertical-left">Hiệu ứng động<el-icon class="icon-margin">
                   <ChatDotRound />
                 </el-icon></span>
             </el-tooltip>
           </el-col>
           <el-col :span="4" class="flex-end">
-            <el-switch v-model="config.animations" inline-prompt active-text="启动" inactive-text="禁用" />
+            <el-switch v-model="config.animations" inline-prompt active-text="Bật" inactive-text="Tắt" />
           </el-col>
         </el-row>
 
-        <!-- 输入框翻译功能 -->
+        <!-- Dịch trong hàm -->
         <el-row class="margin-bottom margin-left-2em">
           <el-col :span="12" class="lightblue rounded-corner">
             <el-tooltip class="box-item" effect="dark"
-                        content="输入框翻译：在任何文本输入框中使用指定方式触发翻译当前输入的内容。"
+                        content="Dịch trong ô nhập: dùng cách kích hoạt đã chọn để dịch nội dung đang nhập ở bất kỳ ô văn bản nào."
                         placement="top-start" :show-after="500">
-              <span class="popup-text popup-vertical-left">输入框翻译<el-icon class="icon-margin">
+              <span class="popup-text popup-vertical-left">Dịch trong ô nhập<el-icon class="icon-margin">
                   <ChatDotRound />
                 </el-icon></span>
             </el-tooltip>
           </el-col>
           <el-col :span="12">
-            <el-select v-model="config.inputBoxTranslationTrigger" placeholder="请选择触发方式">
+            <el-select v-model="config.inputBoxTranslationTrigger" placeholder="Chọn cách kích hoạt">
               <el-option class="select-left" v-for="item in options.inputBoxTranslationTrigger" :key="item.value" 
                          :label="item.label" :value="item.value" />
             </el-select>
           </el-col>
         </el-row>
 
-        <!-- 输入框翻译目标语言 -->
+        <!-- Hộp đầu vào Đích dịch ngôn ngữ -->
         <el-row v-if="config.inputBoxTranslationTrigger !== 'disabled'" class="margin-bottom margin-left-2em">
           <el-col :span="12" class="lightblue rounded-corner">
-            <span class="popup-text popup-vertical-left">翻译目标语言</span>
+            <span class="popup-text popup-vertical-left">Ngôn ngữ dịch đích</span>
           </el-col>
           <el-col :span="12">
-            <el-select v-model="config.inputBoxTranslationTarget" placeholder="请选择目标语言">
+            <el-select v-model="config.inputBoxTranslationTarget" placeholder="Chọn ngôn ngữ đích">
               <el-option class="select-left" v-for="item in options.inputBoxTranslationTarget" :key="item.value" 
                          :label="item.label" :value="item.value" />
             </el-select>
           </el-col>
         </el-row>
 
-        <!-- 翻译并发数 -->
+        <!-- Số tác vụ dịch đồng thời -->
         <el-row class="margin-bottom margin-left-2em">
           <el-col :span="12" class="lightblue rounded-corner">
-            <el-tooltip class="box-item" effect="dark" content="控制同时进行的最大翻译任务数，数值越高翻译速度越快，但可能占用更多系统资源" placement="top-start"
+            <el-tooltip class="box-item" effect="dark" content="Kiểm soát số tác vụ dịch chạy đồng thời. Số càng cao thì dịch càng nhanh nhưng có thể tốn nhiều tài nguyên hệ thống" placement="top-start"
                         :show-after="500">
-          <span class="popup-text popup-vertical-left">翻译并发数<el-icon class="icon-margin">
+          <span class="popup-text popup-vertical-left">Số tác vụ dịch đồng thời<el-icon class="icon-margin">
               <ChatDotRound />
             </el-icon></span>
             </el-tooltip>
@@ -537,25 +537,25 @@
           </el-col>
         </el-row>
 
-        <!-- 使用代理转发 -->
+        <!-- Sử dụng chuyển tiếp proxy -->
         <el-row v-show="compute.showProxy" class="margin-bottom margin-left-2em">
           <el-col :span="8" class="lightblue rounded-corner">
-            <el-tooltip class="box-item" effect="dark" content="使用代理可以解决网络无法访问的问题，如不熟悉代理设置请留空！" placement="top-start"
+            <el-tooltip class="box-item" effect="dark" content="Dùng proxy có thể khắc phục lỗi không truy cập được mạng; nếu chưa quen cấu hình proxy thì để trống!" placement="top-start"
                         :show-after="500">
-              <span class="popup-text popup-vertical-left">代理地址<el-icon class="icon-margin">
+              <span class="popup-text popup-vertical-left">Địa chỉ proxy<el-icon class="icon-margin">
                   <ChatDotRound />
                 </el-icon></span>
             </el-tooltip>
           </el-col>
           <el-col :span="16">
-            <el-input v-model="config.proxy[config.service]" placeholder="默认不使用代理" />
+            <el-input v-model="config.proxy[config.service]" placeholder="Mặc định không dùng proxy" />
           </el-col>
         </el-row>
 
-        <!-- 角色和模板 -->
+        <!-- Vai trò và mẫu -->
         <el-row v-show="compute.showAI" class="margin-bottom margin-left-2em">
           <el-col :span="8" class="lightblue rounded-corner">
-            <el-tooltip class="box-item" effect="dark" content="以系统身份 system 发送的对话，常用于指定 AI 要扮演的角色"
+            <el-tooltip class="box-item" effect="dark" content="Nội dung gửi với vai trò system, thường dùng để chỉ định vai trò AI."
               placement="top-start" :show-after="500">
               <span class="popup-text popup-vertical-left">system<el-icon class="icon-margin">
                   <ChatDotRound />
@@ -570,7 +570,7 @@
         <el-row v-show="compute.showAI" class="margin-bottom margin-left-2em">
           <el-col :span="8" class="lightblue rounded-corner">
             <el-tooltip class="box-item" effect="dark"
-              content="以用户身份 user 发送的对话，其中{{to}}表示目标语言，{{origin}}表示待翻译的文本内容，两者不可缺少。"
+              content="Nội dung gửi với vai trò user, trong đó {{to}} là ngôn ngữ đích và {{origin}} là văn bản cần dịch; cả hai đều bắt buộc."
               placement="top-start" :show-after="500">
               <span class="popup-text popup-vertical-left">user<el-icon class="icon-margin">
                   <ChatDotRound />
@@ -582,22 +582,22 @@
               placeholder="user message template" />
           </el-col>
         </el-row>
-        <!-- 恢夏默认模板按钮 -->
+        <!-- Nút khôi phục mẫu mặc định -->
         <el-row v-show="compute.showAI" class="margin-bottom margin-left-2em">
           <el-col :span="24" style="text-align: right;">
             <el-button type="primary" link @click="resetTemplate">
               <el-icon>
                 <Refresh />
               </el-icon>
-              恢复默认模板
+              Khôi phục mẫu mặc định
             </el-button>
           </el-col>
         </el-row>
 
-        <!-- 配置导入导出 -->
+        <!-- Nhập và xuất cấu hình -->
         <el-row class="margin-bottom margin-left-2em">
           <el-col :span="24">
-            <el-divider content-position="center">配置管理</el-divider>
+            <el-divider content-position="center">Quản lý cấu hình</el-divider>
           </el-col>
         </el-row>
         <el-row class="margin-bottom margin-left-2em">
@@ -606,7 +606,7 @@
               <el-icon>
                 <Download />
               </el-icon>
-              导出配置
+              Xuất cấu hình
             </el-button>
           </el-col>
           <el-col :span="12">
@@ -614,24 +614,24 @@
               <el-icon>
                 <Upload />
               </el-icon>
-              导入配置
+              Nhập cấu hình
             </el-button>
           </el-col>
         </el-row>
 
-        <!-- 导出配置 -->
+        <!-- Xuất cấu hình -->
         <el-row v-if="showExportBox" class="margin-bottom margin-left-2em">
           <el-col :span="24">
             <el-input v-model="exportData" type="textarea" :rows="8" readonly />
           </el-col>
         </el-row>
 
-        <!-- 导入配置 -->
+        <!-- Nhập cấu hình -->
         <el-row v-if="showImportBox" class="margin-bottom margin-left-2em">
           <el-col :span="24">
-            <el-input v-model="importData" type="textarea" :rows="8" placeholder="请在此处粘贴您的JSON配置" />
+            <el-input v-model="importData" type="textarea" :rows="8" placeholder="Dán cấu hình JSON của bạn tại đây" />
             <div style="margin-top: 10px; text-align: right;">
-              <el-button @click="saveImport">保存</el-button>
+              <el-button @click="saveImport">Lưu</el-button>
             </div>
           </el-col>
         </el-row>
@@ -640,7 +640,7 @@
     <!--    -->
   </div>
 
-  <!-- 自定义快捷键对话框 -->
+  <!-- Hộp thoại tùy chỉnh tắt phím -->
   <CustomHotkeyInput
     v-model="showCustomHotkeyDialog"
     :current-value="config.customFloatingBallHotkey"
@@ -648,7 +648,7 @@
     @cancel="handleCustomHotkeyCancel"
   />
 
-  <!-- 自定义鼠标悬浮快捷键对话框 -->
+  <!-- Tùy chỉnh hộp thoại Phím tắt rê chuột -->
   <CustomHotkeyInput
     v-model="showCustomMouseHotkeyDialog"
     :current-value="config.customHotkey"
@@ -662,7 +662,7 @@
 
 <script lang="ts" setup>
 
-// Main 处理配置信息
+// Thông tin cấu hình tay cầm chính
 import { computed, ref, watch, onUnmounted } from 'vue'
 import { models, options, servicesType, defaultOption } from "../entrypoints/utils/option";
 import { Config } from "@/entrypoints/utils/model";
@@ -674,112 +674,112 @@ import { defineAsyncComponent } from 'vue';
 const CustomHotkeyInput = defineAsyncComponent(() => import('@/components/CustomHotkeyInput.vue'));
 import { parseHotkey } from '@/entrypoints/utils/hotkey';
 
-// 初始化深色模式媒体查询
+// Khởi tạo truy vấn phương tiện ở chế độ tối
 const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-// 更新主题函数
+// Cập nhật chức năng chủ đề
 function updateTheme(theme: string) {
   if (theme === 'auto') {
-    // 自动模式下，直接使用系统主题
+    // Ở chế độ tự động, sử dụng trực tiếp chủ đề hệ thống
     const isDark = darkModeMediaQuery.matches;
     console.log('isDark', isDark);
 
     document.documentElement.classList.toggle('dark', isDark);
   } else {
-    // 手动模式下，使用选择的主题
+    // Ở chế độ thủ công, sử dụng chủ đề đã chọn
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }
 }
 
-// 配置信息
+// Thông tin cấu hình
 let config = ref(new Config());
 
-// 从 storage 中获取本地配置
+// Nhận cấu hình cục bộ từ bộ lưu trữ
 storage.getItem('local:config').then((value: any) => {
   if (typeof value === 'string' && value) {
     const parsedConfig = JSON.parse(value);
     Object.assign(config.value, parsedConfig);
   }
-  // 初始应用主题
+  // Chủ đề ứng dụng ban đầu
   updateTheme(config.value.theme || 'auto');
 });
 
-// 监听 storage 中 'local:config' 的变化
-// 当其他页面修改了配置时,会触发这个监听器
-// newValue 是新的配置值,oldValue 是旧的配置值
+// Theo dõi các thay đổi trong 'local:config' trong bộ lưu trữ
+// Trình nghe này sẽ được kích hoạt khi các trang khác sửa đổi cấu hình.
+// newValue là giá trị cấu hình mới, oldValue là giá trị cấu hình cũ
 storage.watch('local:config', (newValue: any, oldValue: any) => {
-  // 检查 newValue 是否为非空字符串
+  // Kiểm tra xem newValue có phải là chuỗi không trống không
   if (typeof newValue === 'string' && newValue) {
-    // 将新的配置值解析为对象,并合并到当前的 config.value 中
-    // 这样可以保持所有页面的配置同步
+    // Phân tích giá trị cấu hình mới thành một đối tượng và hợp nhất nó vào config.value hiện tại
+    // Điều này giữ cho cấu hình của tất cả các trang được đồng bộ hóa
     Object.assign(config.value, JSON.parse(newValue));
   }
 });
 
-// 监听菜单栏配置变化
-// 当配置发生改变时,将新的配置序列化为 JSON 字符串并保存到 storage 中
-// deep: true 表示深度监听对象内部属性的变化
+// Giám sát thay đổi cấu hình thanh menu
+// Khi cấu hình thay đổi, cấu hình mới sẽ được tuần tự hóa thành chuỗi JSON và được lưu trữ trong bộ lưu trữ.
+// deep: true có nghĩa là theo dõi sâu sắc những thay đổi về thuộc tính bên trong của đối tượng
 watch(config, (newValue: any, oldValue: any) => {
-  // TODO 监听配置变化，显示刷新提示
+  // TODO giám sát các thay đổi về cấu hình và hiển thị lời nhắc làm mới
   storage.setItem('local:config', JSON.stringify(newValue));
 }, { deep: true });
 
-// 计算属性
+// Thuộc tính tính toán
 let compute = ref({
-  // 1、是否是AI服务
+  // 1. Đây có phải là dịch vụ AI không?
   showAI: computed(() => servicesType.isAI(config.value.service)),
-  // 2、是否是机器翻译
+  // 2. Có phải Dịch máy không?
   showMachine: computed(() => servicesType.isMachine(config.value.service)),
-  // 3、是否显示代理
+  // 3. Có hiển thị tác nhân hay không
   showProxy: computed(() => servicesType.isUseProxy(config.value.service)),
-  // 4、是否显示模型
+  // 4. Có hiển thị Mô hình không
   showModel: computed(() => servicesType.isUseModel(config.value.service)),
-  // 5、是否显示token
+  // 5. Có hiển thị mã thông báo hay không
   showToken: computed(() => servicesType.isUseToken(config.value.service)),
-  // 6、是否显示 AkSk
+  // 6. Có hiển thị AkSk không
   showAkSk: computed(() => servicesType.isUseAkSk(config.value.service)),
-  // 6.5、是否显示有道翻译配置
+  // 6.5. Có hiển thị cấu hình Youdao Dịch hay không
   showYoudao: computed(() => servicesType.isYoudao(config.value.service)),
-  // 6.6、是否显示腾讯云机器翻译配置
+  // 6.6. Có hiển thị cấu hình máy Tencent Cloud Dịch hay không
   showTencent: computed(() => servicesType.isTencent(config.value.service)),
-  // 7、获取模型列表
+  // 7. Lấy danh sách Mô Hình
   model: computed(() => models.get(config.value.service) || []),
-  // 8、是否需要自定义接口
+  // 8. Bạn có cần tùy chỉnh API không?
   showCustom: computed(() => servicesType.isCustom(config.value.service)),
-  // 9、是否显示 DeepLX URL 配置
+  // 9. Có hiển thị cấu hình URL DeepLX hay không
   showDeepLX: computed(() => config.value.service === 'deeplx'),
-  // 10、是否自定义模型
-  showCustomModel: computed(() => servicesType.isAI(config.value.service) && config.value.model[config.value.service] === "自定义模型"),
-  // 11、判断是否为"双语模式"，控制一些翻译服务的显示
+  // 10. Tùy chỉnh mô hình
+  showCustomModel: computed(() => servicesType.isAI(config.value.service) && config.value.model[config.value.service] === "Mô hình tùy chỉnh"),
+  // 11. Xác định xem đó có phải là "chế độ song ngữ" hay không và kiểm soát việc hiển thị một số Dịch vụ dịch vụ
   filteredServices: computed(() => options.services.filter((service: any) =>
     !([service.google].includes(service.value) && config.value.display !== 1))
   ),
-  // 12、判断是否为 coze
+  // 12. Xác định xem đó có phải là coze không
   showRobotId: computed(() => servicesType.isCoze(config.value.service)),
-  // 13、是否显示New API配置
+  // 13. Có hiển thị cấu hình API mới hay không
   showNewAPI: computed(() => servicesType.isNewApi(config.value.service)),
-  // 14、是否显示Azure OpenAI端点配置
+  // 14. Có hiển thị cấu hình điểm cuối Azure OpenAI hay không
   showAzureOpenaiEndpoint: computed(() => servicesType.isAzureOpenai(config.value.service)),
 })
 
-// 监听主题变化
+// Theo dõi thay đổi chủ đề
 watch(() => config.value.theme, (newTheme) => {
   updateTheme(newTheme || 'auto');
 });
 
-// 使用 onchange 监听系统主题变化
+// Sử dụng onchange để theo dõi các thay đổi của chủ đề hệ thống
 darkModeMediaQuery.onchange = (e) => {
   if (config.value.theme === 'auto') {
     updateTheme('auto');
   }
 };
 
-// 组件卸载时清理
+// Dọn dẹp khi các thành phần được gỡ cài đặt
 onUnmounted(() => {
   darkModeMediaQuery.onchange = null;
 });
 
-// 计算样式分组
+// Nhóm kiểu tính toán
 const styleGroups = computed(() => {
   const groups = options.styles.filter(item => item.disabled);
   return groups.map(group => ({
@@ -788,35 +788,35 @@ const styleGroups = computed(() => {
   }));
 });
 
-// 恢复默认模板
+// Khôi phục mẫu mặc định
 const resetTemplate = () => {
   ElMessageBox.confirm(
-    '确定要恢复默认的 system 和 user 模板吗？此操作将覆盖当前的自定义模板。',
-    '恢复默认模板',
+    'Bạn có chắc muốn khôi phục mẫu system và user mặc định không? Thao tác này sẽ ghi đè mẫu tùy chỉnh hiện tại.',
+    'Khôi phục mẫu mặc định',
     {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+      confirmButtonText: 'Xác nhận',
+      cancelButtonText: 'Hủy',
       type: 'warning',
     }
   ).then(() => {
     config.value.system_role[config.value.service] = defaultOption.system_role;
     config.value.user_role[config.value.service] = defaultOption.user_role;
     ElMessage({
-      message: '已成功恢复默认翻译模板',
+      message: 'Đã khôi phục mẫu dịch mặc định thành công',
       type: 'success',
       duration: 2000
     });
   }).catch(() => {
-    // 用户取消操作，不做任何处理
+    // Người dùng Hủy hoạt động mà không cần xử lý
   });
 };
 
-// 悬浮球开关的计算属性
+// Tính chất của quả bóng lơ lửng BậtTắt
 const floatingBallEnabled = computed({
   get: () => !config.value.disableFloatingBall && config.value.on,
   set: (value) => {
     config.value.disableFloatingBall = !value;
-    // 向所有激活的标签页发送消息
+    // Gửi tin nhắn đến tất cả các tab đang hoạt động
     browser.tabs.query({}).then(tabs => {
       tabs.forEach(tab => {
         if (tab.id) {
@@ -824,7 +824,7 @@ const floatingBallEnabled = computed({
             type: 'toggleFloatingBall',
             isEnabled: value 
           }).catch(() => {
-            // 忽略发送失败的错误（可能是页面未加载内容脚本）
+            // Bỏ qua lỗi không gửi được (có thể trang chưa tải script nội dung)
           });
         }
       });
@@ -832,9 +832,9 @@ const floatingBallEnabled = computed({
   }
 });
 
-// 监听划词翻译模式变化
+// Theo dõi sự thay đổi của từ Chế độ dịch
 watch(() => config.value.selectionTranslatorMode, (newMode) => {
-  // 向所有激活的标签页发送消息
+  // Gửi tin nhắn đến tất cả các tab đang hoạt động
   browser.tabs.query({}).then(tabs => {
     tabs.forEach(tab => {
       if (tab.id) {
@@ -842,26 +842,26 @@ watch(() => config.value.selectionTranslatorMode, (newMode) => {
           type: 'updateSelectionTranslatorMode',
           mode: newMode 
         }).catch(() => {
-          // 忽略发送失败的错误（可能是页面未加载内容脚本）
+          // Bỏ qua lỗi không gửi được (có thể trang chưa tải script nội dung)
         });
       }
     });
   });
 });
 
-// 监听开关变化
+// Theo dõi các thay đổi Kích hoạt
 const handleSwitchChange = () => {
   showRefreshTip.value = true;
 };
 
-// 处理插件状态变化
+// Xử lý các thay đổi của tiện ích trạng thái
 const handlePluginStateChange = (val: boolean) => {
-  // 如果插件被关闭，确保悬浮球和划词翻译也被关闭
+  // Nếu plugin bị Tắt, hãy đảm bảo rằng bóng lơ lửng và lựa chọn Dịch khi bôi cũng bị Tắt
   if (!val) {
-    // 处理悬浮球
+    // Xử lý bóng lơ lửng
     if (!config.value.disableFloatingBall) {
       config.value.disableFloatingBall = true;
-      // 向所有激活的标签页发送消息，关闭悬浮球
+      // Gửi tin nhắn tới tất cả các tab đang hoạt động, Tắt bóng nổi
       browser.tabs.query({}).then(tabs => {
         tabs.forEach(tab => {
           if (tab.id) {
@@ -869,17 +869,17 @@ const handlePluginStateChange = (val: boolean) => {
               type: 'toggleFloatingBall',
               isEnabled: false
             }).catch(() => {
-              // 忽略发送失败的错误（可能是页面未加载内容脚本）
+              // Bỏ qua lỗi không gửi được (có thể trang chưa tải script nội dung)
             });
           }
         });
       });
     }
     
-    // 处理划词翻译
+    // Đang xử lý dịch khi lựa chọn
     if (config.value.selectionTranslatorMode !== 'disabled') {
       config.value.selectionTranslatorMode = 'disabled';
-      // 向所有激活的标签页发送消息，关闭划词翻译
+      // Gửi tin nhắn đến tất cả các tab đang hoạt động, Tắt Dịch khi bôi chọn
       browser.tabs.query({}).then(tabs => {
         tabs.forEach(tab => {
           if (tab.id) {
@@ -887,7 +887,7 @@ const handlePluginStateChange = (val: boolean) => {
               type: 'updateSelectionTranslatorMode',
               mode: 'disabled'
             }).catch(() => {
-              // 忽略发送失败的错误（可能是页面未加载内容脚本）
+              // Bỏ qua lỗi không gửi được (có thể trang chưa tải script nội dung)
             });
           }
         });
@@ -896,9 +896,9 @@ const handlePluginStateChange = (val: boolean) => {
   }
 };
 
-// 处理悬浮球开关变化
+// Xử lý các thay đổi của bóng treo.
 const toggleFloatingBall = (val: boolean) => {
-  // 向所有激活的标签页发送消息
+  // Gửi tin nhắn đến tất cả các tab đang hoạt động
   browser.tabs.query({}).then(tabs => {
     tabs.forEach(tab => {
       if (tab.id) {
@@ -906,30 +906,30 @@ const toggleFloatingBall = (val: boolean) => {
           type: 'toggleFloatingBall',
           isEnabled: val 
         }).catch(() => {
-          // 忽略发送失败的错误（可能是页面未加载内容脚本）
+          // Bỏ qua lỗi không gửi được (có thể trang chưa tải script nội dung)
         });
       }
     });
   });
 };
 
-// 自定义快捷键相关
+// Phím tắt tùy chọn Offphase
 const showCustomHotkeyDialog = ref(false);
 const showCustomMouseHotkeyDialog = ref(false);
 
-// 配置导入导出相关
+// Cấu hình giai đoạn nhập và xuất Tắt
 const showExportConfig = ref(false);
 const showImportConfig = ref(false);
 const exportedConfig = ref('');
 const importConfigText = ref('');
 const importLoading = ref(false);
 
-// 处理快捷键选择变化
+// Xử lý các thay đổi lựa chọn phím tắt
 const handleHotkeyChange = (value: string) => {
   if (value === 'custom') {
-    // 选择自定义后，如果没有设置过自定义快捷键，自动打开设置对话框
+    // Sau khi chọn Custom, nếu chưa cài đặt tùy chọn Tắt tùy chọn, hộp thoại cài đặt Mở tự động sẽ xuất hiện.
     if (!config.value.customFloatingBallHotkey) {
-      // 延迟一下，让选择框先完成状态更新
+      // Trì hoãn một lúc để hộp lựa chọn hoàn tất cập nhật trạng thái trước
       setTimeout(() => {
         openCustomHotkeyDialog();
       }, 100);
@@ -937,49 +937,49 @@ const handleHotkeyChange = (value: string) => {
   }
 };
 
-// 打开自定义快捷键对话框
+// OpenPhímtắt hộp thoại tùy chỉnh
 const openCustomHotkeyDialog = () => {
   showCustomHotkeyDialog.value = true;
 };
 
-// 确认自定义快捷键
+// Xác nhậnPhím tắt tùy chỉnh
 const handleCustomHotkeyConfirm = (hotkey: string) => {
   config.value.customFloatingBallHotkey = hotkey;
   config.value.floatingBallHotkey = 'custom';
   
   ElMessage({
-    message: hotkey === 'none' ? '已禁用快捷键' : `快捷键已设置为: ${getCustomHotkeyDisplayName()}`,
+    message: hotkey === 'none' ? 'Đã tắt phím tắt' : `Đã đặt phím tắt: ${getCustomHotkeyDisplayName()}`,
     type: 'success',
     duration: 2000
   });
 };
 
-// 取消自定义快捷键
+// HủyPhím tắt tùy chỉnh
 const handleCustomHotkeyCancel = () => {
-  // 如果没有自定义快捷键，回退到默认选项
+  // Nếu không có tùy chọn tắt Phím tắt thì quay lại tùy chọn mặc định
   if (!config.value.customFloatingBallHotkey) {
     config.value.floatingBallHotkey = 'Alt+T';
   }
 };
 
-// 获取自定义快捷键显示名称
+// Nhận tên hiển thị tùy chỉnh tắt Key
 const getCustomHotkeyDisplayName = () => {
   if (!config.value.customFloatingBallHotkey) return '';
   
   if (config.value.customFloatingBallHotkey === 'none') {
-    return '已禁用';
+    return 'Đã tắt';
   }
   
   const parsed = parseHotkey(config.value.customFloatingBallHotkey);
   return parsed.isValid ? parsed.displayName : config.value.customFloatingBallHotkey;
 };
 
-// 处理鼠标悬浮快捷键选择变化
+// Xử lý các thay đổi lựa chọn chuột tắt rê
 const handleMouseHotkeyChange = (value: string) => {
   if (value === 'custom') {
-    // 选择自定义后，如果没有设置过自定义快捷键，自动打开设置对话框
+    // Sau khi chọn Custom, nếu chưa cài đặt tùy chọn Tắt tùy chọn, hộp thoại cài đặt Mở tự động sẽ xuất hiện.
     if (!config.value.customHotkey) {
-      // 延迟一下，让选择框先完成状态更新
+      // Trì hoãn một lúc để hộp lựa chọn hoàn tất cập nhật trạng thái trước
       setTimeout(() => {
         openCustomMouseHotkeyDialog();
       }, 100);
@@ -987,76 +987,76 @@ const handleMouseHotkeyChange = (value: string) => {
   }
 };
 
-// 打开自定义鼠标悬浮快捷键对话框
+// MởTùy chỉnh hộp thoại Phím tắt rê chuột
 const openCustomMouseHotkeyDialog = () => {
   showCustomMouseHotkeyDialog.value = true;
 };
 
-// 确认自定义鼠标悬浮快捷键
+// Xác nhận chuột tắt phím tùy chỉnh
 const handleCustomMouseHotkeyConfirm = (hotkey: string) => {
   config.value.customHotkey = hotkey;
   config.value.hotkey = 'custom';
   
   ElMessage({
-    message: hotkey === 'none' ? '已禁用快捷键' : `快捷键已设置为: ${getCustomMouseHotkeyDisplayName()}`,
+    message: hotkey === 'none' ? 'Đã tắt phím tắt' : `Đã đặt phím tắt: ${getCustomMouseHotkeyDisplayName()}`,
     type: 'success',
     duration: 2000
   });
 };
 
-// 取消自定义鼠标悬浮快捷键
+// Hủy bỏ chuột tắt phím tùy chỉnh
 const handleCustomMouseHotkeyCancel = () => {
-  // 如果没有自定义快捷键，回退到默认选项
+  // Nếu không có tùy chọn tắt Phím tắt thì quay lại tùy chọn mặc định
   if (!config.value.customHotkey) {
     config.value.hotkey = 'Control';
   }
 };
 
-// 获取自定义鼠标悬浮快捷键显示名称
+// Lấy tên hiển thị chuột tắt rê phím tùy chỉnh
 const getCustomMouseHotkeyDisplayName = () => {
   if (!config.value.customHotkey) return '';
   
   if (config.value.customHotkey === 'none') {
-    return '已禁用';
+    return 'Đã tắt';
   }
   
   const parsed = parseHotkey(config.value.customHotkey);
   return parsed.isValid ? parsed.displayName : config.value.customHotkey;
 };
 
-// 处理并发数量变化
+// Xử lý các thay đổi số đồng thời
 const handleConcurrentChange = (currentValue: number | undefined, oldValue: number | undefined) => {
-  // 验证并发数量的有效性
+  // Xác minh tính hợp lệ của số đồng thời
   if (currentValue === undefined || currentValue < 1 || currentValue > 100) {
     ElMessage({
-      message: '并发数量必须在 1-100 之间',
+      message: 'Số lượng đồng thời phải nằm trong khoảng 1-100',
       type: 'warning',
       duration: 2000
     });
-    // 恢复默认值
+    // Khôi phục mặc định
     config.value.maxConcurrentTranslations = 6;
     return;
   }
   
-  // 显示设置已更新的提示
+  // Hiển thị thông báo rằng cài đặt đã được cập nhật
   showRefreshTip.value = true;
   
   ElMessage({
-    message: `并发数量已更新为 ${currentValue}`,
+    message: `Đã cập nhật số lượng đồng thời thành ${currentValue}`,
     type: 'success',
     duration: 2000
   });
 };
 
-// 显示刷新提示
+// Hiển thị lời nhắc làm mới
 const showRefreshTip = ref(false);
 
-// 刷新页面
+// Làm mới trang
 const refreshPage = async () => {
   const tabs = await browser.tabs.query({ active: true, currentWindow: true });
   if (tabs[0]?.id) {
     browser.tabs.reload(tabs[0].id);
-    showRefreshTip.value = false; // 刷新后隐藏提示
+    showRefreshTip.value = false; // Ẩn lời nhắc sau khi làm mới
   }
 };
 
@@ -1065,13 +1065,13 @@ const exportData = ref('');
 const showImportBox = ref(false);
 const importData = ref('');
 
-// Azure OpenAI 端点地址验证函数
+// Chức năng xác minh địa chỉ điểm cuối Azure OpenAI
 const isValidAzureEndpoint = (endpoint: string) => {
   if (!endpoint || endpoint.trim() === '') {
     return false;
   }
 
-  // 检查是否包含必要的组件
+  // Kiểm tra xem các thành phần cần thiết có được bao gồm không
   const hasAzureDomain = endpoint.includes('openai.azure.com');
   const hasChatCompletions = endpoint.includes('/chat/completions');
   const hasHttps = endpoint.startsWith('https://');
@@ -1083,7 +1083,7 @@ const handleExport = async () => {
   const configStr = await storage.getItem('local:config');
   if (!configStr) {
     ElMessage({
-      message: '没有找到配置信息',
+      message: 'Không tìm thấy thông tin cấu hình',
       type: 'warning',
     });
     return;
@@ -1133,14 +1133,14 @@ const saveImport = async () => {
     // Add validation here
     if (!validateConfig(parsedConfig)) {
       ElMessage({
-        message: '配置无效或格式不正确, 请检查!',
+        message: 'Cấu hình không hợp lệ hoặc sai định dạng, vui lòng kiểm tra!',
         type: 'error',
       });
       return;
     }
     await storage.setItem('local:config', JSON.stringify(parsedConfig));
     ElMessage({
-      message: '配置导入成功!',
+      message: 'Nhập cấu hình thành công!',
       type: 'success',
     });
     showImportBox.value = false;
@@ -1148,31 +1148,31 @@ const saveImport = async () => {
     // Optionally, reload the extension or relevant parts
   } catch (e) {
     ElMessage({
-      message: '配置格式错误, 请检查!',
+      message: 'Định dạng cấu hình không đúng, vui lòng kiểm tra!',
       type: 'error',
     });
   }
 };
 
 
-// 切换导出配置显示
+// Switch Xuất màn hình cấu hình
 const toggleExportConfig = async () => {
   if (showExportConfig.value) {
-    // 如果已经显示，则隐藏
+    // Ẩn nếu đã hiển thị
     showExportConfig.value = false;
     exportedConfig.value = '';
   } else {
-    // 如果未显示，则显示并生成配置
+    // Nếu không hiển thị, hiển thị và tạo cấu hình
     try {
-      // 确保从storage获取最新的配置
+      // Đảm bảo nhận được cấu hình mới nhất từ ​​bộ lưu trữ
       const latestConfig = await storage.getItem('local:config');
       let configToExport;
 
       if (latestConfig && typeof latestConfig === 'string') {
-        // 使用storage中的最新配置
+        // Sử dụng cấu hình mới nhất trong bộ lưu trữ
         configToExport = JSON.parse(latestConfig);
       } else {
-        // 如果storage中没有，使用当前config.value
+        // Nếu nó không có trong bộ lưu trữ, hãy sử dụng config.value hiện tại
         configToExport = JSON.parse(JSON.stringify(config.value));
       }
 
@@ -1180,13 +1180,13 @@ const toggleExportConfig = async () => {
       showExportConfig.value = true;
 
       ElMessage({
-        message: '配置已生成，请复制保存',
+        message: 'Đã tạo cấu hình, vui lòng sao chép để lưu',
         type: 'success',
         duration: 2000
       });
     } catch (error) {
       ElMessage({
-         message: '导出配置失败：' + ((error as Error)?.message || '未知错误'),
+         message: 'Xuất cấu hình thất bại: ' + ((error as Error)?.message || 'Lỗi không xác định'),
          type: 'error',
          duration: 3000
        });
@@ -1194,50 +1194,50 @@ const toggleExportConfig = async () => {
   }
 };
 
-// 复制导出的配置到剪贴板
+// Sao chép cấu hình đã xuất vào clipboard
 const copyExportedConfig = async () => {
   try {
     await navigator.clipboard.writeText(exportedConfig.value);
     ElMessage({
-      message: '配置已复制到剪贴板',
+      message: 'Đã sao chép cấu hình vào bộ nhớ tạm',
       type: 'success',
       duration: 2000
     });
   } catch (error) {
     ElMessage({
-      message: '复制失败，请手动复制',
+      message: 'Sao chép thất bại, vui lòng sao chép thủ công',
       type: 'warning',
       duration: 2000
     });
   }
 };
 
-// 切换导入配置显示
+// Chuyển đổi Nhập cấu hình hiển thị
 const toggleImportConfig = () => {
   if (showImportConfig.value) {
-    // 如果已经显示，则隐藏并清空内容
+    // Nếu đã hiển thị thì ẩn và xóa nội dung
     showImportConfig.value = false;
     importConfigText.value = '';
   } else {
-    // 如果未显示，则显示
+    // nếu không hiển thị thì hiển thị
     showImportConfig.value = true;
     importConfigText.value = '';
   }
 };
 
-// 取消导入
+// Hủy nhập khẩu
 const cancelImport = () => {
-  // 清空输入框并隐藏导入区域
+  // Xóa hộp nhập và ẩn vùng nhập
   importConfigText.value = '';
   showImportConfig.value = false;
   importLoading.value = false;
 };
 
-// 导入配置
+// Nhập cấu hình
 const importConfig = async () => {
   if (!importConfigText.value.trim()) {
     ElMessage({
-      message: '请输入配置内容',
+      message: 'Vui lòng nhập nội dung cấu hình',
       type: 'warning',
       duration: 2000
     });
@@ -1247,37 +1247,37 @@ const importConfig = async () => {
   importLoading.value = true;
 
   try {
-    // 解析JSON配置
+    // Phân tích cấu hình JSON
     const importedConfig = JSON.parse(importConfigText.value);
 
-    // 验证配置格式
+    // Xác minh định dạng cấu hình
     if (!validateConfig(importedConfig)) {
-      throw new Error('配置格式不正确');
+      throw new Error('Định dạng cấu hình không đúng');
     }
 
-    // 确认导入
+    // Xác nhận nhập
     await ElMessageBox.confirm(
-      '导入配置将覆盖当前所有设置，确定要继续吗？',
-      '确认导入',
+      'Nhập cấu hình sẽ ghi đè toàn bộ cài đặt hiện tại, bạn có chắc muốn tiếp tục không?',
+      'Xác nhận nhập',
       {
-        confirmButtonText: '确定导入',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Xác nhận nhập',
+        cancelButtonText: 'Hủy',
         type: 'warning',
       }
     );
 
-    // 应用新配置
+    // Áp dụng cấu hình mới
     Object.assign(config.value, importedConfig);
 
-    // 保存到storage
+    // Lưu vào kho lưu trữ
     await storage.setItem('local:config', JSON.stringify(config.value));
 
-    // 隐藏导入区域并清空输入
+    // Ẩn khu vực nhập và xóa đầu vào
     showImportConfig.value = false;
     importConfigText.value = '';
 
     ElMessage({
-      message: '配置导入成功',
+      message: 'Nhập cấu hình thành công',
       type: 'success',
       duration: 2000
     });
@@ -1285,7 +1285,7 @@ const importConfig = async () => {
   } catch (error) {
     if ((error as Error).message !== 'cancel') {
       ElMessage({
-        message: '导入失败：' + ((error as Error).message || '配置格式错误'),
+        message: 'Nhập thất bại: ' + ((error as Error).message || 'Lỗi định dạng cấu hình'),
         type: 'error',
         duration: 3000
       });
@@ -1295,15 +1295,15 @@ const importConfig = async () => {
   }
 };
 
-// 验证配置格式
+// Xác minh định dạng cấu hình
 const validateConfig = (configData: any): boolean => {
   try {
-    // 检查是否是对象
+    // Kiểm tra xem nó có phải là một đối tượng không
     if (typeof configData !== 'object' || configData === null) {
       return false;
     }
 
-    // 检查必要的配置字段
+    // Kiểm tra các trường cấu hình cần thiết
     const requiredFields = ['on', 'service', 'display', 'from', 'to'];
     for (const field of requiredFields) {
       if (!(field in configData)) {
@@ -1311,7 +1311,7 @@ const validateConfig = (configData: any): boolean => {
       }
     }
 
-    // 检查服务配置
+    // Kiểm tra cấu hình dịch vụ
     if (typeof configData.service !== 'string') {
       return false;
     }
@@ -1354,7 +1354,7 @@ const validateConfig = (configData: any): boolean => {
   margin-left: 0.25em;
 }
 
-/* 添加自适应样式 */
+/* Thêm kiểu thích ứng */
 :deep(.el-select) {
   width: 100%;
 }
@@ -1380,7 +1380,7 @@ const validateConfig = (configData: any): boolean => {
   margin-top: 0.5em;
 }
 
-/* 设置滚动条样式 */
+/* Đặt kiểu thanh cuộn */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -1447,7 +1447,7 @@ const validateConfig = (configData: any): boolean => {
   }
 }
 
-/* 自定义快捷键相关样式 */
+/* Phím tắt tùy chỉnh kiểu Tắt pha */
 .hotkey-config {
   display: flex;
   flex-direction: column;
@@ -1509,7 +1509,7 @@ const validateConfig = (configData: any): boolean => {
   font-weight: normal !important;
 }
 
-/* 自定义快捷键行样式 */
+/* Phím tắt kiểu dòng tùy chỉnh */
 .custom-hotkey-row {
   border-radius: 8px;
   padding: 8px;
@@ -1569,7 +1569,7 @@ const validateConfig = (configData: any): boolean => {
   opacity: 0.1;
 }
 
-/* 自定义标识徽章 */
+/* Huy hiệu logo tùy chỉnh */
 .custom-badge {
   display: inline-flex;
   align-items: center;
@@ -1583,7 +1583,7 @@ const validateConfig = (configData: any): boolean => {
   line-height: 1;
 }
 
-/* 错误样式 */
+/* sai phong cách */
 .input-error {
   border-color: var(--el-color-danger) !important;
 }

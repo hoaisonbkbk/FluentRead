@@ -3,18 +3,18 @@ import { config } from "@/entrypoints/utils/config";
 
 const prefix = "flcache_"; // fluent read cache
 
-// 构建缓存 key
+// Xây dựng khóa bộ đệm
 function buildKey(message: string) {
     const { service, model, to, style, customModel } = config;
     const selectedModel = model[service] === customModelString ? customModel[service] : model[service];
-    // 前缀_服务_模型_目标语言_消息
+    // tiền tố_service_model_target_message
     return [prefix, style, service, selectedModel, to, message].join('_');
 }
 
 export const cache = {
-    // 存入缓存并设置过期时间
+    // Lưu trữ trong bộ đệm và đặt thời gian hết hạn
     set(set: Set<any>, key: any, expire: number) {
-        // 如果禁用缓存，则不执行任何操作
+        // Nếu bộ nhớ đệm bị tắt, không có tác dụng gì
         if (!config.useCache) return;
         
         set.add(key);
@@ -23,16 +23,16 @@ export const cache = {
         }
     },
 
-    // local 系列为特化的缓存方法，用于操作翻译缓存
+    // Chuỗi cục bộ là một phương pháp lưu vào bộ nhớ đệm chuyên dụng được sử dụng để vận hành bộ đệm dịch.
     localSet(key: string, value: string) {
-        // 如果禁用缓存，则不执行任何操作
+        // Nếu bộ nhớ đệm bị tắt, không có tác dụng gì
         if (!config.useCache) return;
         
         localStorage.setItem(buildKey(key), value);
     },
 
     localSetDual(key: string, value: string) {
-        // 如果禁用缓存，则不执行任何操作
+        // Nếu bộ nhớ đệm bị tắt, không có tác dụng gì
         if (!config.useCache) return;
         
         this.localSet(value, key);
@@ -40,7 +40,7 @@ export const cache = {
     },
 
     localGet(origin: string) {
-        // 如果禁用缓存，则始终返回 null
+        // Nếu bộ nhớ đệm bị tắt, luôn trả về null
         if (!config.useCache) return null;
         
         return localStorage.getItem(buildKey(origin));
@@ -55,7 +55,7 @@ export const cache = {
         }
     },
 
-    // 24h 清理一次缓存（每次页面打开即 main.js 时都应该调用）
+    // Xóa bộ nhớ đệm cứ sau 24 giờ một lần (nên được gọi mỗi khi trang được mở, tức là main.js)
     cleaner() {
         const lastSessionTimestamp = localStorage.getItem('flLastSessionTimestamp');
         const currentTime = Date.now();
@@ -66,23 +66,23 @@ export const cache = {
         }
     },
 
-    // 清除当前 url.host 的翻译缓存
+    // Xóa bộ đệm dịch cho url.host hiện tại
     clean() {
         const keysToDelete = [];
-        // 收集所有要删除的键
+        // Thu thập tất cả các phím để xóa
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (key && key.startsWith(prefix)) keysToDelete.push(key);
         }
-        // 批量删除
+        // Xóa hàng loạt
         keysToDelete.forEach(key => localStorage.removeItem(key));
     }
 };
 
-// 用于节点序列化
+// để tuần tự hóa nút
 export function stringifyNode(node: any): string {
     const serializer = new XMLSerializer();
     let outerHTML = serializer.serializeToString(node);
-    // 移除多余的空白符
+    // Loại bỏ các ký tự khoảng trắng thừa
     return outerHTML.replace(/\s{2,}/g, ' ').trim();
 }

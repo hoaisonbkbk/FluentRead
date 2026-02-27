@@ -1,6 +1,6 @@
 {
-  "name": "流畅阅读",
-  "description": "一款革命性的浏览器开源翻译插件，让所有人都能够拥有母语般的阅读体验",
+  "name": "fluent-read",
+  "description": "Tiện ích dịch mã nguồn mở trên trình duyệt, giúp mọi người đọc mượt như tiếng mẹ đẻ",
   "private": true,
   "version": "0.0.28",
   "type": "module",

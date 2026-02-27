@@ -4,7 +4,7 @@ import {claudeMsgTemplate} from "../utils/template";
 import {config} from "@/entrypoints/utils/config";
 
 async function claude(message: any) {
-    // 构建请求头
+    // Xây dựng tiêu đề yêu cầu
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     headers.append('x-api-key', config.token[services.claude]);
@@ -21,13 +21,13 @@ async function claude(message: any) {
         });
 
         if (!resp.ok) {
-            throw new Error(`请求失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+            throw new Error(`Yêu cầu thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
         }
 
         const result = await resp.json();
         return result.content[0].text;
     } catch (error) {
-        console.error('Claude API 调用失败:', error);
+        console.error('Claude API gọi thất bại:', error);
         throw error;
     }
 }

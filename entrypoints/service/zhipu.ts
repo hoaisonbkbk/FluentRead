@@ -5,26 +5,26 @@ import CryptoJS from 'crypto-js';
 import {config} from "@/entrypoints/utils/config";
 
 
-// 文档参考：https://open.bigmodel.cn/dev/api#nosdk
+// Tài liệu tham khảo: https://open.bigmodel.cn/dev/api#nosdk
 async function zhipu(message: any) {
-    // 智谱根据 token 获取 secret（签名密钥） 和 expiration
+    // Zhipu lấy bí mật (khóa chữ ký) và hết hạn dựa trên mã thông báo
     let token = config.token[services.zhipu];
     let secret, expiration;
     config.extra[services.zhipu] && ({secret, expiration} = config.extra[services.zhipu]);
     if (!secret || expiration <= Date.now()) {
         secret = generateToken(token);
-        if (!secret) throw new Error('无法生成令牌');
-        // 保存 secret 和 expiration
+        if (!secret) throw new Error('Không thể tạo token');
+        // Lưu bí mật và hết hạn
         config.extra[services.zhipu] = {secret, expiration: Date.now() + 3600000 * 24};
         await storage.setItem('local:config', JSON.stringify(config));
     }
 
-    // 构建请求头
+    // Xây dựng tiêu đề yêu cầu
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     headers.append('Authorization', `Bearer ${secret}`);
 
-    // 发起 fetch 请求
+    // Bắt đầu yêu cầu tìm nạp
     const resp = await fetch(urls[services.zhipu], {
         method: method.POST,
         headers: headers,
@@ -36,16 +36,16 @@ async function zhipu(message: any) {
         return result.choices[0].message.content;
     } else {
         console.log(resp)
-        throw new Error(`翻译失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+        throw new Error(`Dịch thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
     }
 }
 
 function generateToken(APIKey: string) {
     if (!APIKey || !APIKey.includes('.')) {
-        console.log("API Key 格式错误：", APIKey)
+        console.log("Định dạng API Key không đúng:", APIKey)
         return;
     }
-    let duration = 3600000 * 24; // 生成的 token 默认24小时后过期
+    let duration = 3600000 * 24; // Mã thông báo được tạo sẽ hết hạn sau 24 ngày theo mặc định.
     const [key, secret] = APIKey.split('.');
 
     return generateJWT(secret, {alg: "HS256", sign_type: "SIGN", typ: "JWT"}, {
@@ -55,17 +55,17 @@ function generateToken(APIKey: string) {
     });
 }
 
-// 生成JWT（JSON Web Token）
+// Tạo JWT (Mã thông báo web JSON)
 function generateJWT(secret: string, header: any, payload: any) {
-    // 对header和payload部分进行UTF-8编码，然后转换为Base64URL格式
+    // UTF-8 mã hóa phần tiêu đề và phần tải trọng, sau đó chuyển đổi chúng sang định dạng Base64URL
     const encodedHeader = base64UrlSafe(btoa(JSON.stringify(header)));
     const encodedPayload = base64UrlSafe(btoa(JSON.stringify(payload)));
-    // 生成 jwt 签名
+    // Tạo chữ ký jwt
     let hmacsha256 = base64UrlSafe(CryptoJS.HmacSHA256(encodedHeader + "." + encodedPayload, secret).toString(CryptoJS.enc.Base64))
     return `${encodedHeader}.${encodedPayload}.${hmacsha256}`;
 }
 
-// 将Base64字符串转换为Base64URL格式的函数
+// Hàm chuyển đổi chuỗi Base64 sang định dạng Base64URL
 function base64UrlSafe(base64String: string) {
     return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }

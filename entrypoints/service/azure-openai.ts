@@ -5,20 +5,20 @@ import {contentPostHandler} from "@/entrypoints/utils/check";
 
 async function azureOpenai(message: any) {
     try {
-        // 验证必要的配置
+        // Xác minh cấu hình cần thiết
         const apiKey = config.token[config.service];
         if (!apiKey || apiKey.trim() === '') {
-            throw new Error('Azure OpenAI API Key 未配置，请在设置中输入有效的 API Key');
+            throw new Error('Azure OpenAI API Key chưa được cấu hình, vui lòng nhập API Key hợp lệ trong cài đặt');
         }
 
         const endpoint = config.azureOpenaiEndpoint;
         if (!endpoint || endpoint.trim() === '') {
-            throw new Error('Azure OpenAI 端点地址未配置，请在设置中输入完整的端点地址');
+            throw new Error('Endpoint Azure OpenAI chưa được cấu hình, vui lòng nhập endpoint đầy đủ trong cài đặt');
         }
 
-        // 验证端点地址格式
+        // Xác minh định dạng địa chỉ điểm cuối
         if (!endpoint.includes('openai.azure.com') || !endpoint.includes('/chat/completions')) {
-            throw new Error('Azure OpenAI 端点地址格式不正确，请确保包含正确的域名和路径');
+            throw new Error('Định dạng endpoint Azure OpenAI không đúng, vui lòng đảm bảo đúng tên miền và đường dẫn');
         }
 
         const headers = new Headers({
@@ -34,24 +34,24 @@ async function azureOpenai(message: any) {
 
         if (!resp.ok) {
             const errorText = await resp.text();
-            let errorMessage = `Azure OpenAI API 调用失败: ${resp.status} ${resp.statusText}`;
+            let errorMessage = `Gọi Azure OpenAI API thất bại: ${resp.status} ${resp.statusText}`;
             
-            // 根据状态码提供更具体的错误信息
+            // Cung cấp thông tin lỗi cụ thể hơn dựa trên mã trạng thái
             switch (resp.status) {
                 case 401:
-                    errorMessage = 'API Key 无效或已过期，请检查您的 Azure OpenAI API Key';
+                    errorMessage = 'API Key không hợp lệ hoặc đã hết hạn, vui lòng kiểm tra Azure OpenAI API Key của bạn';
                     break;
                 case 404:
-                    errorMessage = '端点地址不存在，请检查资源名称和部署名称是否正确';
+                    errorMessage = 'Endpoint không tồn tại, vui lòng kiểm tra tên tài nguyên và tên triển khai';
                     break;
                 case 429:
-                    errorMessage = 'API 调用频率超限，请稍后重试或检查配额设置';
+                    errorMessage = 'Tần suất gọi API vượt giới hạn, vui lòng thử lại sau hoặc kiểm tra quota';
                     break;
                 case 500:
-                    errorMessage = 'Azure OpenAI 服务内部错误，请稍后重试';
+                    errorMessage = 'Lỗi nội bộ dịch vụ Azure OpenAI, vui lòng thử lại sau';
                     break;
                 default:
-                    errorMessage += `\n详细信息: ${errorText}`;
+                    errorMessage += `\nChi tiết: ${errorText}`;
             }
             
             throw new Error(errorMessage);
@@ -60,12 +60,12 @@ async function azureOpenai(message: any) {
         const result = await resp.json();
         
         if (!result.choices || !result.choices[0] || !result.choices[0].message) {
-            throw new Error('Azure OpenAI 返回数据格式异常，请检查模型配置');
+            throw new Error('Định dạng dữ liệu trả về từ Azure OpenAI bất thường, vui lòng kiểm tra cấu hình mô hình');
         }
         
         return contentPostHandler(result.choices[0].message.content);
     } catch (error) {
-        console.error('Azure OpenAI API调用失败:', error);
+        console.error('Gọi Azure OpenAI API thất bại:', error);
         throw error;
     }
 }

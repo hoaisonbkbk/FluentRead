@@ -4,9 +4,9 @@ import {config} from "@/entrypoints/utils/config";
 import {contentPostHandler} from "@/entrypoints/utils/check";
 
 /**
- * Grok 服务实现
- * 使用 X.AI API，兼容 OpenAI 接口
- * 支持模型：grok-3-beta, grok-3-fast-beta, grok-3-mini-beta, grok-3-mini-fast-beta
+ * Triển khai dịch vụ Grok
+ * Sử dụng X.AI API, tương thích với giao diện OpenAI
+ * Các mẫu được hỗ trợ: grok-3-beta, grok-3-fast-beta, grok-3-mini-beta, grok-3-mini-fast-beta
  */
 async function grok(message: any) {
     try {
@@ -24,13 +24,13 @@ async function grok(message: any) {
         });
 
         if (!resp.ok) {
-            throw new Error(`翻译失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+            throw new Error(`Dịch thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
         }
 
         const result = await resp.json();
         return contentPostHandler(result.choices[0].message.content);
     } catch (error) {
-        console.error('Grok API调用失败:', error);
+        console.error('Grok API gọi thất bại:', error);
         throw error;
     }
 }

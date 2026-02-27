@@ -11,9 +11,9 @@ interface YoudaoResponse {
 }
 
 async function youdao(message: any): Promise<string> {
-  // 检查必需的配置
+  // Kiểm tra cấu hình cần thiết
   if (!config.youdaoAppKey || !config.youdaoAppSecret) {
-    throw new Error('请先配置有道翻译的 App Key 和 App Secret');
+    throw new Error('Vui lòng cấu hình App Key và App Secret của Youdao trước');
   }
 
   const appKey = config.youdaoAppKey;
@@ -22,20 +22,20 @@ async function youdao(message: any): Promise<string> {
   const salt = Date.now().toString();
   const curtime = Math.round(Date.now() / 1000).toString();
 
-  // 生成签名
+  // Tạo chữ ký
   function generateSign(appKey: string, query: string, salt: string, curtime: string, appSecret: string): string {
     let str1 = appKey + truncate(query) + salt + curtime + appSecret;
     return CryptoJS.SHA256(str1).toString(CryptoJS.enc.Hex);
   }
 
-  // 截取函数（用于签名计算）
+  // Chức năng chặn (để tính toán chữ ký)
   function truncate(q: string): string {
     const len = q.length;
     if (len <= 20) return q;
     return q.substring(0, 10) + len + q.substring(len - 10, len);
   }
 
-  // 语言代码映射
+  // Ánh xạ mã ngôn ngữ
   const langMap: { [key: string]: string } = {
     'auto': 'auto',
     'zh-Hans': 'zh-CHS',
@@ -101,7 +101,7 @@ async function youdao(message: any): Promise<string> {
 
   const sign = generateSign(appKey, query, salt, curtime, appSecret);
 
-  // 构建请求参数
+  // Xây dựng các tham số yêu cầu
   const params = new URLSearchParams({
     q: query,
     from: fromLang,
@@ -128,46 +128,46 @@ async function youdao(message: any): Promise<string> {
 
     const result: YoudaoResponse = await response.json();
 
-    // 处理错误码
+    // Xử lý mã lỗi
     if (result.errorCode !== '0') {
       const errorMessages: { [key: string]: string } = {
-        '101': '缺少必填的参数',
-        '102': '不支持的语言类型',
-        '103': '翻译文本过长',
-        '104': '不支持的API类型',
-        '105': '不支持的签名类型',
-        '106': '不支持的响应类型',
-        '107': '不支持的传输加密类型',
-        '108': 'appKey无效',
-        '109': 'batchLog格式不正确',
-        '110': '无相关服务的有效实例',
-        '111': '开发者账号无效',
-        '113': 'q不能为空',
-        '201': '解密失败',
-        '202': '签名检验失败',
-        '203': '访问IP地址不在可访问IP列表',
-        '301': '辞典查询失败',
-        '302': '翻译查询失败',
-        '303': '服务端的其它异常',
-        '401': '账户已经欠费',
-        '411': '访问频率受限',
-        '412': '长请求过于频繁'
+        '101': 'Thiếu tham số bắt buộc',
+        '102': 'Loại ngôn ngữ không được hỗ trợ',
+        '103': 'Văn bản dịch quá dài',
+        '104': 'Loại API không được hỗ trợ',
+        '105': 'Loại chữ ký không được hỗ trợ',
+        '106': 'Loại phản hồi không được hỗ trợ',
+        '107': 'Loại mã hóa truyền tải không được hỗ trợ',
+        '108': 'appKey không hợp lệ',
+        '109': 'Định dạng batchLog không đúng',
+        '110': 'Không có instance hợp lệ của dịch vụ liên quan',
+        '111': 'Tài khoản nhà phát triển không hợp lệ',
+        '113': 'q không được để trống',
+        '201': 'Giải mã thất bại',
+        '202': 'Xác minh chữ ký thất bại',
+        '203': 'Địa chỉ IP truy cập không nằm trong danh sách cho phép',
+        '301': 'Tra từ điển thất bại',
+        '302': 'Tra cứu bản dịch thất bại',
+        '303': 'Lỗi khác từ phía máy chủ',
+        '401': 'Tài khoản đã nợ phí',
+        '411': 'Tần suất truy cập bị giới hạn',
+        '412': 'Yêu cầu dài gửi quá thường xuyên'
       };
       
-      const errorMsg = errorMessages[result.errorCode] || `未知错误(${result.errorCode})`;
-      throw new Error(`有道翻译API错误: ${errorMsg}`);
+      const errorMsg = errorMessages[result.errorCode] || `Lỗi không xác định(${result.errorCode})`;
+      throw new Error(`Lỗi API Youdao: ${errorMsg}`);
     }
 
-    // 返回翻译结果
+    // Quay lại Kết quả dịch
     if (result.translation && result.translation.length > 0) {
       return result.translation.join(' ');
     } else {
-      throw new Error('翻译结果为空');
+      throw new Error('Kết quả dịch rỗng');
     }
 
   } catch (error: any) {
-    console.error('有道翻译错误:', error);
-    throw new Error(`翻译失败: ${error.message || error}`);
+    console.error('Lỗi dịch Youdao:', error);
+    throw new Error(`Dịch thất bại: ${error.message || error}`);
   }
 }
 

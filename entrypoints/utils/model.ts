@@ -4,14 +4,14 @@ interface IMapping {
     [key: string]: string;
 }
 
-// 内包，存储额外信息
+// Insourcing, lưu trữ thông tin bổ sung
 interface IExtra {
     [key: string]: any
 }
 
 export class Config {
-    on: boolean; // 是否开启
-    autoTranslate: boolean; // 是否即时翻译
+    on: boolean; // Có nên bật không
+    autoTranslate: boolean; // Có dịch ngay không
     from: string;
     to: string;
     hotkey: string;
@@ -24,35 +24,35 @@ export class Config {
     appid: string;
     key: string;
     model: IMapping;
-    customModel: IMapping;  // 自定义模型名称
-    proxy: IMapping;  // 代理地址
-    custom: string; // 本地服务地址
-    extra: IExtra;  // 额外信息（内包信息）
-    robot_id: IMapping;  // 机器人 ID（兼容 coze）
+    customModel: IMapping;  // Tên mẫu tùy chỉnh
+    proxy: IMapping;  // địa chỉ proxy
+    custom: string; // địa chỉ dịch vụ địa phương
+    extra: IExtra;  // Thông tin bổ sung (thông tin nội bộ)
+    robot_id: IMapping;  // ID robot (tương thích với coze)
     system_role: IMapping;
     user_role: IMapping;
-    count: number;  // 翻译次数
-    theme: string;  // 主题模式：'auto' | 'light' | 'dark'
-    useCache: boolean; // 是否使用缓存
-    disableFloatingBall: boolean; // 是否禁用悬浮球
-    floatingBallPosition: 'left' | 'right'; // 悬浮球位置
-    floatingBallHotkey: string; // 悬浮球快捷键
-    customFloatingBallHotkey: string; // 自定义悬浮球快捷键
-    customHotkey: string; // 自定义鼠标悬浮快捷键
-    disableSelectionTranslator: boolean; // 是否禁用划词翻译
-    deeplx: string; // DeepLX 服务地址
-    selectionTranslatorMode: string; // 划词翻译显示模式: 'disabled' | 'bilingual' | 'translation-only'
-    newApiUrl: string; // NewAPI地址
-    maxConcurrentTranslations: number; // 最大并发翻译数量
-    youdaoAppKey: string; // 有道翻译 App Key
-    youdaoAppSecret: string; // 有道翻译 App Secret
-    tencentSecretId: string; // 腾讯云 Secret ID
-    tencentSecretKey: string; // 腾讯云 Secret Key
-    azureOpenaiEndpoint: string; // Azure OpenAI 端点地址
-    animations: boolean; // 是否启用动画效果
-    translationStatus: boolean; // 是否启用全文翻译进度面板
-    inputBoxTranslationTrigger: string; // 输入框翻译触发方式
-    inputBoxTranslationTarget: string; // 输入框翻译目标语言
+    count: number;  // Số lượng bản dịch
+    theme: string;  // Chế độ chủ đề: 'tự động' | 'ánh sáng' | 'tối tăm'
+    useCache: boolean; // Có nên sử dụng bộ nhớ đệm hay không
+    disableFloatingBall: boolean; // Có tắt bóng nổi không
+    floatingBallPosition: 'left' | 'right'; // Vị trí bóng nổi
+    floatingBallHotkey: string; // Phím tắt bóng nổi
+    customFloatingBallHotkey: string; // Phím tắt bóng nổi có thể tùy chỉnh
+    customHotkey: string; // Tùy chỉnh phím tắt di chuột
+    disableSelectionTranslator: boolean; // Có tắt tính năng dịch từ hay không
+    deeplx: string; // Địa chỉ dịch vụ DeepLX
+    selectionTranslatorMode: string; // Chế độ hiển thị dịch từ: 'bị vô hiệu hóa' | 'song ngữ' | 'chỉ dịch'
+    newApiUrl: string; // Địa chỉ API mới
+    maxConcurrentTranslations: number; // Số lượng bản dịch đồng thời tối đa
+    youdaoAppKey: string; // Khóa ứng dụng dịch Youdao
+    youdaoAppSecret: string; // Bí mật ứng dụng dịch Youdao
+    tencentSecretId: string; // ID bí mật đám mây của Tencent
+    tencentSecretKey: string; // Khóa bí mật đám mây của Tencent
+    azureOpenaiEndpoint: string; // Địa chỉ điểm cuối Azure OpenAI
+    animations: boolean; // Có bật hiệu ứng hoạt hình hay không
+    translationStatus: boolean; // Có bật bảng tiến trình dịch toàn văn bản hay không
+    inputBoxTranslationTrigger: string; // Phương thức kích hoạt dịch hộp đầu vào
+    inputBoxTranslationTarget: string; // Hộp nhập ngôn ngữ đích dịch
 
     constructor() {
         this.on = true;
@@ -77,38 +77,38 @@ export class Config {
         this.system_role = systemRoleFactory();
         this.user_role = userRoleFactory();
         this.count = 0;
-        this.theme = 'auto';  // 默认跟随系统
-        this.useCache = true; // 默认开启缓存
-        this.disableFloatingBall = false; // 默认启用悬浮球
-        this.floatingBallPosition = 'right'; // 默认在右侧
-        this.floatingBallHotkey = 'Alt+T'; // 默认快捷键为 Alt+T
-        this.customFloatingBallHotkey = ''; // 自定义快捷键为空
-        this.customHotkey = ''; // 自定义鼠标悬浮快捷键为空
-        this.disableSelectionTranslator = false; // 默认不禁用划词翻译
-        this.deeplx = ''; // DeepLX 默认服务地址
-        this.selectionTranslatorMode = 'bilingual'; // 默认双语显示模式
-        this.newApiUrl = 'http://localhost:3000'; // NewAPI 默认地址
-        this.maxConcurrentTranslations = 6; // 默认最大并发数为6
-        this.youdaoAppKey = ''; // 有道翻译 App Key
-        this.youdaoAppSecret = ''; // 有道翻译 App Secret
-        this.tencentSecretId = ''; // 腾讯云 Secret ID
-        this.tencentSecretKey = ''; // 腾讯云 Secret Key
-        this.azureOpenaiEndpoint = ''; // Azure OpenAI 端点地址
-        this.animations = true; // 默认启用动画
-        this.translationStatus = true; // 默认启用翻译进度面板
-        this.inputBoxTranslationTrigger = 'disabled'; // 默认关闭输入框翻译
-        this.inputBoxTranslationTarget = 'en'; // 默认翻译成英文
+        this.theme = 'auto';  // Theo hệ thống theo mặc định
+        this.useCache = true; // Bộ nhớ đệm được bật theo mặc định
+        this.disableFloatingBall = false; // Bóng nổi được bật theo mặc định
+        this.floatingBallPosition = 'right'; // Mặc định là ở bên phải
+        this.floatingBallHotkey = 'Alt+T'; // Phím tắt mặc định là Alt+T
+        this.customFloatingBallHotkey = ''; // Phím tắt tùy chỉnh trống
+        this.customHotkey = ''; // Phím tắt di chuột tùy chỉnh trống
+        this.disableSelectionTranslator = false; // Dịch các từ được gạch chân bị tắt theo mặc định
+        this.deeplx = ''; // Địa chỉ dịch vụ mặc định DeepLX
+        this.selectionTranslatorMode = 'bilingual'; // Chế độ hiển thị song ngữ mặc định
+        this.newApiUrl = 'http://localhost:3000'; // Địa chỉ mặc định NewAPI
+        this.maxConcurrentTranslations = 6; // Số lượng đồng thời tối đa mặc định là 6
+        this.youdaoAppKey = ''; // Khóa ứng dụng dịch Youdao
+        this.youdaoAppSecret = ''; // Bí mật ứng dụng dịch Youdao
+        this.tencentSecretId = ''; // ID bí mật đám mây của Tencent
+        this.tencentSecretKey = ''; // Khóa bí mật đám mây của Tencent
+        this.azureOpenaiEndpoint = ''; // Địa chỉ điểm cuối Azure OpenAI
+        this.animations = true; // Hoạt ảnh được bật theo mặc định
+        this.translationStatus = true; // Bảng tiến trình dịch được bật theo mặc định
+        this.inputBoxTranslationTrigger = 'disabled'; // Dịch hộp nhập bị tắt theo mặc định
+        this.inputBoxTranslationTarget = 'en'; // Được dịch sang tiếng Anh theo mặc định
     }
 }
 
-// 构建所有服务的 system_role
+// Xây dựng system_role cho tất cả các dịch vụ
 function systemRoleFactory(): IMapping {
     let systems_role: IMapping = {};
     Object.keys(services).forEach(key => systems_role[key] = defaultOption.system_role);
     return systems_role;
 }
 
-// 构建所有服务的 user_role
+// Xây dựng user_role cho tất cả dịch vụ
 function userRoleFactory(): IMapping {
     let users_role: IMapping = {};
     Object.keys(services).forEach(key => users_role[key] = defaultOption.user_role);

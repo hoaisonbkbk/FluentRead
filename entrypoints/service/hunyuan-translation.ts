@@ -2,29 +2,29 @@ import { method } from "../utils/constant";
 import { config } from "@/entrypoints/utils/config";
 import { detectlang } from "../utils/common";
 
-// 混元翻译大模型支持的语言代码映射
+// Ánh xạ mã ngôn ngữ được hỗ trợ bởi Hunyuan Translation Mô hình
 const languageMap: Record<string, string> = {
-    'zh-Hans': 'zh',    // 简体中文
-    'zh-Hant': 'yue',   // 繁体中文使用粤语代码
-    'en': 'en',         // 英语
-    'ja': 'ja',         // 日语
-    'ko': 'ko',         // 韩语
-    'fr': 'fr',         // 法语
-    'ru': 'ru',         // 俄语
-    'de': 'de',         // 德语
-    'es': 'es',         // 西班牙语
-    'it': 'it',         // 意大利语
-    'tr': 'tr',         // 土耳其语
-    'ar': 'ar',         // 阿拉伯语
-    'pt': 'pt',         // 葡萄牙语
-    'th': 'th',         // 泰语
-    'vi': 'vi',         // 越南语
-    'ms': 'ms',         // 马来语
-    'id': 'id',         // 印尼语
-    // 注意：auto由代码逻辑特殊处理，不在此映射
+    'zh-Hans': 'zh',    // Tiếng Trung giản thể
+    'zh-Hant': 'yue',   // Tiếng Trung phồn thể sử dụng mã Quảng Đông
+    'en': 'en',         // Tiếng Anh
+    'ja': 'ja',         // Tiếng Nhật
+    'ko': 'ko',         // Tiếng Hàn
+    'fr': 'fr',         // Tiếng Pháp
+    'ru': 'ru',         // Tiếng Nga
+    'de': 'de',         // Tiếng Đức
+    'es': 'es',         // Tiếng Tây Ban Nha
+    'it': 'it',         // Tiếng Ý
+    'tr': 'tr',         // tiếng Thổ Nhĩ Kỳ
+    'ar': 'ar',         // tiếng ả rập
+    'pt': 'pt',         // Tiếng Bồ Đào Nha
+    'th': 'th',         // tiếng Thái
+    'vi': 'vi',         // Tiếng Việt
+    'ms': 'ms',         // Mã Lai
+    'id': 'id',         // tiếng Indonesia
+    // Lưu ý: auto được xử lý đặc biệt bằng logic mã và không được ánh xạ ở đây.
 };
 
-// 生成HMAC签名 (返回二进制数据)
+// Tạo chữ ký HMAC (trả về dữ liệu nhị phân)
 async function generateHmacSignature(key: string | ArrayBuffer, message: string): Promise<ArrayBuffer> {
     const encoder = new TextEncoder();
     const keyData = typeof key === 'string' ? encoder.encode(key) : key;
@@ -40,18 +40,18 @@ async function generateHmacSignature(key: string | ArrayBuffer, message: string)
     return await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(message));
 }
 
-// 将二进制数据转换为十六进制字符串
+// Chuyển đổi dữ liệu nhị phân thành chuỗi thập lục phân
 function arrayBufferToHex(buffer: ArrayBuffer): string {
     return Array.from(new Uint8Array(buffer))
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
 }
 
-// 生成腾讯云API签名
+// Tạo chữ ký API đám mây Tencent
 async function createHunyuanSignature(requestPayload: string, timestamp: number, secretId: string, secretKey: string): Promise<string> {
     const date = new Date(timestamp * 1000).toISOString().substring(0, 10);
     
-    // 步骤1：拼接规范请求串
+    // Bước 1: Ghép chuỗi yêu cầu đặc tả
     const httpRequestMethod = "POST";
     const canonicalUri = "/";
     const canonicalQueryString = "";
@@ -65,7 +65,7 @@ async function createHunyuanSignature(requestPayload: string, timestamp: number,
     
     const canonicalRequest = `${httpRequestMethod}\n${canonicalUri}\n${canonicalQueryString}\n${canonicalHeaders}\n${signedHeaders}\n${hashedPayloadHex}`;
     
-    // 步骤2：拼接待签名字符串
+    // Bước 2: Lắp ráp chuỗi cần ký
     const algorithm = "TC3-HMAC-SHA256";
     const credentialScope = `${date}/hunyuan/tc3_request`;
     
@@ -76,14 +76,14 @@ async function createHunyuanSignature(requestPayload: string, timestamp: number,
     
     const stringToSign = `${algorithm}\n${timestamp}\n${credentialScope}\n${hashedCanonicalRequestHex}`;
     
-    // 步骤3：计算签名
+    // Bước 3: Tính chữ ký
     const kDate = await generateHmacSignature(`TC3${secretKey}`, date);
     const kService = await generateHmacSignature(kDate, "hunyuan");
     const kSigning = await generateHmacSignature(kService, "tc3_request");
     const signatureBuffer = await generateHmacSignature(kSigning, stringToSign);
     const signature = arrayBufferToHex(signatureBuffer);
     
-    // 步骤4：拼接 Authorization
+    // Bước 4: Ủy quyền mối nối
     const authorization = `${algorithm} Credential=${secretId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
     
     return authorization;
@@ -91,89 +91,89 @@ async function createHunyuanSignature(requestPayload: string, timestamp: number,
 
 async function hunyuanTranslation(message: any) {
     try {
-        console.log('🔄 混元翻译开始处理:', message.origin);
+        console.log('🔄 Bắt đầu xử lý dịch Hunyuan:', message.origin);
         
-        // 从配置中获取 SecretId 和 SecretKey
+        // Nhận SecretId và SecretKey từ cấu hình
         const secretId = config.tencentSecretId?.trim();
         const secretKey = config.tencentSecretKey?.trim();
         
-        console.log('🔑 密钥配置状态:', { 
+        console.log('🔑 Trạng thái cấu hình khóa:', { 
             hasSecretId: !!secretId, 
             hasSecretKey: !!secretKey,
             service: config.service 
         });
         
         if (!secretId || !secretKey) {
-            throw new Error('腾讯混元翻译密钥未配置，请在设置中配置SecretId和SecretKey');
+            throw new Error('Khóa Tencent Hunyuan chưa được cấu hình, vui lòng cấu hình SecretId và SecretKey trong phần cài đặt');
         }
         
-        // 基本格式验证
+        // Xác thực định dạng cơ bản
         if (secretId.length < 10 || secretKey.length < 10) {
-            throw new Error('SecretId或SecretKey格式不正确，请检查是否完整复制了密钥信息');
+            throw new Error('Định dạng SecretId hoặc SecretKey không đúng, vui lòng kiểm tra đã sao chép đầy đủ thông tin khóa');
         }
         
-        // 转换语言代码
-        // 对于自动检测，使用FluentRead内置的语言检测
+        // Chuyển đổi mã ngôn ngữ
+        // Để tự động nhận dạng, hãy sử dụng tính năng phát hiện ngôn ngữ tích hợp của FluentRead
         let sourceLang: string;
         if (config.from === 'auto') {
             const detectedLang = detectlang(message.origin.replace(/[\s\u3000]/g, ''));
             sourceLang = languageMap[detectedLang] || detectedLang;
-            console.log('🔍 语言检测结果:', { detectedLang, mappedSource: sourceLang });
+            console.log('🔍 Kết quả nhận diện ngôn ngữ:', { detectedLang, mappedSource: sourceLang });
         } else {
             sourceLang = languageMap[config.from] || config.from;
         }
         
         const targetLang = languageMap[config.to] || config.to;
         
-        console.log('🌐 语言映射结果:', { 
+        console.log('🌐 Kết quả ánh xạ ngôn ngữ:', { 
             originalFrom: config.from, 
             mappedSource: sourceLang,
             originalTo: config.to, 
             mappedTarget: targetLang 
         });
         
-        // 如果源语言和目标语言相同，直接返回原文
+        // Nếu ngôn ngữ nguồn giống với đích ngôn ngữ, hãy trả về trực tiếp Nguyên văn.
         if (sourceLang === targetLang) {
-            console.log('⚠️ 源语言与目标语言相同，返回原文');
+            console.log('⚠️ Ngôn ngữ nguồn và ngôn ngữ đích trùng nhau, trả về nguyên văn');
             return message.origin;
         }
         
         if (!targetLang) {
-            throw new Error('混元翻译不支持该目标语言');
+            throw new Error('Hunyuan không hỗ trợ ngôn ngữ đích này');
         }
         
-        // 获取模型配置，默认使用 hunyuan-translation
+        // Lấy cấu hình Mô hình, mặc định sử dụng hunyuan-translation
         const model = config.model[config.service] || 'hunyuan-translation';
         
-        // 构建请求体
+        // Xây dựng nội dung yêu cầu
         const requestBody: any = {
             Model: model,
-            Stream: false, // 暂时使用非流式调用
+            Stream: false, // Tạm thời sử dụng các cuộc gọi không phát trực tuyến
             Text: message.origin,
             // Source: sourceLang,
             Target: targetLang
         };
         
-        // 如果有配置领域信息，可以添加 Field 参数
-        // requestBody.Field = '通用';
+        // Nếu bạn đã định cấu hình thông tin trường, bạn có thể thêm tham số Trường
+        // requestBody.Field = 'Phổ quát';
         
-        // 如果需要参考示例，可以添加 References 参数
+        // Nếu bạn cần ví dụ tham khảo, bạn có thể thêm tham số Tài liệu tham khảo
         // requestBody.References = [{
         //     Type: "sentence",
-        //     Text: "示例原文",
-        //     Translation: "示例译文"
+        //     Text: "Ví dụ Nguyên văn",
+        //     Bản dịch: "Ví dụ Bản dịch"
         // }];
         
         const requestBodyStr = JSON.stringify(requestBody);
         const timestamp = Math.floor(Date.now() / 1000);
         
-        // 生成签名和Authorization头
+        // Tạo tiêu đề chữ ký và ủy quyền
         const authorization = await createHunyuanSignature(requestBodyStr, timestamp, secretId, secretKey);
         
-        // 判断是否使用代理
+        // Xác định xem có nên sử dụng proxy hay không
         const url = config.proxy[config.service] || 'https://hunyuan.tencentcloudapi.com/';
         
-        console.log('📤 混元翻译请求:', { url, requestBody, timestamp });
+        console.log('📤 Yêu cầu dịch Hunyuan:', { url, requestBody, timestamp });
         
         const response = await fetch(url, {
             method: method.POST,
@@ -191,32 +191,32 @@ async function hunyuanTranslation(message: any) {
         
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`腾讯混元翻译请求失败: ${response.status} ${response.statusText}\n${errorText}`);
+            throw new Error(`Yêu cầu Tencent Hunyuan thất bại: ${response.status} ${response.statusText}\n${errorText}`);
         }
         
         const result = await response.json();
-        console.log('📥 混元翻译响应:', result);
+        console.log('📥 Phản hồi dịch Hunyuan:', result);
         
-        // 检查是否有错误
+        // Kiểm tra lỗi
         if (result.Response?.Error) {
-            console.error('❌ 混元翻译API错误:', result.Response.Error);
-            throw new Error(`腾讯混元翻译错误: ${result.Response.Error.Code} - ${result.Response.Error.Message}`);
+            console.error('❌ Lỗi API dịch Hunyuan:', result.Response.Error);
+            throw new Error(`Lỗi Tencent Hunyuan: ${result.Response.Error.Code} - ${result.Response.Error.Message}`);
         }
         
-        // 返回翻译结果
+        // Quay lại Kết quả dịch
         if (result.Response?.Choices && result.Response.Choices.length > 0) {
             const translatedText = result.Response.Choices[0].Message?.Content;
             if (translatedText) {
-                console.log('✅ 混元翻译成功:', translatedText);
+                console.log('✅ Dịch Hunyuan thành công:', translatedText);
                 return translatedText;
             }
         }
         
-        console.error('❌ 混元翻译返回格式异常:', result);
-        throw new Error('腾讯混元翻译返回格式异常');
+        console.error('❌ Định dạng phản hồi dịch Hunyuan bất thường:', result);
+        throw new Error('Định dạng phản hồi Tencent Hunyuan bất thường');
         
     } catch (error) {
-        console.error('腾讯混元翻译服务调用失败:', error);
+        console.error('Gọi dịch vụ Tencent Hunyuan thất bại:', error);
         throw error;
     }
 }

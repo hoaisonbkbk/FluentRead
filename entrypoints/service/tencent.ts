@@ -2,7 +2,7 @@ import { method } from "../utils/constant";
 import { services } from "../utils/option";
 import { config } from "@/entrypoints/utils/config";
 
-// 腾讯云机器翻译语言代码映射
+// Ánh xạ mã ngôn ngữ máy tính Tencent Cloud Dịch
 const languageMap: Record<string, string> = {
     'zh-Hans': 'zh',
     'zh-Hant': 'zh-TW',
@@ -21,7 +21,7 @@ const languageMap: Record<string, string> = {
     'auto': 'auto'
 };
 
-// 生成HMAC签名 (返回二进制数据)
+// Tạo chữ ký HMAC (trả về dữ liệu nhị phân)
 async function generateHmacSignature(key: string | ArrayBuffer, message: string): Promise<ArrayBuffer> {
     const encoder = new TextEncoder();
     const keyData = typeof key === 'string' ? encoder.encode(key) : key;
@@ -37,18 +37,18 @@ async function generateHmacSignature(key: string | ArrayBuffer, message: string)
     return await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(message));
 }
 
-// 将二进制数据转换为十六进制字符串
+// Chuyển đổi dữ liệu nhị phân thành chuỗi thập lục phân
 function arrayBufferToHex(buffer: ArrayBuffer): string {
     return Array.from(new Uint8Array(buffer))
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
 }
 
-// 生成腾讯云API签名
+// Tạo chữ ký API đám mây Tencent
 async function createTencentSignature(requestPayload: string, timestamp: number, secretId: string, secretKey: string): Promise<string> {
     const date = new Date(timestamp * 1000).toISOString().substring(0, 10);
     
-    // 步骤1：拼接规范请求串
+    // Bước 1: Ghép chuỗi yêu cầu đặc tả
     const httpRequestMethod = "POST";
     const canonicalUri = "/";
     const canonicalQueryString = "";
@@ -62,7 +62,7 @@ async function createTencentSignature(requestPayload: string, timestamp: number,
     
     const canonicalRequest = `${httpRequestMethod}\n${canonicalUri}\n${canonicalQueryString}\n${canonicalHeaders}\n${signedHeaders}\n${hashedPayloadHex}`;
     
-    // 步骤2：拼接待签名字符串
+    // Bước 2: Lắp ráp chuỗi cần ký
     const algorithm = "TC3-HMAC-SHA256";
     const credentialScope = `${date}/tmt/tc3_request`;
     
@@ -73,14 +73,14 @@ async function createTencentSignature(requestPayload: string, timestamp: number,
     
     const stringToSign = `${algorithm}\n${timestamp}\n${credentialScope}\n${hashedCanonicalRequestHex}`;
     
-    // 步骤3：计算签名
+    // Bước 3: Tính chữ ký
     const kDate = await generateHmacSignature(`TC3${secretKey}`, date);
     const kService = await generateHmacSignature(kDate, "tmt");
     const kSigning = await generateHmacSignature(kService, "tc3_request");
     const signatureBuffer = await generateHmacSignature(kSigning, stringToSign);
     const signature = arrayBufferToHex(signatureBuffer);
     
-    // 步骤4：拼接 Authorization
+    // Bước 4: Ủy quyền mối nối
     const authorization = `${algorithm} Credential=${secretId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
     
     return authorization;
@@ -88,28 +88,28 @@ async function createTencentSignature(requestPayload: string, timestamp: number,
 
 async function tencent(message: any) {
     try {
-        // 从配置中获取 SecretId 和 SecretKey
+        // Nhận SecretId và SecretKey từ cấu hình
         const secretId = config.tencentSecretId?.trim();
         const secretKey = config.tencentSecretKey?.trim();
         
         if (!secretId || !secretKey) {
-            throw new Error('腾讯云机器翻译密钥未配置，请在设置中配置SecretId和SecretKey');
+            throw new Error('Khóa dịch máy Tencent Cloud chưa cấu hình, vui lòng cấu hình SecretId và SecretKey trong cài đặt');
         }
         
-        // 基本格式验证
+        // Xác thực định dạng cơ bản
         if (secretId.length < 10 || secretKey.length < 10) {
-            throw new Error('SecretId或SecretKey格式不正确，请检查是否完整复制了密钥信息');
+            throw new Error('Định dạng SecretId hoặc SecretKey không đúng, vui lòng kiểm tra đã sao chép đầy đủ thông tin khóa');
         }
         
-        // 转换语言代码
+        // Chuyển đổi mã ngôn ngữ
         const sourceLang = languageMap[config.from] || config.from;
         const targetLang = languageMap[config.to] || config.to;
         
         if (!targetLang || targetLang === 'auto') {
-            throw new Error('腾讯云机器翻译不支持目标语言自动检测');
+            throw new Error('Dịch máy Tencent Cloud không hỗ trợ tự động nhận diện ngôn ngữ đích');
         }
         
-        // 构建JSON请求体
+        // Xây dựng nội dung yêu cầu JSON
         const requestBody = JSON.stringify({
             SourceText: message.origin,
             Source: sourceLang,
@@ -119,10 +119,10 @@ async function tencent(message: any) {
         
         const timestamp = Math.floor(Date.now() / 1000);
         
-        // 生成签名和Authorization头
+        // Tạo tiêu đề chữ ký và ủy quyền
         const authorization = await createTencentSignature(requestBody, timestamp, secretId, secretKey);
         
-        // 判断是否使用代理
+        // Xác định xem có nên sử dụng proxy hay không
         const url = config.proxy[config.service] || 'https://tmt.tencentcloudapi.com/';
         
         const response = await fetch(url, {
@@ -141,25 +141,25 @@ async function tencent(message: any) {
         
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`腾讯云机器翻译请求失败: ${response.status} ${response.statusText}\n${errorText}`);
+            throw new Error(`Yêu cầu dịch máy Tencent Cloud thất bại: ${response.status} ${response.statusText}\n${errorText}`);
         }
         
         const result = await response.json();
         
-        // 检查是否有错误
+        // Kiểm tra lỗi
         if (result.Response?.Error) {
-            throw new Error(`腾讯云机器翻译错误: ${result.Response.Error.Code} - ${result.Response.Error.Message}`);
+            throw new Error(`Lỗi dịch máy Tencent Cloud: ${result.Response.Error.Code} - ${result.Response.Error.Message}`);
         }
         
-        // 返回翻译结果
+        // Quay lại Kết quả dịch
         if (result.Response?.TargetText) {
             return result.Response.TargetText;
         } else {
-            throw new Error('腾讯云机器翻译返回格式异常');
+            throw new Error('Định dạng trả về của dịch máy Tencent Cloud bất thường');
         }
         
     } catch (error) {
-        console.error('腾讯云机器翻译服务调用失败:', error);
+        console.error('Gọi dịch vụ dịch máy Tencent Cloud thất bại:', error);
         throw error;
     }
 }

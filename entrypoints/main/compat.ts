@@ -1,4 +1,4 @@
-// 兼容部分网站独特的 DOM 结构
+// Tương thích với cấu trúc DOM độc đáo của một số trang web
 
 import {findMatchingElement} from "@/entrypoints/utils/common";
 
@@ -7,26 +7,26 @@ type SelectFunction = (node: any) => any | {skip: boolean} | false;
 
 const parser = new DOMParser();
 
-// 调试相关
+// Gỡ lỗi liên quan
 const isDev = process.env.NODE_ENV === 'development';
 
 /**
- * 调试日志函数，只在开发模式下输出
- * @param type 日志类型
- * @param message 日志消息
- * @param ...args 日志参数
+ * Chức năng ghi nhật ký gỡ lỗi, chỉ xuất ở chế độ phát triển
+ * @param loại nhật ký loại
+ * Tin nhắn nhật ký tin nhắn @param
+ * @param ... tham số nhật ký args
  */
 function debugLog(type: string, message: string, ...args: any[]): void {
   if (!isDev) return;
 
-  // 为不同类型设置不同颜色
+  // Đặt màu khác nhau cho các loại khác nhau
   const colors: {[key: string]: string} = {
     'Twitter': 'color: #1DA1F2; font-weight: bold',
     'GitHub': 'color: #6e5494; font-weight: bold',
     'StackOverflow': 'color: #f48024; font-weight: bold',
     'Reddit': 'color: #FF4500; font-weight: bold',
     'Medium': 'color: #00ab6c; font-weight: bold',
-    'YouTube': 'color: #FF0000; font-weight: bold',  // 添加YouTube的颜色
+    'YouTube': 'color: #FF0000; font-weight: bold',  // Thêm màu YouTube
     'Compat': 'color: #0366d6; font-weight: bold',
     'Skip': 'color: #d73a49; font-weight: bold',
     'Content': 'color: #28a745; font-weight: bold',
@@ -36,20 +36,20 @@ function debugLog(type: string, message: string, ...args: any[]): void {
   const color = colors[type] || colors['Default'];
   const prefix = `%c[FluentRead][${type}]`;
   
-  // 根据日志类型决定是否需要分组
+  // Xác định xem có cần nhóm hay không dựa trên loại nhật ký
   if (['Content', 'Skip', 'YouTube', 'GitHub', 'Twitter'].includes(type) && args.length > 0) {
-    // 使用折叠分组，减少日志视觉干扰
+    // Sử dụng nhóm gấp để giảm nhiễu trực quan trong nhật ký
     console.groupCollapsed(prefix, color, message);
     args.forEach((arg, index) => {
       if (typeof arg === 'string') {
-        console.log(`参数${index + 1}:`, arg.substring(0, 100) + (arg.length > 100 ? '...' : ''));
+        console.log(`Tham số ${index + 1}:`, arg.substring(0, 100) + (arg.length > 100 ? '...' : ''));
       } else {
-        console.log(`参数${index + 1}:`, arg);
+        console.log(`Tham số ${index + 1}:`, arg);
       }
     });
     console.groupEnd();
   } else {
-    // 常规日志输出
+    // Đầu ra nhật ký chung
     console.log(prefix, color, message, ...args);
   }
 }
@@ -62,17 +62,17 @@ interface SelectCompatFn {
     [domain: string]: SelectFunction;
 }
 
-// 根据浏览器 url.host 是获取获取主域名
+// Lấy tên miền chính theo url.host của trình duyệt
 export function getMainDomain(url: any) {
     try {
-        // 处理URL对象或字符串
+        // Xử lý các đối tượng hoặc chuỗi URL
         let hostname = '';
         
-        // 如果是URL字符串，提取hostname部分
+        // Nếu là chuỗi URL thì trích xuất phần tên máy chủ
         if (typeof url === 'string') {
-            // 移除协议部分
+            // Xóa phần thỏa thuận
             const noProtocol = url.replace(/^(https?:\/\/)/, '');
-            // 提取域名部分（移除路径和查询参数）
+            // Trích xuất phần tên miền (xóa đường dẫn và tham số truy vấn)
             hostname = noProtocol.split('/')[0];
         } else if (url instanceof URL) {
             hostname = url.hostname;
@@ -80,26 +80,26 @@ export function getMainDomain(url: any) {
             return '';
         }
         
-        // 处理特殊情况: 将Twitter的旧域名和新域名统一处理
+        // Xử lý các tình huống đặc biệt: Thống nhất tên miền cũ và tên miền mới của Twitter
         if (hostname === 'twitter.com' || hostname === 'x.com' || 
             hostname === 'www.twitter.com' || hostname === 'www.x.com') {
             return 'x.com';
         }
         
-        // 移除可能的www前缀
+        // Xóa tiền tố www có thể
         hostname = hostname.replace(/^www\./, '');
         
-        // 提取基本域名
+        // Trích xuất tên miền cơ sở
         const parts = hostname.split('.');
         if (parts.length >= 2) {
-            // 对于常见的二级域名（如co.uk），需要特殊处理
+            // Đối với các tên miền cấp 2 phổ biến (chẳng hạn như co.uk), cần phải có cách xử lý đặc biệt
             if (parts.length >= 3 && 
                 ((parts[parts.length-2] === 'co' || parts[parts.length-2] === 'com') && 
                  parts[parts.length-1].length === 2)) {
-                // 例如 example.co.uk 应该返回 example.co.uk
+                // Ví dụ: example.co.uk sẽ trả về example.co.uk
                 return parts.slice(-3).join('.');
             } else {
-                // 否则返回主域名和顶级域名
+                // Ngược lại trả về tên miền chính và tên miền cấp cao nhất
                 return parts.slice(-2).join('.');
             }
         }
@@ -112,84 +112,84 @@ export function getMainDomain(url: any) {
 }
 
 /**
- * 检查文本内容是否属于不应翻译的特殊内容
- * 比如：URLs、邮箱地址、用户名、代码片段等
+ * Kiểm tra nội dung văn bản có phải là nội dung đặc biệt không nên dịch
+ * Ví dụ: URL, địa chỉ email, tên người dùng, đoạn mã, v.v.
  */
 function isSpecialContent(text: string): boolean {
     if (!text) return false;
     
     const trimmedText = text.trim();
     
-    // 检查是否为URL
+    // Kiểm tra xem đó có phải là URL không
     if (/^https?:\/\/\S+/i.test(trimmedText)) return true;
     
-    // 检查是否为邮箱地址
+    // Kiểm tra xem đó có phải là địa chỉ email không
     if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(trimmedText)) return true;
     
-    // 检查是否为社交媒体用户名格式
-    if (/^@\w+$/.test(trimmedText)) return true;      // Twitter格式：@username
-    if (/^u\/\w+$/.test(trimmedText)) return true;    // Reddit格式：u/username
+    // Kiểm tra xem nó có ở định dạng tên người dùng mạng xã hội không
+    if (/^@\w+$/.test(trimmedText)) return true;      // Định dạng Twitter: @tên người dùng
+    if (/^u\/\w+$/.test(trimmedText)) return true;    // Định dạng Reddit: u/tên người dùng
     
-    // 检查是否为x.com或twitter.com的ID格式
+    // Kiểm tra xem đó có phải là định dạng ID của x.com hay twitter.com không
     if (/^id@https?:\/\/(x\.com|twitter\.com)\/[\w-]+\/status\/\d+/.test(trimmedText)) return true;
     
-    // 检查是否为GitHub相关特殊内容
-    // GitHub Issue或PR编号
+    // Kiểm tra xem đó có phải là nội dung đặc biệt liên quan đến GitHub không
+    // Vấn đề GitHub hoặc số PR
     if (/^#\d+$/.test(trimmedText)) return true;
-    // GitHub仓库引用 user/repo#123
+    // Người dùng tham chiếu kho lưu trữ GitHub/repo#123
     if (/^[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+#\d+$/.test(trimmedText)) return true;
-    // GitHub 文件路径
+    // Đường dẫn tệp GitHub
     if (/^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+\/(blob|tree)\/[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-\/]+$/.test(trimmedText)) return true;
-    // GitHub提交哈希
+    // Hàm băm cam kết GitHub
     if (/^[a-f0-9]{7,40}$/.test(trimmedText)) return true;
-    // 以.开头的文件名
+    // Tên tệp bắt đầu bằng .
     if (/^\.[a-zA-Z0-9_.-]+$/.test(trimmedText)) return true;
-    // 以通过文件后缀结尾的
+    // kết thúc bằng hậu tố tập tin
     if (/^[a-zA-Z0-9_.-]+\.[a-zA-Z0-9_.-]+$/.test(trimmedText)) return true;
 
-    // 检查是否为代码片段（简单判断，可能会有误判）
-    if (/^[a-zA-Z0-9_]+\([^)]*\)/.test(trimmedText)) return true;  // 函数调用
-    if (/^import\s+|^from\s+|^require\(/.test(trimmedText)) return true;  // 导入语句
-    if (/^const\s+|^let\s+|^var\s+|^function\s+/.test(trimmedText)) return true;  // 变量/函数声明
+    // Kiểm tra xem có phải là đoạn mã không (đánh giá đơn giản, có thể có phán đoán sai)
+    if (/^[a-zA-Z0-9_]+\([^)]*\)/.test(trimmedText)) return true;  // gọi hàm
+    if (/^import\s+|^from\s+|^require\(/.test(trimmedText)) return true;  // báo cáo nhập khẩu
+    if (/^const\s+|^let\s+|^var\s+|^function\s+/.test(trimmedText)) return true;  // Khai báo biến/hàm
     
-    // 检查是否为哈希值或其他特殊标识符
+    // Kiểm tra xem đó có phải là giá trị băm hay mã định danh đặc biệt khác không
     if (/^[a-f0-9]{8,}$/i.test(trimmedText)) return true;
     
     return false;
 }
 
-// 文本替换环节的兼容函数，主域名 : 兼容函数
+// Chức năng tương thích của liên kết thay thế văn bản, tên miền chính: chức năng tương thích
 export const replaceCompatFn: ReplaceCompatFn = {
     ["youtube.com"]: (node: any, text: any) => {
-        // 使用DOMParser解析翻译后的HTML
+        // Phân tích cú pháp HTML đã dịch bằng DOMParser
         const doc = parser.parseFromString(text, 'text/html');
         const newNode = doc.body.firstChild as HTMLElement;
         
-        // 针对YouTube特有的格式化字符串进行特殊处理
+        // Xử lý đặc biệt các chuỗi định dạng dành riêng cho YouTube
         if (node.tagName.toLowerCase() === 'yt-formatted-string') {
-            // 尝试保留原有的属性和样式
+            // Cố gắng giữ lại các thuộc tính và kiểu dáng ban đầu
             if (node.hasAttribute('has-link-only_')) {
                 node.innerHTML = newNode.innerHTML;
                 return;
             }
             
-            // 处理具有特殊格式的内容
+            // Xử lý nội dung với các định dạng đặc biệt
             if (node.querySelector('a') || node.querySelector('span')) {
-                // 尝试保留链接和格式，但更新文本内容
+                // Cố gắng giữ lại các liên kết và định dạng nhưng cập nhật nội dung văn bản
                 const links = node.querySelectorAll('a');
                 const spans = node.querySelectorAll('span');
                 
                 if (links.length > 0 || spans.length > 0) {
-                    // 创建临时元素存储新文本
+                    // Tạo phần tử tạm thời để lưu trữ văn bản mới
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = newNode.innerHTML;
                     
-                    // 保留原有的链接和格式元素
+                    // Giữ nguyên các liên kết và thành phần định dạng ban đầu
                     node.childNodes.forEach((child: Node) => {
                         if (child.nodeType === Node.ELEMENT_NODE) {
-                            // 保留原有的HTML元素
+                            // Giữ các phần tử HTML gốc
                             if (child.nodeName.toLowerCase() === 'a' || child.nodeName.toLowerCase() === 'span') {
-                                // 更新元素内容，但保留属性
+                                // Cập nhật nội dung phần tử nhưng giữ lại thuộc tính
                                 (child as HTMLElement).textContent = tempDiv.textContent || '';
                             }
                         }
@@ -199,12 +199,12 @@ export const replaceCompatFn: ReplaceCompatFn = {
             }
         }
         
-        // 默认处理：直接替换innerHTML
+        // Xử lý mặc định: thay thế trực tiếp bên trongHTML
         node.innerHTML = newNode.innerHTML;
     }
 };
 
-// 元素 node 选择环节的兼容函数
+// Chức năng tương thích của liên kết chọn nút phần tử
 export const selectCompatFn: SelectCompatFn = {
     ["mvnrepository.com"]: (node: any) => {
         if (node.tagName.toLowerCase() === 'div' && node.classList.contains('im-description')) return node
@@ -213,73 +213,73 @@ export const selectCompatFn: SelectCompatFn = {
         if (node.tagName.toLowerCase() === 'div' && node.classList.contains('main_text')) return node
     },
     ["youtube.com"]: (node: any) => {
-        // 检查是否应该跳过该节点
+        // Kiểm tra xem nút có nên được bỏ qua không
         if (shouldSkipYouTubeElement(node)) {
-            debugLog('Compat', '跳过YouTube元素:', node.textContent);
+            debugLog('Compat', 'Bỏ qua các phần tử YouTube:', node.textContent);
             return { skip: true };
         }
         
-        // 视频标题
+        // tiêu đề video
         const videoTitle = findMatchingElement(node, 'h1.title');
         if (videoTitle) {
-            debugLog('YouTube', '翻译视频标题', videoTitle.textContent);
+            debugLog('YouTube', 'Dịch tiêu đề video', videoTitle.textContent);
             return videoTitle;
         }
         
-        // 视频描述
+        // Mô tả video
         const videoDescription = findMatchingElement(node, 'div#description-inline-expander');
         if (videoDescription) {
-            debugLog('YouTube', '翻译视频描述', videoDescription.textContent?.substring(0, 50) + '...');
+            debugLog('YouTube', 'Dịch mô tả video', videoDescription.textContent?.substring(0, 50) + '...');
             return videoDescription;
         }
         
-        // 评论内容
+        // Nội dung bình luận
         const commentContent = findMatchingElement(node, 'yt-formatted-string#content-text');
         if (commentContent) {
-            debugLog('YouTube', '翻译评论内容', commentContent.textContent);
+            debugLog('YouTube', 'Dịch nội dung đánh giá', commentContent.textContent);
             return commentContent;
         }
         
-        // 频道简介
+        // Giới thiệu kênh
         const channelDescription = findMatchingElement(node, 'div#description');
         if (channelDescription) {
-            debugLog('YouTube', '翻译频道简介', channelDescription.textContent?.substring(0, 50) + '...');
+            debugLog('YouTube', 'Giới thiệu kênh dịch', channelDescription.textContent?.substring(0, 50) + '...');
             return channelDescription;
         }
 
-        // 播放列表描述
+        // Mô tả danh sách phát
         const playlistDescription = findMatchingElement(node, 'yt-formatted-string.ytd-playlist-panel-renderer');
         if (playlistDescription) {
-            debugLog('YouTube', '翻译播放列表描述', playlistDescription.textContent);
+            debugLog('YouTube', 'Dịch mô tả danh sách phát', playlistDescription.textContent);
             return playlistDescription;
         }
         
-        // 视频卡片标题
+        // Tiêu đề thẻ video
         const videoCardTitle = findMatchingElement(node, 'yt-formatted-string.ytd-compact-video-renderer');
         if (videoCardTitle) {
-            debugLog('YouTube', '翻译视频卡片标题', videoCardTitle.textContent);
+            debugLog('YouTube', 'Dịch tiêu đề card màn hình', videoCardTitle.textContent);
             return videoCardTitle;
         }
         
-        // 社区帖子内容
+        // Nội dung bài đăng của cộng đồng
         const communityPost = findMatchingElement(node, 'div#content');
         if (communityPost && communityPost.closest('ytd-backstage-post-renderer')) {
-            debugLog('YouTube', '翻译社区帖子', communityPost.textContent?.substring(0, 50) + '...');
+            debugLog('YouTube', 'Dịch bài đăng trên cộng đồng', communityPost.textContent?.substring(0, 50) + '...');
             return communityPost;
         }
         
-        // 字幕内容
+        // nội dung phụ đề
         const captionText = findMatchingElement(node, 'span.captions-text');
         if (captionText) {
-            debugLog('YouTube', '翻译字幕内容', captionText.textContent);
+            debugLog('YouTube', 'Dịch nội dung phụ đề', captionText.textContent);
             return captionText;
         }
         
-        // 视频信息文本 - 一般格式化字符串处理
+        // Văn bản thông tin video - xử lý chuỗi được định dạng chung
         if (node.tagName.toLowerCase() === 'yt-formatted-string' && 
             node.textContent?.trim() &&
             node.textContent.length > 5) {
-            // 检查是否不在按钮或控制区域内
+            // Kiểm tra xem nó có nằm trong nút hoặc vùng điều khiển không
             let isInControl = false;
             let parent = node.parentElement;
             while (parent) {
@@ -293,12 +293,12 @@ export const selectCompatFn: SelectCompatFn = {
             }
             
             if (!isInControl) {
-                debugLog('YouTube', '翻译格式化字符串', node.textContent);
+                debugLog('YouTube', 'Dịch các chuỗi được định dạng', node.textContent);
                 return node;
             }
         }
         
-        // 默认不翻译
+        // Không được dịch theo mặc định
         return false;
     },
     ['webtrees.net']: (node: any) => {
@@ -306,385 +306,385 @@ export const selectCompatFn: SelectCompatFn = {
         if (node.tagName.toLowerCase() === 'div' && node.classList.contains('kmsg')) return node
     },
     ['x.com']: (node: any) => {
-        // 需要先检查是否为应该跳过的元素
+        // Trước tiên bạn cần kiểm tra xem đó có phải là phần tử nên bỏ qua không
         if (shouldSkipTwitterElement(node)) {
-            // 开发模式下记录被跳过的Twitter元素
-            debugLog('Compat', '跳过Twitter元素:', node.textContent);
+            // Ghi nhật ký các phần tử Twitter bị bỏ qua trong chế độ phát triển
+            debugLog('Compat', 'Bỏ qua các yếu tố Twitter:', node.textContent);
             return { skip: true };
         }
         
-        // 个人简介
+        // Hồ sơ
         const userDescription = findMatchingElement(node, 'div[data-testid="UserDescription"]'); 
         if (userDescription) return userDescription;
         
-        // 推文正文 - 但不包括用户名提及部分
+        // Nội dung của tweet - nhưng không đề cập đến tên người dùng
         const tweetText = findMatchingElement(node, 'div[data-testid="tweetText"]');
         if (tweetText) return tweetText;
         
-        // 评论内容
+        // Nội dung bình luận
         const reply = findMatchingElement(node, 'div[role="group"] div[lang]');
         if (reply) return reply;
         
-        // 主页时间线帖子
+        // Trang chủ Dòng thời gian Bài viết
         const timelineCell = findMatchingElement(node, 'div[data-testid="cellInnerDiv"] div[lang]');
         if (timelineCell) return timelineCell;
 
-        // 返回应该翻译的主要内容元素
+        // Trả về thành phần nội dung chính cần dịch
         const tweetContent = findMatchingElement(node, 'article div[lang]');
         if (tweetContent) return tweetContent;
         
-        // 默认返回false，表示不翻译
+        // Trả về sai theo mặc định, biểu thị không có bản dịch
         return false;
     },
     ['github.com']: (node: any) => {
-        // 判断是否应该跳过该节点
+        // Xác định xem nút có nên được bỏ qua hay không
         if (shouldSkipGitHubElement(node)) {
             return { skip: true };
         }
         
-        // 检查是否为目录节点
+        // Kiểm tra xem nó có phải là nút thư mục không
         if (isGitHubPathOrFileName(node)) {
-            debugLog('GitHub', '目录/文件名跳过', node.textContent);
+            debugLog('GitHub', 'Bỏ qua thư mục/tên tập tin', node.textContent);
             return { skip: true };
         }
         
-        // 首先翻译最重要的文本内容
+        // Dịch nội dung văn bản quan trọng nhất trước
         
-        // 问题（Issue）和PR内容
+        // Vấn đề và nội dung PR
         const issueBody = findMatchingElement(node, 'div.comment-body');
         if (issueBody) return issueBody;
         
-        // 评论内容
+        // Nội dung bình luận
         const comment = findMatchingElement(node, 'div.comment-body td.comment-body');
         if (comment) return comment;
         
-        // 然后翻译次要但仍然重要的内容
+        // Sau đó dịch nội dung ít quan trọng hơn nhưng vẫn quan trọng
         
-        // 问题（Issue）标题
+        // Tiêu đề vấn đề
         const issueTitle = findMatchingElement(node, 'div.js-issue-title');
         if (issueTitle) return issueTitle;
         
-        // PR描述
+        // Mô tả PR
         const prDescription = findMatchingElement(node, 'div.pull-request-review-comment');
         if (prDescription) return prDescription;
         
-        // 仓库描述
+        // Mô tả kho hàng
         const repoDescription = findMatchingElement(node, 'p.f4.my-3');
         if (repoDescription) return repoDescription;
         
-        // 代码提交信息
+        // Thông tin gửi mã
         const commitMessage = findMatchingElement(node, 'div.commit-desc pre');
         if (commitMessage) return commitMessage;
         
-        // 项目关于（About）文本
+        // Văn bản Giới thiệu (Giới thiệu) về Dự án
         const aboutText = findMatchingElement(node, 'div.BorderGrid-cell > p');
         if (aboutText) return aboutText;
         
-        // 最后翻译其他辅助内容
+        // Cuối cùng dịch các nội dung phụ trợ khác
         
-        // PR状态信息
+        // Thông tin trạng thái PR
         const prStatus = findMatchingElement(node, 'div.merge-status-item span.status-meta');
         if (prStatus) return prStatus;
         
-        // 项目语言描述
+        // Mô tả ngôn ngữ dự án
         const languageDesc = findMatchingElement(node, 'div.f6.color-fg-muted.mt-2');
         if (languageDesc) return languageDesc;
         
-        // 个人简介
+        // Hồ sơ
         const profile = findMatchingElement(node, 'div.p-note.user-profile-bio');
         if (profile) return profile;
         
-        // 仓库列表项说明
+        // Mô tả mục danh sách kho
         const repoListDesc = findMatchingElement(node, 'p.pinned-item-desc');
         if (repoListDesc) return repoListDesc;
         
-        // Action运行日志
+        // Nhật ký chạy hành động
         const actionLog = findMatchingElement(node, 'div.js-log-container pre');
         if (actionLog) return actionLog;
         
-        // 默认不翻译
+        // Không được dịch theo mặc định
         return false;
     },
     ['stackoverflow.com']: (node: any) => {
-        // 判断是否应该跳过该节点
+        // Xác định xem nút có nên được bỏ qua hay không
         if (shouldSkipStackOverflowElement(node)) {
             return { skip: true };
         }
         
-        // 首先翻译最重要的内容
+        // Dịch nội dung quan trọng nhất trước
         
         
-        // 然后翻译次要但仍然重要的内容
+        // Sau đó dịch nội dung ít quan trọng hơn nhưng vẫn quan trọng
         
-        // 问题标题
+        // Tiêu đề câu hỏi
         const questionTitle = findMatchingElement(node, 'h1.question-hyperlink');
         if (questionTitle) return questionTitle;
         
-        // 问题描述摘要
+        // Tóm tắt mô tả vấn đề
         const excerpt = findMatchingElement(node, 'div.excerpt');
         if (excerpt) return excerpt;
         
-        // 最后翻译其他辅助内容
+        // Cuối cùng dịch các nội dung phụ trợ khác
         
-        // 问题状态提示
+        // Lời nhắc trạng thái sự cố
         const status = findMatchingElement(node, 'div.question-status');
         if (status) return status;
         
-        // 用户简介
+        // Hồ sơ người dùng
         const userProfile = findMatchingElement(node, 'div.profile-about');
         if (userProfile) return userProfile;
         
-        // 错误提示
+        // Thông báo lỗi
         const errorMessage = findMatchingElement(node, 'div.s-notice');
         if (errorMessage) return errorMessage;
         
-        // 默认不翻译
+        // Không được dịch theo mặc định
         return false;
     },
     ['medium.com']: (node: any) => {
-        // 判断是否应该跳过该节点
+        // Xác định xem nút có nên được bỏ qua hay không
         if (shouldSkipMediumElement(node)) {
             return { skip: true };
         }
         
-        // 文章标题
+        // Tiêu đề bài viết
         const articleTitle = findMatchingElement(node, 'h1');
         if (articleTitle) return articleTitle;
         
-        // 文章副标题
+        // Phụ đề bài viết
         const articleSubtitle = findMatchingElement(node, 'h2');
         if (articleSubtitle) return articleSubtitle;
         
-        // 文章段落
+        // Đoạn văn
         const articleParagraph = findMatchingElement(node, 'p');
         if (articleParagraph) return articleParagraph;
         
-        // 文章列表项
+        // Mục danh sách bài viết
         const articleListItem = findMatchingElement(node, 'li');
         if (articleListItem) return articleListItem;
         
-        // 引用内容
+        // Trích dẫn nội dung
         const blockquote = findMatchingElement(node, 'blockquote');
         if (blockquote) return blockquote;
         
-        // 文章正文容器
+        // Thùng đựng vật phẩm
         const articleBody = findMatchingElement(node, 'article section');
         if (articleBody) return articleBody;
         
-        // 作者简介
+        // Về tác giả
         const authorBio = findMatchingElement(node, 'p.pw-author-note');
         if (authorBio) return authorBio;
         
-        // 评论内容
+        // Nội dung bình luận
         const comment = findMatchingElement(node, 'div.pw-responses-thread p');
         if (comment) return comment;
         
-        // 默认不翻译
+        // Không được dịch theo mặc định
         return false;
     },
     ['reddit.com']: (node: any) => {
-        // 判断是否应该跳过该节点
+        // Xác định xem nút có nên được bỏ qua hay không
         if (shouldSkipRedditElement(node)) {
-            debugLog('Reddit', '跳过Reddit元素', node.textContent);
+            debugLog('Reddit', 'Bỏ qua các phần tử Reddit', node.textContent);
             return { skip: true };
         }
         
-        // 帖子标题
+        // Tiêu đề bài viết
         const postTitle = findMatchingElement(node, 'h1, h3[data-click-id="body"]');
         if (postTitle) {
-            debugLog('Reddit', '翻译帖子标题', postTitle.textContent);
+            debugLog('Reddit', 'Dịch tiêu đề bài viết', postTitle.textContent);
             return postTitle;
         }
         
-        // 描述文本
+        // văn bản mô tả
         const description = findMatchingElement(node, 'div.community-details-heading p, div.community-details p, div.wiki-page-content, div[data-click-id="text"]');
         if (description) {
-            debugLog('Reddit', '翻译描述文本', description.textContent?.substring(0, 50) + '...');
+            debugLog('Reddit', 'Dịch văn bản mô tả', description.textContent?.substring(0, 50) + '...');
             return description;
         }
         
-        // Wiki内容
+        // nội dung Wiki
         const wikiContent = findMatchingElement(node, 'div.md-container div.md, div.md');
         if (wikiContent) {
-            debugLog('Reddit', '翻译Wiki内容', wikiContent.textContent?.substring(0, 50) + '...');
+            debugLog('Reddit', 'Dịch nội dung wiki', wikiContent.textContent?.substring(0, 50) + '...');
             return wikiContent;
         }
         
-        // 社区描述
+        // mô tả cộng đồng
         const communityDescription = findMatchingElement(node, 'div[data-click-id="about"] h2, div[data-redditstyle="true"] h2');
         if (communityDescription) {
-            debugLog('Reddit', '翻译社区描述', communityDescription.textContent);
+            debugLog('Reddit', 'Mô tả cộng đồng dịch thuật', communityDescription.textContent);
             return communityDescription;
         }
         
-        // 社区规则
+        // quy tắc cộng đồng
         const communityRules = findMatchingElement(node, 'div.rules-list div.rule-item div.rule-item-body, div.rule-item p');
         if (communityRules) {
-            debugLog('Reddit', '翻译社区规则', communityRules.textContent);
+            debugLog('Reddit', 'Nội quy cộng đồng dịch thuật', communityRules.textContent);
             return communityRules;
         }
         
-        // 帖子卡片内容
+        // Nội dung bưu thiếp
         const postCard = findMatchingElement(node, 'div[data-testid="post-title"], div.Post h3');
         if (postCard) {
-            debugLog('Reddit', '翻译帖子卡片', postCard.textContent);
+            debugLog('Reddit', 'Dịch bưu thiếp', postCard.textContent);
             return postCard;
         }
         
-        // 公告内容
+        // Nội dung thông báo
         const announcement = findMatchingElement(node, 'div[data-testid="content"], div.announcement');
         if (announcement) {
-            debugLog('Reddit', '翻译公告内容', announcement.textContent?.substring(0, 50) + '...');
+            debugLog('Reddit', 'Dịch nội dung thông báo', announcement.textContent?.substring(0, 50) + '...');
             return announcement;
         }
         
-        // 默认不翻译
+        // Không được dịch theo mặc định
         return false;
     },
     ['news.ycombinator.com']: (node: any) => {
-        // 判断是否应该跳过该节点
+        // Xác định xem nút có nên được bỏ qua hay không
         if (shouldSkipHNElement(node)) {
             return { skip: true };
         }
         
-        // 帖子标题
+        // Tiêu đề bài viết
         const storyTitle = findMatchingElement(node, 'td.title a.titlelink');
         if (storyTitle) return storyTitle;
         
-        // 评论内容
+        // Nội dung bình luận
         const comment = findMatchingElement(node, 'div.comment span.commtext');
         if (comment) return comment;
         
-        // 帖子文本
+        // Đăng văn bản
         const storyText = findMatchingElement(node, 'div.toptext');
         if (storyText) return storyText;
         
-        // 用户简介
+        // Hồ sơ người dùng
         const userAbout = findMatchingElement(node, 'td.default');
         if (userAbout) return userAbout;
         
-        // 默认不翻译
+        // Không được dịch theo mặc định
         return false;
     }
 }
 
 /**
- * 判断是否应该跳过Twitter网站上的特定元素
+ * Xác định xem có nên bỏ qua một yếu tố cụ thể trên trang web Twitter hay không
  */
 function shouldSkipTwitterElement(node: any): boolean {
-    // 检查是否为特殊内容（URL、邮箱、用户名等）
+    // Kiểm tra xem đó có phải là nội dung đặc biệt không (URL, email, tên người dùng, v.v.)
     if (node.textContent && isSpecialContent(node.textContent)) {
-        debugLog('Twitter', '特殊内容', node.textContent);
+        debugLog('Twitter', 'nội dung đặc biệt', node.textContent);
         return true;
     }
 
-    // 如果当前节点或其祖先节点匹配这些选择器，则跳过
+    // Bỏ qua nếu nút hiện tại hoặc nút tổ tiên của nó khớp với các bộ chọn này
     const skipSelectors = [
-        // 侧边栏导航
+        // Điều hướng thanh bên
         // 'nav[aria-label="Primary"]',
         'div[data-testid="sidebarColumn"]',
-        // 趋势栏
+        // thanh xu hướng
         'div[aria-label="Timeline: Trending now"]',
         'aside[aria-label="Who to follow"]',
-        // 搜索栏
+        // thanh tìm kiếm
         'div[data-testid="SearchBox_Search_Input"]',
-        // 各种按钮和UI元素
+        // Các nút và thành phần UI khác nhau
         'div[role="button"]',
         'div[data-testid="BottomBar"]',
-        // 未展开的帖子操作区域
+        // Khu vực đăng hành động chưa được mở rộng
         'div[role="group"][aria-label]',
-        // 推荐关注
+        // Đề nghị chú ý
         'div[data-testid="suggestedUserHover"]',
-        // 各种图标和操作按钮
+        // Các biểu tượng và nút hành động khác nhau
         'div[aria-label*="icon"]',
         'div[data-testid*="icon"]',
-        // 顶部应用栏
+        // Thanh ứng dụng hàng đầu
         'header[role="banner"]',
-        // 字数限制计数器
+        // bộ đếm giới hạn từ
         'div[data-testid="characterCount"]',
-        // 用户名称相关
+        // Tên người dùng liên quan
         'div[data-testid="User-Name"]',
         'div[data-testid="UserName"]',
         'span[data-testid="tweetText"] span.r-bcqeeo',
-        // 用户ID和用户名相关
+        // ID người dùng và tên người dùng liên quan
         'div[data-testid="HoverCard"]',
         'div[data-testid="UserCell"]',
         'a[role="link"][href*="/status/"]',
-        // 关注按钮
+        // nút theo dõi
         'div[role="button"][data-testid="follow"]',
         'div[role="button"][data-testid="unfollow"]',
-        // 包含"关注"文本的元素
+        // Phần tử chứa văn bản "Theo dõi"
         'div[dir="auto"][id^="id__"]'
     ];
 
-    // 检查当前节点是否匹配跳过选择器
+    // Kiểm tra xem nút hiện tại có khớp với bộ chọn bỏ qua không
     for (const selector of skipSelectors) {
         if (node.matches?.(selector)) {
-            debugLog('Twitter', '选择器匹配跳过', selector, node.textContent);
+            debugLog('Twitter', 'bỏ qua kết quả chọn', selector, node.textContent);
             return true;
         }
     }
     
-    // 检查节点的类名、属性等特征
+    // Kiểm tra tên lớp, thuộc tính và các đặc điểm khác của nút
     const nodeTag = node.tagName?.toLowerCase();
     if (nodeTag === 'svg' || nodeTag === 'path' || nodeTag === 'g') {
-        debugLog('Twitter', 'SVG元素跳过', node.textContent);
+        debugLog('Twitter', 'Các phần tử SVG bị bỏ qua', node.textContent);
         return true;
     }
 
-    // 检查是否为操作按钮文本（点赞、转发、评论等）
+    // Kiểm tra xem đó có phải là văn bản nút hành động không (như, tweet lại, bình luận, v.v.)
     if (node.textContent?.trim().match(/^(\d+|Like|Reply|Retweet|Share)$/)) {
-        debugLog('Twitter', '操作按钮跳过', node.textContent);
+        debugLog('Twitter', 'Nút hành động bỏ qua', node.textContent);
         return true;
     }
     
-    // 检查是否为用户名或用户ID
+    // Kiểm tra xem đó là tên người dùng hay userid
     const textContent = node.textContent?.trim();
     if (textContent) {
-        // 检查是否为用户名格式
+        // Kiểm tra xem nó có ở định dạng tên người dùng không
         if (textContent.startsWith('@')) {
-            debugLog('Twitter', '用户名跳过', node.textContent);
+            debugLog('Twitter', 'bỏ qua tên người dùng', node.textContent);
             return true;
         }
         
-        // 检查是否为用户ID格式 
+        // Kiểm tra xem nó có ở định dạng ID người dùng không 
         if (textContent.startsWith('id@')) {
-            debugLog('Twitter', '用户ID跳过', node.textContent);
+            debugLog('Twitter', 'ID người dùng bị bỏ qua', node.textContent);
             return true;
         }
         
-        // 检查是否包含关注字样
-        if (textContent.includes('关注') || textContent.includes('Follow')) {
-            debugLog('Twitter', '关注按钮跳过', node.textContent);
+        // Kiểm tra xem từ "chú ý" có được bao gồm không
+        if (textContent.includes('\u5173\u6ce8') || textContent.includes('Follow')) {
+            debugLog('Twitter', 'nút theo dõi bỏ qua', node.textContent);
             return true;
         }
         
-        // 检查是否为Twitter用户名标签
+        // Kiểm tra xem đó có phải là thẻ tên người dùng Twitter không
         if (/^([A-Za-z0-9_]{1,15})$/.test(textContent)) {
-            debugLog('Twitter', '用户名标签跳过', node.textContent);
+            debugLog('Twitter', 'Thẻ tên người dùng bị bỏ qua', node.textContent);
             return true;
         }
     }
     
-    // 检查常见的Twitter UI元素类名
+    // Kiểm tra tên lớp thành phần giao diện người dùng Twitter phổ biến
     const classList = node.classList;
     if (classList) {
-        // Twitter常用的UI类名前缀
+        // Tiền tố tên lớp UI thường được sử dụng trên Twitter
         for (const className of classList) {
             if (className.startsWith('r-') || className.startsWith('css-')) {
-                // 进一步检查节点内容是否为纯UI元素
+                // Kiểm tra thêm xem nội dung nút có phải là thành phần UI thuần túy hay không
                 const text = node.textContent?.trim();
                 if (!text || text.length < 10) {
-                    debugLog('Twitter', 'UI元素跳过', node.textContent);
+                    debugLog('Twitter', 'Các thành phần giao diện người dùng bị bỏ qua', node.textContent);
                     return true;
                 }
             }
         }
     }
     
-    // 检查ID属性
+    // Kiểm tra thuộc tính ID
     if (node.id && node.id.startsWith('id__')) {
-        debugLog('Twitter', 'ID属性跳过', node.textContent);
+        debugLog('Twitter', 'Thuộc tính ID bị bỏ qua', node.textContent);
         return true;
     }
     
@@ -692,22 +692,22 @@ function shouldSkipTwitterElement(node: any): boolean {
 }
 
 /**
- * 判断是否应该跳过GitHub网站上的特定元素
+ * Xác định xem có nên bỏ qua các thành phần cụ thể trên trang GitHub hay không
  */
 function shouldSkipGitHubElement(node: any): boolean {
-    // 检查是否为特殊内容（URL、邮箱、用户名等）
+    // Kiểm tra xem đó có phải là nội dung đặc biệt không (URL, email, tên người dùng, v.v.)
     if (node.textContent && isSpecialContent(node.textContent)) {
-        debugLog('GitHub', '特殊内容跳过', node.textContent);
+        debugLog('GitHub', 'Nội dung đặc biệt bị bỏ qua', node.textContent);
         return true;
     }
     
-    // 判断是否为目录名称或路径
+    // Xác định xem đó là tên thư mục hay đường dẫn
     if (isGitHubPathOrFileName(node)) {
-        debugLog('GitHub', '目录/文件名跳过', node.textContent);
+        debugLog('GitHub', 'Bỏ qua thư mục/tên tập tin', node.textContent);
         return true;
     }
     
-    // 检查是否为GitHub特定的标签文本
+    // Kiểm tra xem văn bản thẻ cụ thể của GitHub
     const gitHubLabels = [
         'bug', 'feature', 'enhancement', 'documentation', 'duplicate', 'good first issue',
         'help wanted', 'invalid', 'question', 'wontfix', 'dependencies', 'security',
@@ -720,7 +720,7 @@ function shouldSkipGitHubElement(node: any): boolean {
         'discussion', 'breaking change', 'needs triage'
     ];
     
-    // GitHub状态文本
+    // Văn bản trạng thái GitHub
     const gitHubStatusTexts = [
         'Open', 'Closed', 'Merged', 'Draft', 'Pending', 'Approved',
         'Changes requested', 'Review required', 'Needs work', 'Ready for review',
@@ -731,234 +731,234 @@ function shouldSkipGitHubElement(node: any): boolean {
         'No wrap', 'Soft wrap', 'Set status'
     ];
     
-    // 如果节点文本是GitHub标签或状态文本，跳过翻译
+    // Bỏ qua bản dịch nếu văn bản nút là nhãn GitHub hoặc văn bản trạng thái
     if (node.textContent) {
         const text = node.textContent.trim();
         
-        // 检查是否为GitHub Label文本
+        // Kiểm tra xem đó có phải là văn bản Nhãn GitHub không
         for (const label of gitHubLabels) {
             if (text.toLowerCase() === label.toLowerCase()) {
-                debugLog('GitHub', 'GitHub Label跳过', text);
+                debugLog('GitHub', 'Nhãn GitHubBỏ qua', text);
                 return true;
             }
         }
         
-        // 检查是否为GitHub状态文本
+        // Kiểm tra xem văn bản trạng thái GitHub
         for (const status of gitHubStatusTexts) {
             if (text === status) {
-                debugLog('GitHub', 'GitHub状态文本跳过', text);
+                debugLog('GitHub', 'Văn bản trạng thái GitHub bị bỏ qua', text);
                 return true;
             }
         }
         
-        // 检查是否为搜索过滤器语法
+        // Kiểm tra xem cú pháp bộ lọc tìm kiếm
         if (/^([a-z]+):([a-z]+)(\s+([a-z]+):([a-z]+))*$/.test(text)) {
-            debugLog('GitHub', '搜索过滤器语法跳过', text);
+            debugLog('GitHub', 'Bỏ qua cú pháp bộ lọc tìm kiếm', text);
             return true;
         }
         
-        // 检查是否为版本号或数字统计
+        // Kiểm tra xem đó là số phiên bản hay số liệu thống kê
         if (/^v?\d+\.\d+(\.\d+)?(-[a-z0-9.]+)?$/.test(text) || 
             /^\d+\s+(issues|pull requests|commits|stars|forks|watching)$/.test(text.toLowerCase())) {
-            debugLog('GitHub', '版本号或数字统计跳过', text);
+            debugLog('GitHub', 'Số phiên bản hoặc số liệu thống kê bị bỏ qua', text);
             return true;
         }
     }
     
-    // 如果当前节点或其祖先节点匹配这些选择器，则跳过
+    // Bỏ qua nếu nút hiện tại hoặc nút tổ tiên của nó khớp với các bộ chọn này
     const skipSelectors = [
-        // 导航栏和菜单
+        // Thanh điều hướng và menu
         'header.Header',
         'nav.js-repo-nav',
         'nav.menu',
-        // 侧边栏
+        // thanh bên
         'div.Layout-sidebar',
-        // 表单元素
+        // phần tử biểu mẫu
         'form',
         'input',
         'textarea',
         'button',
-        // 代码块和相关元素
+        // Khối mã và các phần tử liên quan
         'pre.highlight',
         'code',
         'table.highlight',
         'table.diff-table',
-        // 分页和过滤器
+        // Phân trang và bộ lọc
         'div.pagination',
         'div.subnav',
-        // 操作按钮区域
+        // Khu vực nút thao tác
         'div.file-header',
         'div.file-actions',
-        // 贡献图
+        // Biểu đồ đóng góp
         'div.js-calendar-graph',
-        // 统计信息区
+        // Khu vực thông tin thống kê
         'ul.repository-lang-stats-numbers',
-        // 按钮文本
+        // văn bản nút
         'summary',
         'span.Counter',
         'div.controls',
         'span.js-hidden-pane-button',
-        // 文件树
+        // cây tập tin
         'div.js-details-container Details',
         'div.Box-row',
-        // 目录文件名相关
+        // Tên tập tin thư mục liên quan
         'div.react-directory-filename-column',
         'div.react-directory-filename-cell',
         'div.react-directory-truncate',
-        'div[class*="directory-"]', // 匹配所有包含directory-的类名
+        'div[class*="directory-"]', // Khớp tất cả các tên lớp có chứa thư mục-
         'a[title][aria-label*="Directory"]',
         'a[title][aria-label*="File"]',
-        // 底部
+        // đáy
         'footer',
-        // 用户名相关
+        // Tên người dùng liên quan
         'a.author',
         'span.author',
         'a.user-mention',
         'a.commit-author',
-        // Pull Request和Issue相关元素
+        // Kéo các phần tử liên quan đến Yêu cầu và Vấn đề
         'div.merge-status-list',
         'div.js-navigation-container',
-        'span.State', // PR状态标签
+        'span.State', // Nhãn trạng thái PR
         'div.TimelineItem-badge',
-        'div.color-fg-muted', // 灰色提示文本
+        'div.color-fg-muted', // Văn bản nhắc nhở màu xám
         'div.Box-header',
-        'div.js-details-container', // 折叠的详情容器
-        'span.Link--secondary', // 次要链接文本
-        // 仓库元数据
+        'div.js-details-container', // Vùng chứa chi tiết đã thu gọn
+        'span.Link--secondary', // Văn bản liên kết phụ
+        // Siêu dữ liệu kho
         'div.BorderGrid-row',
         
-        // 仓库统计信息和小组件
-        '.repo-language-color', // 语言颜色指示器
-        'a.topic-tag', // 话题标签
-        'span.d-inline-block.mr-3', // 内联统计块
-        'a.Link--muted', // 次要链接
-        'span.no-wrap', // 不换行的文本（通常是统计数据）
-        '.octicon', // 图标
-        'a.Link--primary > svg.octicon', // 主要链接中的图标
-        'div.d-flex', // 弹性布局容器（常用于统计信息）
-        'div.repo-and-owner', // 仓库和所有者信息
+        // Thống kê kho và vật dụng
+        '.repo-language-color', // Chỉ báo màu ngôn ngữ
+        'a.topic-tag', // Thẻ bắt đầu bằng #
+        'span.d-inline-block.mr-3', // Khối thống kê nội tuyến
+        'a.Link--muted', // liên kết phụ
+        'span.no-wrap', // Văn bản không ngắt dòng (thường là số liệu thống kê)
+        '.octicon', // biểu tượng
+        'a.Link--primary > svg.octicon', // Các biểu tượng trong liên kết chính
+        'div.d-flex', // Vùng chứa bố cục linh hoạt (thường được sử dụng để thống kê)
+        'div.repo-and-owner', // Thông tin kho và chủ sở hữu
         
-        // 仓库顶部区域
+        // Khu vực trên cùng của kho
         'nav.js-repo-nav',
-        'h1.flex-auto', // 标题
-        'div.pagehead', // 页面头部
-        'div.pagehead-actions', // 页面头部操作区
-        'div.f4.mt-3', // 主要描述
-        'h2#files', // 文件列表标题
+        'h1.flex-auto', // Tiêu đề
+        'div.pagehead', // Tiêu đề trang
+        'div.pagehead-actions', // Khu vực hoạt động tiêu đề trang
+        'div.f4.mt-3', // mô tả chính
+        'h2#files', // tiêu đề danh sách tập tin
         
-        // 底部区域元素
-        'div.commit-tease', // 提交信息预览
-        'div.file-wrap', // 文件包装器
-        'ul.repository-lang-stats-numbers', // 语言统计数字
+        // phần tử vùng đáy
+        'div.commit-tease', // Gửi bản xem trước thông tin
+        'div.file-wrap', // trình bao bọc tập tin
+        'ul.repository-lang-stats-numbers', // thống kê ngôn ngữ
         
-        // 统计计数器和标签
-        'span.Counter', // 计数器
-        'a.UnderlineNav-item', // 导航下划线项
-        'span[data-view-component="true"]', // 视图组件
-        'span.color-fg-muted', // 灰色文本
-        'span.text-bold', // 粗体文本
+        // Bộ đếm và nhãn thống kê
+        'span.Counter', // quầy tính tiền
+        'a.UnderlineNav-item', // Các mục được gạch chân trong điều hướng
+        'span[data-view-component="true"]', // xem thành phần
+        'span.color-fg-muted', // văn bản màu xám
+        'span.text-bold', // văn bản in đậm
         
-        // Issue/PR导航区域
-        'div.tabnav', // 标签导航
-        'div.tabnav-tabs', // 标签导航标签
-        'div.table-list-header-toggle', // 表格列表头切换
+        // Khu vực điều hướng vấn đề/PR
+        'div.tabnav', // Điều hướng thẻ
+        'div.tabnav-tabs', // Thẻ điều hướng thẻ
+        'div.table-list-header-toggle', // Chuyển đổi tiêu đề cột của bảng
         
-        // 活动区域
+        // Khu vực hoạt động
         'div.Box-header',
         'div.TimelineItem-badge',
         
-        // 包管理和发布区域
-        'div.package-list', // 包列表
-        'div.release-entry', // 发布条目
+        // Khu vực quản lý và xuất bản gói
+        'div.package-list', // Danh sách gói hàng
+        'div.release-entry', // Đăng một mục
         
-        // 通用组件
-        'span.Label', // 标签
-        'span.State', // 状态指示器
-        'a.social-count', // 社交计数
-        'a.pl-3', // 带左内边距的链接
-        'div[role="grid"]', // 网格角色的div
-        'div.flash', // 闪烁通知
+        // Các thành phần chung
+        'span.Label', // gắn thẻ
+        'span.State', // chỉ báo trạng thái
+        'a.social-count', // số lượng xã hội
+        'a.pl-3', // Liên kết có phần đệm bên trái
+        'div[role="grid"]', // div cho vai trò lưới
+        'div.flash', // thông báo chớp nhoáng
         
-        // 仓库信息卡片
-        'div.Box-row--gray', // 灰色行
-        'div.BorderGrid-cell', // 边框网格单元格
+        // Thẻ thông tin kho hàng
+        'div.Box-row--gray', // hàng màu xám
+        'div.BorderGrid-cell', // ô lưới viền
         
-        // Issue和PR搜索结果页面的元素
-        'div.issue-item', // Issue项
-        'div.issue-item-header', // Issue项头部
-        'span.opened-by', // 打开者标记
-        'div.issue-item-body', // Issue项内容
-        'div.issue-item-footer', // Issue项底部
-        'span.issue-item-meta', // Issue项元数据
-        'span.issue-meta-section', // Issue元数据区域
-        'div.flex-auto.min-width-0', // 弹性自动最小宽度容器
-        'div.issues-reset-query-wrapper', // 重置查询包装器
-        'span.issue-keyword', // Issue关键字
-        'a.issues-reset-query', // 重置查询链接
-        'span.selected-text', // 选中文本
-        'a.filter-item', // 过滤项
-        'span.label', // 标签
-        'span.tooltipped', // 提示标签
-        'div.select-menu-item-text', // 选择菜单项文本
-        'div.select-menu-filters', // 选择菜单过滤器
-        'a.select-menu-item', // 选择菜单项
-        'div.select-menu-list', // 选择菜单列表
-        'nav.subnav', // 子导航
-        'div.flex-column.flex-auto', // 弹性列自动容器
-        'div.table-list-filters', // 表格列表过滤器
-        'div.table-list-header', // 表格列表头
-        'div.flex-items-center.flex-justify-between', // 弹性项目居中和两端对齐
-        'div.js-issue-row', // Issue行
-        'div.lh-default', // 默认行高
-        'a.js-selected-navigation-item', // 选中的导航项
-        'nav.d-flex', // 弹性导航
-        'div.js-check-all-container', // 全选容器
-        'div.flex-shrink-0', // 弹性收缩为0
-        'div.timeline-comment-header', // 时间线评论头
-        'div.comment-form-textarea', // 评论表单文本域
-        'div.sidebar-notifications', // 侧边栏通知
-        'div.gh-header', // GitHub头部
-        'span.js-issue-title', // Issue标题
-        'a.js-hard-refresh', // 强制刷新链接
-        'div.Link--muted', // 次要链接
+        // Các thành phần của trang kết quả tìm kiếm Vấn đề và PR
+        'div.issue-item', // Mục phát hành
+        'div.issue-item-header', // Tiêu đề vấn đề
+        'span.opened-by', // dấu mở
+        'div.issue-item-body', // Nội dung mục phát hành
+        'div.issue-item-footer', // Vấn đề mục dưới cùng
+        'span.issue-item-meta', // Siêu dữ liệu về mục phát hành
+        'span.issue-meta-section', // Khu vực siêu dữ liệu vấn đề
+        'div.flex-auto.min-width-0', // Thùng chứa chiều rộng tối thiểu tự động linh hoạt
+        'div.issues-reset-query-wrapper', // Đặt lại trình bao bọc truy vấn
+        'span.issue-keyword', // Từ khóa phát hành
+        'a.issues-reset-query', // Đặt lại liên kết truy vấn
+        'span.selected-text', // Chọn văn bản
+        'a.filter-item', // Lọc các mục
+        'span.label', // gắn thẻ
+        'span.tooltipped', // Nhãn nhắc nhở
+        'div.select-menu-item-text', // Chọn văn bản mục menu
+        'div.select-menu-filters', // Chọn bộ lọc menu
+        'a.select-menu-item', // Chọn mục menu
+        'div.select-menu-list', // Chọn danh sách thực đơn
+        'nav.subnav', // điều hướng phụ
+        'div.flex-column.flex-auto', // Thùng chứa tự động cột linh hoạt
+        'div.table-list-filters', // bộ lọc danh sách bảng
+        'div.table-list-header', // Tiêu đề cột của bảng
+        'div.flex-items-center.flex-justify-between', // Các mục Flex được căn giữa và căn chỉnh
+        'div.js-issue-row', // Dòng vấn đề
+        'div.lh-default', // Chiều cao hàng mặc định
+        'a.js-selected-navigation-item', // Mục điều hướng đã chọn
+        'nav.d-flex', // Điều hướng linh hoạt
+        'div.js-check-all-container', // Chọn tất cả các container
+        'div.flex-shrink-0', // Độ co đàn hồi là 0
+        'div.timeline-comment-header', // Tiêu đề bình luận dòng thời gian
+        'div.comment-form-textarea', // Trường văn bản mẫu bình luận
+        'div.sidebar-notifications', // Thông báo thanh bên
+        'div.gh-header', // Tiêu đề GitHub
+        'span.js-issue-title', // Tiêu đề vấn đề
+        'a.js-hard-refresh', // Buộc làm mới liên kết
+        'div.Link--muted', // liên kết phụ
         
-        // 新增：Issue标签元素
-        'a.IssueLabel', // Issue标签链接
-        'span.IssueLabel', // Issue标签
-        'span.Label', // 通用标签
-        'span.labels', // 标签容器
-        'span.label-link', // 标签链接
-        'a.label-link', // 标签链接
-        'div.labels', // 标签容器
-        'span.color-label', // 颜色标签
-        'span.bg-yellow', // 黄色背景（通常用于标签）
-        'span.bg-green', // 绿色背景
-        'span.bg-red', // 红色背景
-        'span.bg-purple', // 紫色背景
-        'span.bg-blue', // 蓝色背景
-        'span.text-green', // 绿色文本
-        'span.text-red', // 红色文本
-        'span.text-gray', // 灰色文本
-        'div.js-issue-labels', // Issue标签容器
-        'div.js-issue-labels .labels a', // Issue标签链接
-        'div.js-issue-labels .IssueLabel', // Issue标签
-        'span.js-issue-labels', // Issue标签
-        'span.issue-meta-section.ml-2.issue-label-group', // Issue标签组
-        'span.color-fg-danger', // 危险颜色（通常用于closed/rejected状态）
-        'span.color-fg-success', // 成功颜色（通常用于open/accepted状态）
-        'span.color-fg-muted', // 暗淡颜色（通常用于辅助信息）
-        'span.color-fg-done', // 完成颜色
+        // Mới: Yếu tố thẻ phát hành
+        'a.IssueLabel', // Liên kết thẻ phát hành
+        'span.IssueLabel', // Thẻ phát hành
+        'span.Label', // Nhãn phổ quát
+        'span.labels', // hộp đựng nhãn
+        'span.label-link', // gắn thẻ liên kết
+        'a.label-link', // gắn thẻ liên kết
+        'div.labels', // hộp đựng nhãn
+        'span.color-label', // nhãn màu
+        'span.bg-yellow', // Nền màu vàng (thường dùng cho nhãn)
+        'span.bg-green', // nền xanh
+        'span.bg-red', // nền đỏ
+        'span.bg-purple', // nền màu tím
+        'span.bg-blue', // nền màu xanh
+        'span.text-green', // văn bản màu xanh lá cây
+        'span.text-red', // văn bản màu đỏ
+        'span.text-gray', // văn bản màu xám
+        'div.js-issue-labels', // Vùng chứa thẻ phát hành
+        'div.js-issue-labels .labels a', // Liên kết thẻ phát hành
+        'div.js-issue-labels .IssueLabel', // Thẻ phát hành
+        'span.js-issue-labels', // Thẻ phát hành
+        'span.issue-meta-section.ml-2.issue-label-group', // Nhóm nhãn phát hành
+        'span.color-fg-danger', // Màu nguy hiểm (thường được sử dụng cho trạng thái đóng/bị từ chối)
+        'span.color-fg-success', // Màu thành công (thường được sử dụng cho trạng thái mở/chấp nhận)
+        'span.color-fg-muted', // Màu sắc buồn tẻ (thường dùng để hỗ trợ thông tin)
+        'span.color-fg-done', // màu hoàn thiện
     ];
 
-    // 检查当前节点是否匹配跳过选择器
+    // Kiểm tra xem nút hiện tại có khớp với bộ chọn bỏ qua không
     for (const selector of skipSelectors) {
         if (node.matches?.(selector)) {
-            debugLog('GitHub', '选择器匹配跳过', selector, node.textContent);
+            debugLog('GitHub', 'bỏ qua kết quả chọn', selector, node.textContent);
             return true;
         }
     }
     
-    // 检查节点的类名是否包含特定关键字
+    // Kiểm tra xem tên lớp của nút có chứa từ khóa cụ thể không
     const skipClassKeywords = [
         'octicon', 'anim-', 'btn', 'menu', 'icon', 'Avatar', 'repo', 
         'branch', 'commits', 'issues', 'pull', 'directory', 'filename', 
@@ -970,13 +970,13 @@ function shouldSkipGitHubElement(node: any): boolean {
     if (node.className && typeof node.className === 'string') {
         for (const keyword of skipClassKeywords) {
             if (node.className.includes(keyword)) {
-                debugLog('GitHub', '类名关键字跳过', keyword, node.className);
+                debugLog('GitHub', 'Bỏ qua từ khóa tên lớp', keyword, node.className);
                 return true;
             }
         }
     }
     
-    // 检查特定属性
+    // Kiểm tra thuộc tính cụ thể
     const skipAttributes = [
         'data-hovercard-type', 'data-issue-and-pr-hovercards-enabled',
         'data-issue-title', 'data-url', 'data-pjax', 'data-hotkey', 'data-target', 
@@ -985,47 +985,47 @@ function shouldSkipGitHubElement(node: any): boolean {
     
     for (const attr of skipAttributes) {
         if (node.hasAttribute && node.hasAttribute(attr)) {
-            debugLog('GitHub', '属性匹配跳过', attr);
+            debugLog('GitHub', 'Kết hợp thuộc tính bị bỏ qua', attr);
             return true;
         }
     }
     
-    // 检查是否为用户名或@提及
+    // Kiểm tra xem đó có phải là tên người dùng hoặc @mention không
     if (node.textContent?.trim().startsWith('@')) {
-        debugLog('GitHub', '用户名@提及跳过', node.textContent);
+        debugLog('GitHub', 'Tên người dùng @đề cập bị bỏ qua', node.textContent);
         return true;
     }
     
-    // 忽略代码片段
+    // Bỏ qua đoạn mã
     if (node.tagName?.toLowerCase() === 'pre' || node.tagName?.toLowerCase() === 'code') {
-        debugLog('GitHub', '代码片段跳过', node.tagName);
+        debugLog('GitHub', 'bỏ qua đoạn mã', node.tagName);
         return true;
     }
     
-    // 忽略图标
+    // biểu tượng bỏ qua
     if (node.tagName?.toLowerCase() === 'svg') {
-        debugLog('GitHub', 'SVG图标跳过');
+        debugLog('GitHub', 'bỏ qua biểu tượng SVG');
         return true;
     }
     
-    // 检查是否为统计数字和计数（例如：16.3k stars, 854 watching等）
+    // Kiểm tra số liệu thống kê và số lượng (ví dụ: 16,3 nghìn sao, 854 lượt xem, v.v.)
     const statCountPattern = /^\s*\d+(\.\d+)?[kKmMbB]?\s*(stars|watching|forks|views|issues|pull|commits|watchers)?\s*$/;
     if (statCountPattern.test(node.textContent?.trim())) {
-        debugLog('GitHub', '统计数字跳过', node.textContent);
+        debugLog('GitHub', 'Thống kê bị bỏ qua', node.textContent);
         return true;
     }
     
-    // 检查是否为仓库标签文本
+    // Kiểm tra xem đó có phải là văn bản nhãn kho không
     if (node.className?.includes('topic-tag-link') || 
         node.className?.includes('topic-tag') || 
         node.parentElement?.className?.includes('topic-tag')) {
-        debugLog('GitHub', '仓库标签跳过', node.textContent);
+        debugLog('GitHub', 'Nhãn kho bị bỏ qua', node.textContent);
         return true;
     }
     
-    // 检查是否为许可证文本
+    // Kiểm tra văn bản giấy phép
     if (/^Apache-[\d.]+|MIT|GPL-[\d.]+|BSD|LGPL/.test(node.textContent?.trim())) {
-        debugLog('GitHub', '许可证文本跳过', node.textContent);
+        debugLog('GitHub', 'Văn bản giấy phép bị bỏ qua', node.textContent);
         return true;
     }
     
@@ -1033,7 +1033,7 @@ function shouldSkipGitHubElement(node: any): boolean {
 }
 
 /**
- * 判断节点是否包含GitHub的路径或文件名
+ * Xác định xem nút có chứa đường dẫn hoặc tên tệp của GitHub không
  */
 function isGitHubPathOrFileName(node: any): boolean {
     if (!node || !node.textContent) return false;
@@ -1041,63 +1041,63 @@ function isGitHubPathOrFileName(node: any): boolean {
     const text = node.textContent.trim();
     if (!text) return false;
     
-    // 检查节点是否为导航路径元素
+    // Kiểm tra xem nút có phải là thành phần đường dẫn điều hướng không
     if (node.matches?.('nav[aria-label="Breadcrumb"]') || 
         node.matches?.('span.final-path') || 
         node.matches?.('span.js-repo-root') ||
         node.matches?.('a[title][aria-label*="Directory"]') ||
         node.matches?.('a[title][aria-label*="File"]')) {
-        debugLog('GitHub', '路径导航元素', '匹配选择器', node.outerHTML?.substring(0, 100));
+        debugLog('GitHub', 'phần tử điều hướng đường dẫn', 'khớp selector', node.outerHTML?.substring(0, 100));
         return true;
     }
     
-    // 检查父元素是否为目录元素
+    // Kiểm tra xem phần tử cha có phải là phần tử thư mục không
     let parent = node.parentElement;
     while (parent) {
         if (parent.matches?.('div.react-directory-filename-column') || 
             parent.matches?.('div.react-directory-filename-cell') ||
             parent.matches?.('div.react-directory-truncate') ||
             parent.className?.includes('directory-')) {
-            debugLog('GitHub', '目录元素父节点', '匹配父元素选择器', parent.outerHTML?.substring(0, 100));
+            debugLog('GitHub', 'Nút cha của phần tử thư mục', 'khớp selector phần tử cha', parent.outerHTML?.substring(0, 100));
             return true;
         }
         parent = parent.parentElement;
     }
     
-    // 检查是否为目录链接
+    // Kiểm tra xem đó có phải là liên kết thư mục không
     if (node.tagName?.toLowerCase() === 'a' && 
         node.getAttribute('aria-label')?.includes('Directory')) {
-        debugLog('GitHub', '目录链接', 'aria-label包含Directory', node.getAttribute('aria-label'));
+        debugLog('GitHub', 'liên kết thư mục', 'aria-label chứa Directory', node.getAttribute('aria-label'));
         return true;
     }
     
-    // 检查是否为常见目录或文件名
+    // Kiểm tra xem đó có phải là tên thư mục hoặc tệp chung không
     if (/^\.github|^src\/|^test\/|^docs\/|^\.gitignore$|^LICENSE$|^README\.md$|^CHANGELOG\.md$|^package\.json$|^Dockerfile$/i.test(text)) {
-        // 如果当前节点是链接或者在文件列表中
+        // Nếu nút hiện tại là một liên kết hoặc trong danh sách tệp
         if (node.tagName?.toLowerCase() === 'a' || 
             node.parentElement?.matches?.('div.Box-row')) {
-            debugLog('GitHub', '常见目录或文件名', text);
+            debugLog('GitHub', 'Tên thư mục hoặc tập tin chung', text);
             return true;
         }
     }
     
-    // 检查是否为路径格式（包含/的短文本）
+    // Kiểm tra xem nó có ở định dạng đường dẫn không (văn bản ngắn chứa /)
     if (text.includes('/') && text.length < 100 && 
-        !/\s/.test(text) && // 不包含空格
-        !/[，。？！；：""''（）【】「」『』〔〕]/.test(text)) { // 不包含中文标点
-        debugLog('GitHub', '路径格式文本', text);
+        !/\s/.test(text) && // Không chứa dấu cách
+        !/[，。？！；：""''（）【】「」『』〔〕]/.test(text)) { // Không chứa dấu câu tiếng Trung
+        debugLog('GitHub', 'văn bản định dạng đường dẫn', text);
         return true;
     }
     
-    // 检查是否为常见的开发相关文件扩展名
+    // Kiểm tra các phần mở rộng tệp phổ biến liên quan đến phát triển
     if (/\.(js|ts|jsx|tsx|css|scss|html|json|md|py|java|go|rs|c|cpp|h|hpp|rb|php|sh|bat|cmd|yaml|yml|xml)$/i.test(text)) {
-        debugLog('GitHub', '文件扩展名匹配', text);
+        debugLog('GitHub', 'Phần mở rộng tập tin phù hợp', text);
         return true;
     }
     
-    // 检查是否为Issue/PR编号格式
+    // Kiểm tra xem đó có phải là định dạng số Vấn đề/PR không
     if (/^#\d+$/.test(text) || /^[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+#\d+$/.test(text)) {
-        debugLog('GitHub', 'Issue/PR编号', text);
+        debugLog('GitHub', 'Số phát hành/số PR', text);
         return true;
     }
     
@@ -1105,44 +1105,44 @@ function isGitHubPathOrFileName(node: any): boolean {
 }
 
 /**
- * 判断是否应该跳过Stack Overflow网站上的特定元素
+ * Xác định xem có nên bỏ qua các thành phần cụ thể trên trang web Stack Overflow hay không
  */
 function shouldSkipStackOverflowElement(node: any): boolean {
-    // 如果当前节点或其祖先节点匹配这些选择器，则跳过
+    // Bỏ qua nếu nút hiện tại hoặc nút tổ tiên của nó khớp với các bộ chọn này
     const skipSelectors = [
-        // 导航栏
+        // Thanh điều hướng
         'nav.s-topbar',
         'div.s-topbar',
-        // 侧边栏
+        // thanh bên
         'div.s-sidebarwidget',
-        // 表单元素
+        // phần tử biểu mẫu
         'form',
         'input',
         'textarea',
         'button',
-        // 代码块
+        // khối mã
         'pre.s-code-block',
         'code',
-        // 操作按钮
+        // Nút hành động
         'div.js-voting-container',
         'div.js-post-menu',
-        // 链接和标签
+        // Liên kết và thẻ
         'div.post-taglist',
         'div.module.community-bulletin',
-        // 统计信息
+        // Thống kê
         'div.-flair',
         'div.s-stats',
         'div.s-badge',
-        // 页脚
+        // chân trang
         'footer',
         'div.site-footer',
     ];
     
-    // 检查当前节点是否匹配跳过选择器
+    // Kiểm tra xem nút hiện tại có khớp với bộ chọn bỏ qua không
     for (const selector of skipSelectors) {
         if (node.matches?.(selector)) return true;
         
-        // 检查祖先节点
+        // Kiểm tra các nút tổ tiên
         let parent = node.parentElement;
         while (parent) {
             if (parent.matches?.(selector)) return true;
@@ -1150,7 +1150,7 @@ function shouldSkipStackOverflowElement(node: any): boolean {
         }
     }
     
-    // 检查节点的类名是否包含特定关键字
+    // Kiểm tra xem tên lớp của nút có chứa từ khóa cụ thể không
     const skipClassKeywords = ['js-', 'icon', 'btn', 'badge', 'vote', 'tag', 's-btn', 'vote-count'];
     
     if (node.className && typeof node.className === 'string') {
@@ -1159,51 +1159,51 @@ function shouldSkipStackOverflowElement(node: any): boolean {
         }
     }
     
-    // 忽略代码片段
+    // Bỏ qua đoạn mã
     if (node.tagName?.toLowerCase() === 'pre' || node.tagName?.toLowerCase() === 'code') return true;
     
-    // 忽略图标
+    // biểu tượng bỏ qua
     if (node.tagName?.toLowerCase() === 'svg') return true;
     
     return false;
 }
 
 /**
- * 判断是否应该跳过Medium网站上的特定元素
+ * Xác định xem có nên bỏ qua các thành phần cụ thể trên trang Medium hay không
  */
 function shouldSkipMediumElement(node: any): boolean {
-    // 如果当前节点或其祖先节点匹配这些选择器，则跳过
+    // Bỏ qua nếu nút hiện tại hoặc nút tổ tiên của nó khớp với các bộ chọn này
     const skipSelectors = [
-        // 导航栏和工具栏
+        // Thanh điều hướng và thanh công cụ
         'nav',
         'div.metabar',
         'div.js-metabar',
-        // 侧边栏 
+        // thanh bên 
         'div.js-sidebarContainer',
         'div.js-sidebar',
-        // UI元素
+        // thành phần giao diện người dùng
         'button',
         'input',
         'textarea',
-        // 代码块
+        // khối mã
         'pre',
         'code',
-        // 底部元素
+        // phần tử dưới cùng
         'footer',
-        // 作者资料卡
+        // Thẻ thông tin tác giả
         'div.pw-multi-author-card',
-        // 推荐文章卡片上的标题/描述以外的内容
+        // Đề xuất nội dung ngoài tiêu đề/mô tả trên thẻ bài viết
         'div.pw-card-body div.pw-card-description ~ *',
-        // 分享按钮和响应按钮
+        // Nút chia sẻ và nút phản hồi
         'div.pw-post-actions',
         'div.pw-responses-header',
     ];
     
-    // 检查当前节点是否匹配跳过选择器
+    // Kiểm tra xem nút hiện tại có khớp với bộ chọn bỏ qua không
     for (const selector of skipSelectors) {
         if (node.matches?.(selector)) return true;
         
-        // 检查祖先节点
+        // Kiểm tra các nút tổ tiên
         let parent = node.parentElement;
         while (parent) {
             if (parent.matches?.(selector)) return true;
@@ -1211,7 +1211,7 @@ function shouldSkipMediumElement(node: any): boolean {
         }
     }
     
-    // 检查节点的类名是否包含特定关键字
+    // Kiểm tra xem tên lớp của nút có chứa từ khóa cụ thể không
     const skipClassKeywords = ['js-', 'btn', 'button', 'u-', 'overlay', 'postActionsBar'];
     
     if (node.className && typeof node.className === 'string') {
@@ -1220,192 +1220,192 @@ function shouldSkipMediumElement(node: any): boolean {
         }
     }
     
-    // 忽略代码片段
+    // Bỏ qua đoạn mã
     if (node.tagName?.toLowerCase() === 'pre' || node.tagName?.toLowerCase() === 'code') return true;
     
-    // 忽略图片图标
+    // bỏ qua biểu tượng hình ảnh
     if (node.tagName?.toLowerCase() === 'svg' || node.tagName?.toLowerCase() === 'img') return true;
     
     return false;
 }
 
 /**
- * 判断是否应该跳过Reddit网站上的特定元素
+ * Xác định xem có nên bỏ qua một phần tử cụ thể trên trang Reddit hay không
  */
 function shouldSkipRedditElement(node: any): boolean {
-    // 检查是否为特殊内容（URL、邮箱、用户名等）
+    // Kiểm tra xem đó có phải là nội dung đặc biệt không (URL, email, tên người dùng, v.v.)
     if (node.textContent && isSpecialContent(node.textContent)) {
-        debugLog('Reddit', '特殊内容跳过', node.textContent);
+        debugLog('Reddit', 'Nội dung đặc biệt bị bỏ qua', node.textContent);
         return true;
     }
     
-    // 处理帖子标题中的屏幕阅读器内容
+    // Xử lý nội dung trình đọc màn hình trong tiêu đề bài viết
     if (node.tagName?.toLowerCase() === 'faceplate-screen-reader-content') {
-        debugLog('Reddit', '屏幕阅读器内容跳过', node.textContent);
+        debugLog('Reddit', 'Nội dung trình đọc màn hình bị bỏ qua', node.textContent);
         return true;
     }
     
-    // 处理帖子中的时间标签
+    // Xử lý thẻ thời gian trong bài viết
     if (node.tagName?.toLowerCase() === 'time') {
-        debugLog('Reddit', '时间标签跳过', node.textContent);
+        debugLog('Reddit', 'bỏ qua thẻ thời gian', node.textContent);
         return true;
     }
     
-    // 如果当前节点或其祖先节点匹配这些选择器，则跳过
+    // Bỏ qua nếu nút hiện tại hoặc nút tổ tiên của nó khớp với các bộ chọn này
     const skipSelectors = [
-        // 导航栏和头部
+        // Thanh điều hướng và tiêu đề
         'header', 
-        'div._3Qx5bBCG_O8wVZee9J-KyJ', // Reddit的头部容器
-        'div._1x6pySZ2CoUnAfsFhGe7J1', // 导航栏
-        'div._1QhgSEQa6-vyHBHcV0rygZ', // 顶部横幅
-        'nav, div[data-testid="subreddit-header"]', // 导航区域
-        'div._3ozFtOe6WpJEMUtxDOIvtU', // 菜单条
-        'div._2QZ7T4uAFMs_N83BZcN-Em', // 排序栏
+        'div._3Qx5bBCG_O8wVZee9J-KyJ', // Vùng chứa tiêu đề Reddit
+        'div._1x6pySZ2CoUnAfsFhGe7J1', // Thanh điều hướng
+        'div._1QhgSEQa6-vyHBHcV0rygZ', // biểu ngữ hàng đầu
+        'nav, div[data-testid="subreddit-header"]', // khu vực điều hướng
+        'div._3ozFtOe6WpJEMUtxDOIvtU', // thanh thực đơn
+        'div._2QZ7T4uAFMs_N83BZcN-Em', // cột sắp xếp
         
-        // Reddit新UI元素
-        'faceplate-timeago', // 时间显示组件
-        'a[data-ks-id]', // 帖子链接
-        'shreddit-post[data-ks-item]', // 帖子组件
-        'a[slot="full-post-link"]', // 完整帖子链接
-        'span[slot="credit-bar"]', // 信用栏
-        'shreddit-post-flair', // 帖子标签
-        'shreddit-join-button', // 加入按钮
-        'shreddit-post-overflow-menu', // 溢出菜单
-        'shreddit-async-loader', // 异步加载器
-        'faceplate-hovercard', // 悬停卡片
-        'faceplate-tracker', // 跟踪器
-        'faceplate-number', // 数字格式化组件
-        'shreddit-distinguished-post-tags', // 特殊帖子标签
+        // Các thành phần giao diện người dùng mới của Reddit
+        'faceplate-timeago', // Thành phần hiển thị thời gian
+        'a[data-ks-id]', // Đăng liên kết
+        'shreddit-post[data-ks-item]', // Đăng thành phần
+        'a[slot="full-post-link"]', // Liên kết bài viết đầy đủ
+        'span[slot="credit-bar"]', // thanh tín dụng
+        'shreddit-post-flair', // Đăng thẻ
+        'shreddit-join-button', // nút tham gia
+        'shreddit-post-overflow-menu', // menu tràn
+        'shreddit-async-loader', // Trình tải không đồng bộ
+        'faceplate-hovercard', // thẻ di chuột
+        'faceplate-tracker', // người theo dõi
+        'faceplate-number', // Thành phần định dạng số
+        'shreddit-distinguished-post-tags', // Thẻ bài đặc biệt
         
-        // 侧边栏
-        'div._1OVBBWLtHoSPfGCRaPzpTf', // 侧边栏容器
-        'div.wBtTDilkW_zr1D60d6V2Z', // 侧边栏组件
-        'div._3Qkp11fjcAw9I9wtLo8frE', // 边栏卡片
-        'div._1HSQGYlfPWzs40LP8sZqzT', // 社区边栏
-        'div._2vEf-C2keJaBMY9qk_BxVn', // 侧边栏块
-        'div._3Qkp11fjcAw9I9wtLo8frE', // 社区信息卡
-        'div._2QmHYFeMADTpuXJtd36LQs', // 边栏模块
+        // thanh bên
+        'div._1OVBBWLtHoSPfGCRaPzpTf', // thùng chứa thanh bên
+        'div.wBtTDilkW_zr1D60d6V2Z', // Thành phần thanh bên
+        'div._3Qkp11fjcAw9I9wtLo8frE', // Thẻ thanh bên
+        'div._1HSQGYlfPWzs40LP8sZqzT', // Thanh bên cộng đồng
+        'div._2vEf-C2keJaBMY9qk_BxVn', // khối thanh bên
+        'div._3Qkp11fjcAw9I9wtLo8frE', // thẻ thông tin cộng đồng
+        'div._2QmHYFeMADTpuXJtd36LQs', // Mô-đun thanh bên
         
-        // 表单元素
+        // phần tử biểu mẫu
         'form', 'input', 'textarea', 'button',
-        'button._3QMG29bQNj9RUoGMvSHpZg', // 主要按钮
-        'button._10K5i7NW6qcm-UoCtpB3aK', // 次要按钮
-        'div._3QMG29bQNj9RUoGMvSHpZg, div._10K5i7NW6qcm-UoCtpB3aK', // 按钮容器
+        'button._3QMG29bQNj9RUoGMvSHpZg', // nút chính
+        'button._10K5i7NW6qcm-UoCtpB3aK', // nút phụ
+        'div._3QMG29bQNj9RUoGMvSHpZg, div._10K5i7NW6qcm-UoCtpB3aK', // hộp đựng nút
         
-        // 帖子操作区
-        'div._1ixsU4oQRnNfZ91jhBU74y', // 投票区
-        'div._3-SW6hQX6gXK9G4FM74obr', // 评论操作区
-        'div._2hw0iZ3L5x8UbnfX8ZDKb', // 操作按钮组
-        'div[data-testid="post-comment-header"]', // 评论头部
-        'div[data-click-id="upvote"]', // 投票按钮
-        'div[data-click-id="downvote"]', // 踩按钮
-        'div[data-click-id="share"]', // 分享按钮
-        'div[data-click-id="comments"]', // 评论按钮
+        // Khu vực sau hoạt động
+        'div._1ixsU4oQRnNfZ91jhBU74y', // khu vực bỏ phiếu
+        'div._3-SW6hQX6gXK9G4FM74obr', // Khu vực hoạt động bình luận
+        'div._2hw0iZ3L5x8UbnfX8ZDKb', // Nhóm nút hành động
+        'div[data-testid="post-comment-header"]', // tiêu đề bình luận
+        'div[data-click-id="upvote"]', // nút biểu quyết
+        'div[data-click-id="downvote"]', // nút nhấn
+        'div[data-click-id="share"]', // nút chia sẻ
+        'div[data-click-id="comments"]', // Nút bình luận
         
-        // Reddit特定视图元素
-        'div[data-post-click-location="text-body"]', // 帖子正文点击区域
-        'div.md.feed-card-text-preview', // 帖子预览
-        'div#feed-post-credit-bar', // 帖子信用栏
-        'span.created-separator', // 创建分隔符
-        'span.inline-block.my-0.created-separator', // 分隔符
-        'div[data-testid="post-content"]', // 帖子内容
+        // Các phần tử xem cụ thể của Reddit
+        'div[data-post-click-location="text-body"]', // Khu vực nhấp chuột vào bài viết
+        'div.md.feed-card-text-preview', // Xem trước bài đăng
+        'div#feed-post-credit-bar', // Cột tín dụng sau
+        'span.created-separator', // Tạo dấu phân cách
+        'span.inline-block.my-0.created-separator', // dấu phân cách
+        'div[data-testid="post-content"]', // Đăng nội dung
         
-        // 投票和互动小组件 - 从截图中可见的元素
-        'button._2pFdCpgBihIaYh9DSMWBIu', // 通用按钮
-        'div._1E9mcoVn4MYnuBQSVDt1gC', // 投票区域容器
-        'span._vaFo96phV6L5Hltvwcox', // 投票计数元素
-        'div._3-SW6hQX6gXK9G4FM74obr', // 操作按钮区
-        'div._3Qkp11fjcAw9I9wtLo8frE', // 帖子信息卡
-        'div._2X6EB3ZhEeXCh1eIVA64XM, div._1hwEKkB_38tIoal6fcdrt9', // 内置小组件
-        'div._3nSp9cdBpqL13CqjdMr2L_', // 统计信息元素
-        'div._2FKpII1jz0h6xCAw1kQAvS, div._2xLbdLcm9WYMj6tMTDwBmf', // 互动区域
-        'div._3U_7i38RDFqmOFXMuRZYvZ, div._VmOLt6lJfSjP8Pr5DL9T', // 分享和存储按钮
+        // Các tiện ích thăm dò ý kiến và tương tác - các thành phần hiển thị từ ảnh chụp màn hình
+        'button._2pFdCpgBihIaYh9DSMWBIu', // Nút phổ quát
+        'div._1E9mcoVn4MYnuBQSVDt1gC', // thùng chứa khu vực bỏ phiếu
+        'span._vaFo96phV6L5Hltvwcox', // yếu tố kiểm phiếu
+        'div._3-SW6hQX6gXK9G4FM74obr', // Khu vực nút thao tác
+        'div._3Qkp11fjcAw9I9wtLo8frE', // Đăng thẻ thông tin
+        'div._2X6EB3ZhEeXCh1eIVA64XM, div._1hwEKkB_38tIoal6fcdrt9', // Các tiện ích tích hợp
+        'div._3nSp9cdBpqL13CqjdMr2L_', // yếu tố thống kê
+        'div._2FKpII1jz0h6xCAw1kQAvS, div._2xLbdLcm9WYMj6tMTDwBmf', // khu vực tương tác
+        'div._3U_7i38RDFqmOFXMuRZYvZ, div._VmOLt6lJfSjP8Pr5DL9T', // Nút chia sẻ và lưu
         
-        // Reddit新版统计元素
-        'span[data-testid="community-hover-card:active-count"]', // 社区活跃用户计数
-        'span.bg-kiwigreen-400', // 在线状态指示器
-        'span.text-12.leading-4.text-neutral-content-weak', // 状态文本
+        // Các yếu tố thống kê mới của Reddit
+        'span[data-testid="community-hover-card:active-count"]', // Số người dùng hoạt động trong cộng đồng
+        'span.bg-kiwigreen-400', // Chỉ báo trạng thái trực tuyến
+        'span.text-12.leading-4.text-neutral-content-weak', // văn bản trạng thái
         
-        // 界面控制元素
-        'a[href="/settings"]', // 设置链接
-        'div[role="menu"]', // 菜单角色元素
-        'div[role="button"]', // 按钮角色元素
-        'div._JRBNstMcGxbZUxrrIKXe, div._2IHh1GBfUxJVQQX0dJvAEf', // 折叠/展开控制
-        'div._3MknXZVbkWU8JL9XGlzASi, div._3Z6MIaeww5FJSez7H2YWXi', // 滚动控制
-        'div[data-adclicklocation="top_bar"]', // 广告位置属性
-        'a[data-click-id="subreddit"]', // 社区链接控件
+        // phần tử điều khiển giao diện
+        'a[href="/settings"]', // Đặt liên kết
+        'div[role="menu"]', // yếu tố vai trò menu
+        'div[role="button"]', // Yếu tố vai trò nút
+        'div._JRBNstMcGxbZUxrrIKXe, div._2IHh1GBfUxJVQQX0dJvAEf', // Thu gọn/mở rộng điều khiển
+        'div._3MknXZVbkWU8JL9XGlzASi, div._3Z6MIaeww5FJSez7H2YWXi', // điều khiển cuộn
+        'div[data-adclicklocation="top_bar"]', // thuộc tính vị trí quảng cáo
+        'a[data-click-id="subreddit"]', // Kiểm soát liên kết cộng đồng
         
-        // 广告
+        // quảng cáo
         'div.promotedlink', 'div._3Qkp11fjcAw9I9wtLo8frE div._2vEf-C2keJaBMY9qk_BxVn',
-        'div[data-before-content="advertisement"]', // 广告标记
-        'div[data-testid="post-container"][data-promoted="true"]', // 推广帖子
-        'div[data-testid="post"][data-promoted="true"]', // 另一种推广帖子
-        'div.ad-container, div.AdPlace', // 广告容器
+        'div[data-before-content="advertisement"]', // thẻ quảng cáo
+        'div[data-testid="post-container"][data-promoted="true"]', // Bài đăng được quảng cáo
+        'div[data-testid="post"][data-promoted="true"]', // Một loại bài viết quảng cáo khác
+        'div.ad-container, div.AdPlace', // thùng đựng quảng cáo
         
-        // 搜索栏
-        'div._2dkUkgReBsuY2IHM9aAHMx', // 搜索栏
-        'input[name="q"]', // 搜索输入框
-        'div._1LganuXpbKgkYX39pbmrCl, form._1QxZxZ9ntXPkuXMnfDTHzH', // 搜索表单元素
+        // thanh tìm kiếm
+        'div._2dkUkgReBsuY2IHM9aAHMx', // thanh tìm kiếm
+        'input[name="q"]', // Hộp nhập tìm kiếm
+        'div._1LganuXpbKgkYX39pbmrCl, form._1QxZxZ9ntXPkuXMnfDTHzH', // Tìm kiếm các phần tử biểu mẫu
         
-        // 底部
+        // đáy
         'footer', 'div._3w_665DK_NH7yIsRMuZkqB',
-        'div._3Wl-riAhLCZuDLzWNbD_z6', // 底部导航
-        'div._3qX0zy2NNkra76bgyHbrcR, div._10YWGZZj2W-2J7T-IJVVNU', // 底部链接组
+        'div._3Wl-riAhLCZuDLzWNbD_z6', // Điều hướng dưới cùng
+        'div._3qX0zy2NNkra76bgyHbrcR, div._10YWGZZj2W-2J7T-IJVVNU', // nhóm liên kết dưới cùng
         
-        // 用户相关
+        // Liên quan đến người dùng
         'a[data-testid="post_author_link"]',
         'a.author', 'span.author',
         'a[data-testid="comment_author_link"]',
-        'div._2mHuuvyV9doV3zwbZPtIPG', // 用户信息栏
-        'a._3BcIEQadBHDKnV8E-qUMtJ', // 用户链接
-        'div._23wugcdiaj44hdfugIAlnX', // 用户标记
-        'div[data-testid="comment_author"]', // 评论作者
-        'span._12nHw-MGuz_r1dQx4wxxAf, a._12nHw-MGuz_r1dQx4wxxAf', // 用户名显示元素
-        'div[data-testid="subreddit-sidebar"] div._3ryJoIoycVkI7DggMcJiKM', // 社区用户栏
+        'div._2mHuuvyV9doV3zwbZPtIPG', // Thanh thông tin người dùng
+        'a._3BcIEQadBHDKnV8E-qUMtJ', // liên kết người dùng
+        'div._23wugcdiaj44hdfugIAlnX', // thẻ người dùng
+        'div[data-testid="comment_author"]', // Đánh giá tác giả
+        'span._12nHw-MGuz_r1dQx4wxxAf, a._12nHw-MGuz_r1dQx4wxxAf', // Phần tử hiển thị tên người dùng
+        'div[data-testid="subreddit-sidebar"] div._3ryJoIoycVkI7DggMcJiKM', // Cột người dùng cộng đồng
         
-        // 统计信息
-        'span._vaFo96phV6L5Hltvwcox', // 投票数
-        'span._1jNPl3YUk6zbpLWdjaJT1r', // 评论数
-        'div._2mHuuvyV9doV3zwbZPtIPG', // 时间戳
-        'div._2ETuFsOP3jKbVR95iRImaDvU-g6W3dAQ', // 帖子信息栏
-        'div._3-SW6hQX6gXK9G4FM74obr span', // 操作按钮文本
-        'div._3XFx6CfPlg-4Usgxm0gK8R, div.BilRyRl5iuFY2VJoNfVz0', // 统计区域
-        'div._11dVAO6CK-nOlDyrYr6tsX, div._3ioGMz1QkHcUCVgLx3kzOQ', // 计数
-        'div._2hYRM7d0BaB17cCB3FGmm9', // 时间计数
+        // Thống kê
+        'span._vaFo96phV6L5Hltvwcox', // Số phiếu bầu
+        'span._1jNPl3YUk6zbpLWdjaJT1r', // Số lượng bình luận
+        'div._2mHuuvyV9doV3zwbZPtIPG', // Dấu thời gian
+        'div._2ETuFsOP3jKbVR95iRImaDvU-g6W3dAQ', // Thanh thông tin đăng
+        'div._3-SW6hQX6gXK9G4FM74obr span', // văn bản nút hành động
+        'div._3XFx6CfPlg-4Usgxm0gK8R, div.BilRyRl5iuFY2VJoNfVz0', // khu vực thống kê
+        'div._11dVAO6CK-nOlDyrYr6tsX, div._3ioGMz1QkHcUCVgLx3kzOQ', // đếm
+        'div._2hYRM7d0BaB17cCB3FGmm9', // đếm thời gian
         
-        // 横幅和通知
-        'div._3q-XSJ2JokLxfTqcOzQxzf', // 新帖子通知
-        'div[data-redditstyle="true"] div._1DooEIX-1Nj5rweIc5cw_E', // 常见的横幅
-        'div._31L5xyMG1DzvGnqhbHkKV4, div._3NpZ0JJ2ZEBZXLpt7AMxgW', // 通知条
-        'div._3Im6OD67aKo33nql4FpSp0, div._2zeq1aXKDHDDXUNXAJyRVk', // 系统消息
+        // Biểu ngữ và thông báo
+        'div._3q-XSJ2JokLxfTqcOzQxzf', // Thông báo bài viết mới
+        'div[data-redditstyle="true"] div._1DooEIX-1Nj5rweIc5cw_E', // biểu ngữ chung
+        'div._31L5xyMG1DzvGnqhbHkKV4, div._3NpZ0JJ2ZEBZXLpt7AMxgW', // thông báo
+        'div._3Im6OD67aKo33nql4FpSp0, div._2zeq1aXKDHDDXUNXAJyRVk', // Thông báo hệ thống
         
-        // 其他Reddit特定元素
-        'div._2vkeRJojnV7cb9pMlPHy7d', // Join按钮
-        'div[data-testid="frontpage-sidebar"]', // 首页侧边栏
-        'div._2vEf-C2keJaBMY9qk_BxVn button', // 侧边栏按钮
-        'div._3Qx5bBCG_O8wVZee9J-KyJ', // 头部区域
-        'div[data-testid="subreddit-name"]', // 社区名区域
-        'div._2x02fRB8KYZPG74bIR0jpe', // 帖子工具栏
-        'div[data-test-id="post-content"] video', // 视频内容
-        'div._3gbb_EMFXxTYrxDZ2kusIp', // 图片帖子
-        'div._1sDtEhccxFpHDn2ruDutJe', // 链接预览
-        'div._2wKMjKBrZFbRMP33ghA1uI', // 投票条
-        'div._3_HlHJ56dAfStT19Jgl1bF', // 投票按钮组
-        'div._pGofQ7zn0wPWxvde-6HDL', // 各种徽章
-        'div._33axOHPa8DzNnTmwzen-wO', // 奖励徽章
-        'div._2hgXdc8jVQaXYAXvnqVBBh, div._1yxKmMhLFJJp2CfU1jFZz5', // 热门/新帖子标签
-        'div._2FbYTP2kJW6pyJnjwLWr8f, div._3bl3XkXsAgnvhW0Ghm6Dh-', // 首页主题控制栏
+        // Các yếu tố dành riêng cho Reddit khác
+        'div._2vkeRJojnV7cb9pMlPHy7d', // Nút tham gia
+        'div[data-testid="frontpage-sidebar"]', // Thanh bên trang chủ
+        'div._2vEf-C2keJaBMY9qk_BxVn button', // nút thanh bên
+        'div._3Qx5bBCG_O8wVZee9J-KyJ', // vùng đầu
+        'div[data-testid="subreddit-name"]', // Khu vực tên cộng đồng
+        'div._2x02fRB8KYZPG74bIR0jpe', // Thanh công cụ đăng bài
+        'div[data-test-id="post-content"] video', // nội dung video
+        'div._3gbb_EMFXxTYrxDZ2kusIp', // bài đăng hình ảnh
+        'div._1sDtEhccxFpHDn2ruDutJe', // Xem trước liên kết
+        'div._2wKMjKBrZFbRMP33ghA1uI', // phiếu bầu
+        'div._3_HlHJ56dAfStT19Jgl1bF', // nhóm nút biểu quyết
+        'div._pGofQ7zn0wPWxvde-6HDL', // huy hiệu khác nhau
+        'div._33axOHPa8DzNnTmwzen-wO', // Huy hiệu giải thưởng
+        'div._2hgXdc8jVQaXYAXvnqVBBh, div._1yxKmMhLFJJp2CfU1jFZz5', // Thẻ bài viết phổ biến/mới
+        'div._2FbYTP2kJW6pyJnjwLWr8f, div._3bl3XkXsAgnvhW0Ghm6Dh-', // Thanh điều khiển chủ đề trang chủ
     ];
     
-    // 检查当前节点是否匹配跳过选择器
+    // Kiểm tra xem nút hiện tại có khớp với bộ chọn bỏ qua không
     for (const selector of skipSelectors) {
         if (node.matches?.(selector)) {
-            debugLog('Reddit', '选择器匹配跳过', selector, node.textContent);
+            debugLog('Reddit', 'bỏ qua kết quả chọn', selector, node.textContent);
             return true;
         }
     }
     
-    // 检查数据属性
+    // Kiểm tra thuộc tính dữ liệu
     const skipDataAttributes = [
         'click-id="share"', 'click-id="upvote"', 'click-id="downvote"', 'click-id="award"', 
         'click-id="comments"', 'click-id="save"', 'click-id="vote-arrows"', 'click-id="media"',
@@ -1414,12 +1414,12 @@ function shouldSkipRedditElement(node: any): boolean {
     
     for (const attr of skipDataAttributes) {
         if (node.hasAttribute && node.hasAttribute(attr)) {
-            debugLog('Reddit', '数据属性匹配跳过', attr);
+            debugLog('Reddit', 'Việc khớp thuộc tính dữ liệu bị bỏ qua', attr);
             return true;
         }
     }
     
-    // 检查节点的类名是否包含特定关键字
+    // Kiểm tra xem tên lớp của nút có chứa từ khóa cụ thể không
     const skipClassKeywords = [
         '_', 'icon', 'Button', 'vote', 'score', 'flair', 'author',
         'award', 'caret', 'expando', 'menu', 'hover', 'promoted',
@@ -1431,52 +1431,52 @@ function shouldSkipRedditElement(node: any): boolean {
     if (node.className && typeof node.className === 'string') {
         for (const keyword of skipClassKeywords) {
             if (node.className.includes(keyword) && node.textContent?.length < 20) {
-                debugLog('Reddit', '类名关键字跳过', keyword, node.className);
+                debugLog('Reddit', 'Bỏ qua từ khóa tên lớp', keyword, node.className);
                 return true;
             }
         }
     }
     
-    // 检查是否为用户名格式
+    // Kiểm tra xem nó có ở định dạng tên người dùng không
     const textContent = node.textContent?.trim();
     if (textContent) {
-        // Reddit用户名格式 u/username
+        // Định dạng tên người dùng Reddit u/tên người dùng
         if (/^u\/\w+$/.test(textContent)) {
-            debugLog('Reddit', '用户名格式跳过', textContent);
+            debugLog('Reddit', 'Định dạng tên người dùng bị bỏ qua', textContent);
             return true;
         }
         
-        // 社区名格式 r/community
+        // Định dạng tên cộng đồng r/community
         if (/^r\/\w+$/.test(textContent)) {
-            debugLog('Reddit', '社区名格式跳过', textContent);
+            debugLog('Reddit', 'Định dạng tên cộng đồng bị bỏ qua', textContent);
             return true;
         }
         
-        // 跳过投票计数
+        // Bỏ qua việc kiểm phiếu
         if (/^\d+(\.\d+)?[kKmM]?$/.test(textContent) || /^[+-]?\d+(\.\d+)?[kKmM]?$/.test(textContent)) {
-            debugLog('Reddit', '投票计数跳过', textContent);
+            debugLog('Reddit', 'số phiếu bầu bị bỏ qua', textContent);
             return true;
         }
         
-        // 跳过时间戳格式
+        // Bỏ qua định dạng dấu thời gian
         if (/^(Posted )?\d+ (minutes|hours|days|weeks|months|years) ago$/.test(textContent)) {
-            debugLog('Reddit', '时间戳跳过', textContent);
+            debugLog('Reddit', 'bỏ qua dấu thời gian', textContent);
             return true;
         }
         
-        // 跳过评论计数
+        // Bỏ qua số lượng bình luận
         if (/^\d+(\.\d+)?[kKmM]? comments?$/.test(textContent)) {
-            debugLog('Reddit', '评论计数跳过', textContent);
+            debugLog('Reddit', 'Số bình luận bị bỏ qua', textContent);
             return true;
         }
         
-        // 统计数字格式: "19K", "1K", 等
+        // Định dạng thống kê: "19K", "1K", v.v.
         if (/^\s*\d+[KkMmBb]?\s*$/.test(textContent)) {
-            debugLog('Reddit', '统计数字跳过', textContent);
+            debugLog('Reddit', 'Thống kê bị bỏ qua', textContent);
             return true;
         }
         
-        // 跳过Reddit常用UI文本
+        // Bỏ qua văn bản giao diện người dùng Reddit phổ biến
         const skipPhrases = [
             'upvote', 'downvote', 'share', 'save', 'hide', 'report', 'crosspost',
             'award', 'reply', 'give award', 'hide', 'comments', 'comment',
@@ -1494,21 +1494,21 @@ function shouldSkipRedditElement(node: any): boolean {
         
         for (const phrase of skipPhrases) {
             if (textContent.toLowerCase() === phrase) {
-                debugLog('Reddit', '常用UI文本跳过', textContent);
+                debugLog('Reddit', 'Bỏ qua văn bản giao diện người dùng phổ biến', textContent);
                 return true;
             }
         }
     }
     
-    // 忽略代码片段
+    // Bỏ qua đoạn mã
     if (node.tagName?.toLowerCase() === 'pre' || node.tagName?.toLowerCase() === 'code') {
-        debugLog('Reddit', '代码片段跳过');
+        debugLog('Reddit', 'bỏ qua đoạn mã');
         return true;
     }
     
-    // 忽略图片和图标
+    // Bỏ qua hình ảnh và biểu tượng
     if (node.tagName?.toLowerCase() === 'svg' || node.tagName?.toLowerCase() === 'img') {
-        debugLog('Reddit', '图片/图标跳过');
+        debugLog('Reddit', 'Bỏ qua hình ảnh/biểu tượng');
         return true;
     }
     
@@ -1516,30 +1516,30 @@ function shouldSkipRedditElement(node: any): boolean {
 }
 
 /**
- * 判断是否应该跳过Hacker News网站上的特定元素
+ * Xác định xem có nên bỏ qua các thành phần cụ thể trên trang web Hacker News hay không
  */
 function shouldSkipHNElement(node: any): boolean {
-    // 如果当前节点或其祖先节点匹配这些选择器，则跳过
+    // Bỏ qua nếu nút hiện tại hoặc nút tổ tiên của nó khớp với các bộ chọn này
     const skipSelectors = [
-        // 顶部和底部导航
+        // Điều hướng trên và dưới
         'td.hnnavbar',
         'span.pagetop',
-        // 各种链接区
+        // Các khu vực liên kết khác nhau
         'td.subtext',
-        // 用户信息
+        // Thông tin người dùng
         'span.hnuser',
         'span.age',
-        // 表单元素
+        // phần tử biểu mẫu
         'form',
         'input',
         'textarea',
     ];
     
-    // 检查当前节点是否匹配跳过选择器
+    // Kiểm tra xem nút hiện tại có khớp với bộ chọn bỏ qua không
     for (const selector of skipSelectors) {
         if (node.matches?.(selector)) return true;
         
-        // 检查祖先节点
+        // Kiểm tra các nút tổ tiên
         let parent = node.parentElement;
         while (parent) {
             if (parent.matches?.(selector)) return true;
@@ -1547,7 +1547,7 @@ function shouldSkipHNElement(node: any): boolean {
         }
     }
     
-    // 检查节点文本是否为纯按钮/链接文本
+    // Kiểm tra xem văn bản nút có phải là văn bản nút/liên kết đơn giản không
     const skipTexts = ['reply', 'flag', 'favorite', 'hide', 'past', 'web', 'comments', 'ask', 'show', 'jobs', 'submit'];
     if (node.textContent && skipTexts.includes(node.textContent.trim().toLowerCase())) {
         return true;
@@ -1557,148 +1557,148 @@ function shouldSkipHNElement(node: any): boolean {
 }
 
 /**
- * 判断是否应该跳过YouTube网站上的特定元素
+ * Xác định xem có nên bỏ qua một thành phần cụ thể trên trang web YouTube hay không
  */
 function shouldSkipYouTubeElement(node: any): boolean {
-    // 检查是否为特殊内容（URL、邮箱、用户名等）
+    // Kiểm tra xem đó có phải là nội dung đặc biệt không (URL, email, tên người dùng, v.v.)
     if (node.textContent && isSpecialContent(node.textContent)) {
-        debugLog('YouTube', '特殊内容跳过', node.textContent);
+        debugLog('YouTube', 'Nội dung đặc biệt bị bỏ qua', node.textContent);
         return true;
     }
     
-    // 如果当前节点或其祖先节点匹配这些选择器，则跳过
+    // Bỏ qua nếu nút hiện tại hoặc nút tổ tiên của nó khớp với các bộ chọn này
     const skipSelectors = [
-        // 导航和菜单相关
-        'div#masthead-container', // 顶部导航栏
-        'div#guide-content', // 左侧菜单
-        'ytd-mini-guide-renderer', // 迷你导航
-        'div#buttons', // 按钮区域
-        'ytd-topbar-menu-button-renderer', // 顶部菜单按钮
-        'ytd-guide-entry-renderer', // 导航入口
-        'ytd-guide-section-renderer h3', // 导航区标题
-        'div#channel-header', // 频道头部区域
-        'div#channel-navigation', // 频道导航区域
+        // Điều hướng và menu liên quan
+        'div#masthead-container', // thanh điều hướng trên cùng
+        'div#guide-content', // menu bên trái
+        'ytd-mini-guide-renderer', // điều hướng nhỏ
+        'div#buttons', // khu vực nút
+        'ytd-topbar-menu-button-renderer', // nút menu trên cùng
+        'ytd-guide-entry-renderer', // Lối vào điều hướng
+        'ytd-guide-section-renderer h3', // Tiêu đề khu vực điều hướng
+        'div#channel-header', // Vùng tiêu đề kênh
+        'div#channel-navigation', // Khu vực điều hướng kênh
         
-        // 视频控制相关
-        'div.ytp-chrome-bottom', // 播放器底部控制栏
-        'div.ytp-chrome-top', // 播放器顶部控制栏
-        'div.ytp-right-controls', // 右侧控制
-        'div.ytp-left-controls', // 左侧控制
-        'div.ytp-progress-bar-container', // 进度条容器
-        'span.ytp-time-current', // 当前时间
-        'span.ytp-time-duration', // 视频总时长
-        'button.ytp-button', // 所有播放器按钮
-        'div.ytp-chapter-container', // 章节容器
+        // Điều khiển video liên quan
+        'div.ytp-chrome-bottom', // Thanh điều khiển phía dưới trình phát
+        'div.ytp-chrome-top', // Thanh điều khiển trên cùng của trình phát
+        'div.ytp-right-controls', // điều khiển bên phải
+        'div.ytp-left-controls', // điều khiển bên trái
+        'div.ytp-progress-bar-container', // vùng chứa thanh tiến trình
+        'span.ytp-time-current', // thời điểm hiện tại
+        'span.ytp-time-duration', // Tổng thời lượng video
+        'button.ytp-button', // Tất cả các nút của trình phát
+        'div.ytp-chapter-container', // thùng đựng chương
         
-        // 统计和互动区域
-        'div#info-contents ytd-video-primary-info-renderer div#top-level-buttons-computed', // 点赞/分享按钮
-        'span#dot', // 分隔点
-        'span.ytd-video-view-count-renderer', // 观看次数
-        'span.ytd-video-owner-renderer', // 频道信息区域
-        'div#owner', // 视频所有者区域
-        'a.ytd-video-owner-renderer', // 频道链接
-        'ytd-subscribe-button-renderer', // 订阅按钮
-        'div.ytd-subscribe-button-renderer', // 订阅按钮渲染器
-        'ytd-button-renderer', // 按钮渲染器
-        'ytd-menu-renderer', // 菜单渲染器
-        'ytd-badge-supported-renderer', // 徽章支持渲染器
-        'div#sponsor-button', // 赞助按钮
+        // Khu vực thống kê và tương tác
+        'div#info-contents ytd-video-primary-info-renderer div#top-level-buttons-computed', // Nút thích/chia sẻ
+        'span#dot', // điểm phân cách
+        'span.ytd-video-view-count-renderer', // lượt xem
+        'span.ytd-video-owner-renderer', // Khu vực thông tin kênh
+        'div#owner', // Khu vực chủ sở hữu video
+        'a.ytd-video-owner-renderer', // Liên kết kênh
+        'ytd-subscribe-button-renderer', // Nút đăng ký
+        'div.ytd-subscribe-button-renderer', // Trình kết xuất nút đăng ký
+        'ytd-button-renderer', // trình kết xuất nút
+        'ytd-menu-renderer', // Trình kết xuất thực đơn
+        'ytd-badge-supported-renderer', // Trình kết xuất hỗ trợ huy hiệu
+        'div#sponsor-button', // Nút tài trợ
         
-        // 评论区控制元素
-        'div#action-buttons', // 评论操作按钮
-        'ytd-toggle-button-renderer', // 切换按钮
-        'div#vote-count-middle', // 评论投票计数
-        'ytd-comments-header-renderer', // 评论头部渲染器
-        'div#title.ytd-comments-header-renderer', // 评论标题
-        'span.ytd-comments-header-renderer', // 评论数量
-        'ytd-sort-filter-sub-menu-renderer', // 评论排序选项
-        'ytd-comment-action-buttons-renderer', // 评论操作按钮
+        // Yếu tố kiểm soát khu vực bình luận
+        'div#action-buttons', // Nút hành động bình luận
+        'ytd-toggle-button-renderer', // nút chuyển đổi
+        'div#vote-count-middle', // Số phiếu bình luận
+        'ytd-comments-header-renderer', // Nhận xét về trình kết xuất tiêu đề
+        'div#title.ytd-comments-header-renderer', // Tiêu đề bình luận
+        'span.ytd-comments-header-renderer', // Số lượng bình luận
+        'ytd-sort-filter-sub-menu-renderer', // Tùy chọn sắp xếp bình luận
+        'ytd-comment-action-buttons-renderer', // Nút hành động bình luận
         
-        // 内容卡片和元数据
-        'div.ytd-metadata-row-container-renderer', // 元数据行
-        'div#subscribe-button', // 订阅按钮
-        'span.ytd-channel-name', // 频道名称
-        'div#owner-sub-count', // 订阅者数量
-        'div.ytd-watch-metadata yt-formatted-string[is-empty]', // 空格式化字符串
-        'ytd-metadata-row-renderer', // 元数据行
-        'div#above-the-fold', // 页面顶部区域
-        'div#primary-inner ytd-merch-shelf-renderer', // 商品架
-        'div.ytd-structured-description-content-renderer', // 结构化描述内容
-        'ytd-info-panel-content-renderer', // 信息面板内容
-        'ytd-info-panel-container-renderer', // 信息面板容器
+        // Thẻ nội dung và siêu dữ liệu
+        'div.ytd-metadata-row-container-renderer', // hàng siêu dữ liệu
+        'div#subscribe-button', // Nút đăng ký
+        'span.ytd-channel-name', // Tên kênh
+        'div#owner-sub-count', // Số lượng người đăng ký
+        'div.ytd-watch-metadata yt-formatted-string[is-empty]', // chuỗi định dạng trống
+        'ytd-metadata-row-renderer', // hàng siêu dữ liệu
+        'div#above-the-fold', // khu vực trên cùng của trang
+        'div#primary-inner ytd-merch-shelf-renderer', // Giá đựng hàng hóa
+        'div.ytd-structured-description-content-renderer', // Nội dung mô tả có cấu trúc
+        'ytd-info-panel-content-renderer', // Nội dung bảng thông tin
+        'ytd-info-panel-container-renderer', // Hộp chứa bảng thông tin
         
-        // 缩略图和推荐视频信息
-        'span.ytd-thumbnail-overlay-time-status-renderer', // 视频时长
-        'span.ytd-video-meta-block', // 视频元数据块
-        'div#metadata-line', // 元数据行
-        'span.ytd-grid-video-renderer', // 网格视频渲染器
-        'div#video-title.ytd-grid-video-renderer', // 视频网格标题
-        'a.yt-simple-endpoint.ytd-grid-video-renderer', // 视频网格链接
-        'ytd-thumbnail', // 缩略图
-        'div#hover-overlays', // 悬停叠加层
+        // Hình thu nhỏ và thông tin video được đề xuất
+        'span.ytd-thumbnail-overlay-time-status-renderer', // Thời lượng video
+        'span.ytd-video-meta-block', // khối siêu dữ liệu video
+        'div#metadata-line', // hàng siêu dữ liệu
+        'span.ytd-grid-video-renderer', // Trình kết xuất video dạng lưới
+        'div#video-title.ytd-grid-video-renderer', // Tiêu đề lưới video
+        'a.yt-simple-endpoint.ytd-grid-video-renderer', // Liên kết lưới video
+        'ytd-thumbnail', // hình thu nhỏ
+        'div#hover-overlays', // Lớp phủ di chuột
         
-        // 其他UI元素
-        'button', // 所有按钮
-        'yt-icon', // YouTube图标
-        'a.yt-simple-endpoint[href^="/hashtag/"]', // 话题标签链接
-        'a.yt-simple-endpoint[href^="/channel/"]', // 频道链接
-        'div#text.ytd-channel-name', // 频道名文本
-        'span.yt-core-attributed-string--link-inherit-color', // 特定格式化字符串
-        'ytd-notification-topbar-button-renderer', // 通知按钮
-        'ytd-searchbox', // 搜索框
-        'ytd-dropdown-renderer', // 下拉菜单
-        'ytd-live-chat-frame', // 直播聊天
-        'ytd-playlist-header-renderer div#stats', // 播放列表统计数据
-        'ytd-playlist-panel-renderer div#header-count', // 播放列表计数
-        'ytd-playlist-panel-renderer div#play-button', // 播放列表播放按钮
-        'ytd-playlist-panel-renderer a.ytd-playlist-panel-video-renderer', // 播放列表视频链接
-        'ytd-playlist-byline-renderer', // 播放列表署名
+        // Các thành phần giao diện người dùng khác
+        'button', // Tất cả các nút
+        'yt-icon', // Biểu tượng YouTube
+        'a.yt-simple-endpoint[href^="/hashtag/"]', // Liên kết gắn thẻ bắt đầu bằng #
+        'a.yt-simple-endpoint[href^="/channel/"]', // Liên kết kênh
+        'div#text.ytd-channel-name', // Văn bản tên kênh
+        'span.yt-core-attributed-string--link-inherit-color', // chuỗi định dạng cụ thể
+        'ytd-notification-topbar-button-renderer', // nút thông báo
+        'ytd-searchbox', // hộp tìm kiếm
+        'ytd-dropdown-renderer', // trình đơn thả xuống
+        'ytd-live-chat-frame', // Trò chuyện trực tiếp
+        'ytd-playlist-header-renderer div#stats', // Thống kê danh sách phát
+        'ytd-playlist-panel-renderer div#header-count', // số danh sách phát
+        'ytd-playlist-panel-renderer div#play-button', // Nút phát danh sách phát
+        'ytd-playlist-panel-renderer a.ytd-playlist-panel-video-renderer', // Liên kết video danh sách phát
+        'ytd-playlist-byline-renderer', // Chữ ký danh sách phát
     ];
     
-    // 检查当前节点是否匹配跳过选择器
+    // Kiểm tra xem nút hiện tại có khớp với bộ chọn bỏ qua không
     for (const selector of skipSelectors) {
         if (node.matches?.(selector)) {
-            debugLog('YouTube', '选择器匹配跳过', selector, node.textContent);
+            debugLog('YouTube', 'bỏ qua kết quả chọn', selector, node.textContent);
             return true;
         }
     }
     
-    // 检查节点的类名是否包含特定关键字
+    // Kiểm tra xem tên lớp của nút có chứa từ khóa cụ thể không
     const skipClassKeywords = ['ytp-', 'button', 'badge', 'menu', 'selector', 'icon', 'thumbnail', 'avatar'];
     
     if (node.className && typeof node.className === 'string') {
         for (const keyword of skipClassKeywords) {
             if (node.className.includes(keyword)) {
-                debugLog('YouTube', '类名关键字跳过', keyword, node.className);
+                debugLog('YouTube', 'Bỏ qua từ khóa tên lớp', keyword, node.className);
                 return true;
             }
         }
     }
     
-    // 检查文本内容特征
+    // Kiểm tra đặc điểm nội dung văn bản
     const textContent = node.textContent?.trim();
     if (textContent) {
-        // 跳过纯数字、视图计数、日期等
+        // Bỏ qua các số thuần túy, số lượt xem, ngày tháng, v.v.
         if (/^\d+(\.\d+)?[KMB]?$/.test(textContent)) {
-            debugLog('YouTube', '数字计数跳过', textContent);
+            debugLog('YouTube', 'bỏ qua đếm số', textContent);
             return true;
         }
         
-        // 跳过视频时长格式
+        // Bỏ qua định dạng thời lượng video
         if (/^\d+:\d+$/.test(textContent) || /^\d+:\d+:\d+$/.test(textContent)) {
-            debugLog('YouTube', '时间格式跳过', textContent);
+            debugLog('YouTube', 'bỏ qua định dạng thời gian', textContent);
             return true;
         }
         
-        // 跳过视图计数和日期组合
+        // Bỏ qua số lượt xem và kết hợp ngày
         if (/^\d+(\.\d+)?[KMB]? views/.test(textContent) || 
             /\d+ (days|months|years) ago$/.test(textContent) ||
             /^\d+(\.\d+)?[KMB]? watching now$/.test(textContent)) {
-            debugLog('YouTube', '视图计数/日期跳过', textContent);
+            debugLog('YouTube', 'Lượt xem/Ngày bỏ qua', textContent);
             return true;
         }
         
-        // 跳过YouTube常用单词和短语
+        // Bỏ qua các từ và cụm từ phổ biến trên YouTube
         const skipPhrases = [
             'Subscribe', 'subscribed', 'subscribers', 'Join', 'Share', 'Save', 
             'Report', 'Download', 'Add to', 'Show more', 'Show less', 
@@ -1711,22 +1711,22 @@ function shouldSkipYouTubeElement(node: any): boolean {
         
         for (const phrase of skipPhrases) {
             if (textContent.includes(phrase) && textContent.length < 30) {
-                debugLog('YouTube', '特定短语跳过', phrase, textContent);
+                debugLog('YouTube', 'cụm từ cụ thể bị bỏ qua', phrase, textContent);
                 return true;
             }
         }
         
-        // 检查是否为频道名/@用户名
+        // Kiểm tra xem đó có phải là tên kênh/@tên người dùng không
         if (/^@\w+$/.test(textContent) || 
             (textContent.startsWith('@') && textContent.length < 30)) {
-            debugLog('YouTube', '频道/用户名跳过', textContent);
+            debugLog('YouTube', 'Bỏ qua kênh/tên người dùng', textContent);
             return true;
         }
     }
     
-    // 忽略图标和图像
+    // Bỏ qua các biểu tượng và hình ảnh
     if (node.tagName?.toLowerCase() === 'svg' || node.tagName?.toLowerCase() === 'img') {
-        debugLog('YouTube', '图标/图像跳过');
+        debugLog('YouTube', 'Bỏ qua biểu tượng/hình ảnh');
         return true;
     }
     
