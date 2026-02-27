@@ -20,8 +20,8 @@ async function custom(message: any) {
         let result = await resp.json();
         return  contentPostHandler(result.choices[0].message.content);
     } else {
-        console.log("翻译失败：", resp);
-        throw new Error(`翻译失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+        console.log("Dịch thất bại: ", resp);
+        throw new Error(`Dịch thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
     }
 }
 

@@ -4,7 +4,7 @@ import {minimaxTemplate} from "../utils/template";
 import {config} from "@/entrypoints/utils/config";
 
 async function minimax(message: any) {
-    // 构建请求头
+    // Xây dựng tiêu đề yêu cầu
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     headers.append('Authorization', `Bearer ${config.token[services.minimax]}`);
@@ -13,7 +13,7 @@ async function minimax(message: any) {
 
     console.log(url)
 
-    // 发起 fetch 请求
+    // Bắt đầu yêu cầu tìm nạp
     const resp = await fetch(url, {
         method: method.POST,
         headers: headers,
@@ -25,7 +25,7 @@ async function minimax(message: any) {
         return result.choices[0].message.content
     } else {
         console.log(resp)
-        throw new Error(`翻译失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+        throw new Error(`Dịch thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
     }
 }
 

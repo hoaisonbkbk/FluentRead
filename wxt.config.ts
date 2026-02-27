@@ -20,8 +20,9 @@ export default defineConfig({
         define: {
             'process.env.VUE_APP_VERSION': JSON.stringify(packageJson.version),
         }
-    }),
+    } as any),
     manifest: {
+        name: 'FluentRead',
         permissions: ['storage', 'contextMenus', 'offscreen'],
     },
 

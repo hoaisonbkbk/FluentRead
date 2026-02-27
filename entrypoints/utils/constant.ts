@@ -1,6 +1,6 @@
 import { services } from "./option";
 
-// 常量工具类
+// Lớp công cụ không đổi
 export const urls: any = {
     [services.deepL]: "https://api-free.deepl.com/v2/translate",
     [services.deeplx]: "http://localhost:1188/translate",
@@ -36,11 +36,11 @@ export const urls: any = {
 export const method = {POST: "POST", GET: "GET",};
 
 export const constants = {
-    // 键鼠事件
+    // Sự kiện bàn phím và chuột
     DoubleClick: "DoubleClick",
     LongPress: "LongPress",
     MiddleClick: "MiddleClick",
-    // 触屏设备事件
+    // Sự kiện thiết bị màn hình cảm ứng
     TwoFinger: "TwoFinger",
     ThreeFinger: "ThreeFinger",
     FourFinger: "FourFinger",
@@ -49,13 +49,13 @@ export const constants = {
 }
 
 export const styles = {
-    // 仅译文模式
+    // Chế độ chỉ dịch
     singleTranslation: 0,
-    // 双语对照模式
+    // mô hình so sánh song ngữ
     bilingualTranslation: 1,
 }
 
-// 右键菜单ID常量
+// Hằng số ID menu chuột phải
 export const CONTEXT_MENU_IDS = {
     TRANSLATE_FULL_PAGE: 'fluent-read-translate-full-page',
     RESTORE_ORIGINAL: 'fluent-read-restore-original',

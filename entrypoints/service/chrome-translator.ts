@@ -1,19 +1,19 @@
 import { config } from "@/entrypoints/utils/config";
 
 /**
- * Chrome 内置翻译 API 服务
- * 基于 Chrome 浏览器的 Translation API 实现快速、安全的翻译
+ * Dịch vụ API dịch tích hợp của Chrome
+ * Dịch nhanh, an toàn dựa trên API dịch của Chrome
  * 
- * 使用 Chrome Offscreen API 在独立的 DOM 环境中运行翻译功能
+ * Sử dụng API ngoài màn hình Chrome để chạy các chức năng dịch trong môi trường DOM riêng biệt
  */
 
-// 在 background script 中使用 offscreen API 处理翻译
+// Sử dụng API ngoài màn hình trong tập lệnh nền để xử lý bản dịch
 async function translateWithOffscreen(message: any): Promise<any> {
     try {
-        // 确保 offscreen 文档存在
+        // Đảm bảo tài liệu ngoài màn hình tồn tại
         await ensureOffscreenDocument();
 
-        // 向 offscreen 文档发送翻译请求
+        // Gửi yêu cầu dịch tới tài liệu ngoài màn hình
         const response = await new Promise((resolve, reject) => {
             chrome.runtime.sendMessage({
                 type: 'CHROME_TRANSLATE_OFFSCREEN',
@@ -31,67 +31,67 @@ async function translateWithOffscreen(message: any): Promise<any> {
             });
         });
 
-        // 检查响应
+        // Kiểm tra phản hồi
         if (response && typeof response === 'object' && 'success' in response) {
             const typedResponse = response as { success: boolean; result?: string; error?: string };
             if (typedResponse.success) {
                 return typedResponse.result;
             } else {
-                throw new Error(typedResponse.error || '翻译失败');
+                throw new Error(typedResponse.error || 'Dịch thất bại');
             }
         }
 
-        throw new Error('无效的响应格式');
+        throw new Error('Định dạng phản hồi không hợp lệ');
     } catch (error) {
-        console.error('Offscreen 翻译失败:', error);
-        throw new Error(`Chrome Translation API 不可用：${error instanceof Error ? error.message : '未知错误'}`);
+        console.error('Dịch Offscreen thất bại:', error);
+        throw new Error(`Chrome Translation API không khả dụng: ${error instanceof Error ? error.message : 'Lỗi không xác định'}`);
     }
 }
 
-// 确保 offscreen 文档存在
+// Đảm bảo tài liệu ngoài màn hình tồn tại
 async function ensureOffscreenDocument() {
     try {
-        // 检查是否已经有 offscreen 文档
+        // Kiểm tra xem đã có tài liệu ngoài màn hình chưa
         const existingContexts = await chrome.runtime.getContexts({
             contextTypes: ['OFFSCREEN_DOCUMENT']
         });
 
         if (existingContexts.length > 0) {
-            return; // 已经存在
+            return; // đã tồn tại
         }
 
-        // 创建 offscreen 文档
+        // Tạo tài liệu ngoài màn hình
         await chrome.offscreen.createDocument({
             url: 'offscreen.html',
-            reasons: ['DOM_SCRAPING'], // 使用 DOM_SCRAPING 原因来访问 Translation API
+            reasons: ['DOM_SCRAPING'], // Sử dụng lý do DOM_SCRAPING để truy cập API dịch
             justification: 'Chrome Translation API requires DOM context'
         });
 
-        console.log('Offscreen 文档创建成功');
+        console.log('Đã tạo tài liệu offscreen thành công');
     } catch (error) {
-        console.error('创建 offscreen 文档失败:', error);
-        throw new Error('无法创建 offscreen 文档');
+        console.error('Tạo tài liệu offscreen thất bại:', error);
+        throw new Error('Không thể tạo tài liệu offscreen');
     }
 }
 
-// 主翻译函数
+// chức năng dịch chính
 export default async function chromeTranslator(message: any): Promise<any> {
-    // console.log('Chrome Translator 收到消息:', message);
+    // console.log('Chrome Translator đã nhận được tin nhắn:', tin nhắn);
 
     const text = message.origin;
     
     if (!text || typeof text !== 'string' || text.trim() === '') {
-        // console.error('翻译文本为空或无效:', { text, type: typeof text, message });
-        throw new Error('翻译文本不能为空');
+        // console.error('Bản dịch trống hoặc không hợp lệ:', { text, type: typeof text, message });
+        throw new Error('Văn bản dịch không được để trống');
     }
 
-    // 检查是否在 background script 环境中
+    // Kiểm tra xem trong môi trường tập lệnh nền
     if (typeof window === 'undefined') {
-        // console.log('在 background script 中，使用 offscreen API');
-        // 在 background script 中，使用 offscreen API
+        // console.log('Trong tập lệnh nền, sử dụng API ngoài màn hình');
+        // Trong tập lệnh nền, hãy sử dụng API ngoài màn hình
         return await translateWithOffscreen(message);
     }
 
-    // 如果在其他环境中，抛出错误
-    throw new Error('Chrome Translation API 只能在 Google Chrome 浏览器 v138 stable 版本以上使用');
+    // Nếu ở môi trường khác, báo lỗi
+    throw new Error('Chrome Translation API chỉ dùng được trên Google Chrome bản ổn định v138 trở lên');
 }

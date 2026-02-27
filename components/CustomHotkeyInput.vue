@@ -1,9 +1,9 @@
 <template>
   <div class="custom-hotkey-input">
-    <!-- 自定义快捷键输入对话框 -->
+    <!-- Phím tắt hộp thoại nhập tùy chỉnh -->
     <el-dialog
       v-model="dialogVisible"
-      title="自定义快捷键"
+      title="Phím tắt tùy chỉnh"
       width="300px"
       :close-on-click-modal="false"
       :modal="false"
@@ -14,7 +14,7 @@
       <div class="hotkey-input-container">
         <div class="input-section">
           <el-text class="input-label">
-            请按下您想要设置的快捷键组合：
+            Hãy nhấn tổ hợp phím tắt bạn muốn đặt:
           </el-text>
           <div 
             class="hotkey-input-field"
@@ -30,39 +30,39 @@
             ref="inputField"
           >
             <div v-if="!isRecording && !currentHotkey" class="placeholder">
-              点击这里开始录制快捷键...
+              Nhấn vào đây để bắt đầu ghi phím tắt...
             </div>
             <div v-else-if="isRecording" class="recording-text">
               <el-icon class="recording-icon"><Loading /></el-icon>
-              正在录制，请按下快捷键...
+              Đang ghi, vui lòng nhấn phím tắt...
             </div>
             <div v-else-if="currentHotkey" class="hotkey-display">
               {{ parsedHotkey?.displayName || currentHotkey }}
             </div>
           </div>
           
-          <!-- 错误提示 -->
+          <!-- Thông báo lỗi -->
           <div v-if="errorMessage" class="error-message">
             <el-icon><WarningFilled /></el-icon>
             {{ errorMessage }}
           </div>
           
-          <!-- 冲突警告 -->
+          <!-- cảnh báo xung đột -->
           <div v-if="conflictWarning" class="warning-message">
             <el-icon><Warning /></el-icon>
             {{ conflictWarning }}
           </div>
           
-          <!-- 成功提示 -->
+          <!-- Lời khuyên để thành công -->
           <div v-if="parsedHotkey?.isValid && !errorMessage && !conflictWarning" class="success-message">
             <el-icon><CircleCheckFilled /></el-icon>
-            快捷键有效，可以使用
+            Phím tắt hợp lệ và có thể sử dụng
           </div>
         </div>
 
-        <!-- 预设快捷键推荐 -->
+        <!-- Các phím tắt cài sẵn được đề xuất -->
         <div class="preset-section">
-          <el-text class="section-title">或选择推荐的快捷键：</el-text>
+          <el-text class="section-title">Hoặc chọn phím tắt đề xuất:</el-text>
           <div class="preset-buttons">
             <el-button
               v-for="preset in recommendedHotkeys"
@@ -77,24 +77,24 @@
           </div>
         </div>
 
-        <!-- 简化说明 -->
+        <!-- Giải thích đơn giản -->
         <div class="help-section">
           <el-text size="small" type="info">
-            提示：建议使用修饰键组合（如 Ctrl+字母），避免与系统快捷键冲突。注意：不能使用 CMD 充当快捷键
+            Gợi ý: nên dùng tổ hợp có phím bổ trợ (ví dụ Ctrl+chữ cái) để tránh xung đột phím hệ thống. Lưu ý: không thể dùng CMD làm phím tắt.
           </el-text>
         </div>
       </div>
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="handleCancel">取消</el-button>
-          <el-button @click="clearHotkey" v-if="currentHotkey">清除</el-button>
+          <el-button @click="handleCancel">Hủy</el-button>
+          <el-button @click="clearHotkey" v-if="currentHotkey">Xóa</el-button>
           <el-button 
             type="primary" 
             @click="handleConfirm"
             :disabled="!canConfirm"
           >
-            确认
+            Xác nhận
           </el-button>
         </div>
       </template>
@@ -127,7 +127,7 @@ interface Emits {
 
 const emit = defineEmits<Emits>();
 
-// 响应式数据
+// Dữ liệu đáp ứng
 const dialogVisible = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
@@ -140,19 +140,19 @@ const errorMessage = ref('');
 const conflictWarning = ref('');
 const inputField = ref<HTMLElement>();
 
-// 解析当前快捷键
+// Phân tích phím tắt hiện tại
 const parsedHotkey = computed<ParsedHotkey | null>(() => {
   if (!currentHotkey.value || currentHotkey.value === 'none') return null;
   return parseHotkey(currentHotkey.value);
 });
 
-// 检查是否可以确认
+// Kiểm tra xem bạn có thể Xác nhận nhận không
 const canConfirm = computed(() => {
   return currentHotkey.value === 'none' || 
          (parsedHotkey.value?.isValid && !errorMessage.value);
 });
 
-// 推荐的快捷键
+// Phím tắt được đề xuất
 const recommendedHotkeys = [
   { value: 'Alt+T', label: 'Alt+T' },
   { value: 'Alt+Q', label: 'Alt+Q' },
@@ -161,17 +161,17 @@ const recommendedHotkeys = [
   { value: 'F10', label: 'F10' },
 ];
 
-// 监听当前值变化
+// Theo dõi thay đổi giá trị hiện tại
 watch(() => props.currentValue, (newValue) => {
   currentHotkey.value = newValue || '';
 });
 
-// 监听快捷键变化，进行验证
+// Theo dõi các thay đổi của phím tắt và xác minh
 watch(currentHotkey, (newValue) => {
   validateCurrentHotkey(newValue);
 });
 
-// 验证当前快捷键
+// Xác minh các phím tắt hiện tại
 function validateCurrentHotkey(hotkeyString: string) {
   errorMessage.value = '';
   conflictWarning.value = '';
@@ -181,18 +181,18 @@ function validateCurrentHotkey(hotkeyString: string) {
   const parsed = parseHotkey(hotkeyString);
   
   if (!parsed.isValid) {
-    errorMessage.value = parsed.errorMessage || '无效的快捷键';
+    errorMessage.value = parsed.errorMessage || 'Phím tắt không hợp lệ';
     return;
   }
   
-  // 检查冲突
+  // Kiểm tra xung đột
   const conflictCheck = validateHotkeyConflicts(parsed);
   if (conflictCheck.hasConflict) {
-    conflictWarning.value = conflictCheck.conflictDescription || '可能存在冲突';
+    conflictWarning.value = conflictCheck.conflictDescription || 'Có thể có xung đột';
   }
 }
 
-// 开始录制快捷键
+// BậtPhím tắt ghi âmBắt đầu
 async function startRecording() {
   if (isRecording.value) return;
   
@@ -201,34 +201,34 @@ async function startRecording() {
   errorMessage.value = '';
   conflictWarning.value = '';
   
-  // 聚焦输入框
+  // Hộp nhập tiêu điểm
   await nextTick();
   inputField.value?.focus();
 }
 
-// 处理按键按下
+// Xử lý các thao tác nhấn phím
 function handleKeyDown(event: KeyboardEvent) {
   if (!isRecording.value) return;
   
   event.preventDefault();
   event.stopPropagation();
   
-  // 记录按下的键
+  // Ghi lại các phím đã nhấn
   if (event.ctrlKey) pressedKeys.value.add('ctrl');
   if (event.altKey) pressedKeys.value.add('alt');
   if (event.shiftKey) pressedKeys.value.add('shift');
   if (event.metaKey) pressedKeys.value.add('meta');
   
-  // 处理普通按键
+  // Xử lý các phím thông thường
   const key = event.key.toLowerCase();
   const code = event.code?.toLowerCase();
   
-  // 忽略单独的修饰键
+  // Bỏ qua các phím bổ trợ riêng lẻ
   if (['control', 'alt', 'shift', 'meta'].includes(key)) {
     return;
   }
   
-  // 记录普通按键
+  // Ghi lại các lần gõ phím thông thường
   if (key.length === 1) {
     pressedKeys.value.add(key);
   } else if (code?.startsWith('key')) {
@@ -236,7 +236,7 @@ function handleKeyDown(event: KeyboardEvent) {
   } else if (/^f\d+$/.test(key)) {
     pressedKeys.value.add(key);
   } else {
-    // 特殊键处理
+    // Xử lý phím đặc biệt
     const specialKeys = {
       'escape': 'escape',
       'enter': 'enter',
@@ -256,14 +256,14 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 }
 
-// 处理按键释放
+// Xử lý việc nhả phím
 function handleKeyUp(event: KeyboardEvent) {
   if (!isRecording.value) return;
   
   event.preventDefault();
   event.stopPropagation();
   
-  // 延迟一点再生成快捷键，确保所有键都被记录
+  // Trì hoãn một chút trước khi tạo phím tắt để đảm bảo tất cả các phím được ghi lại
   setTimeout(() => {
     if (pressedKeys.value.size > 0) {
       generateHotkeyFromKeys();
@@ -271,18 +271,18 @@ function handleKeyUp(event: KeyboardEvent) {
   }, 100);
 }
 
-// 从按键生成快捷键字符串
+// Tạo chuỗi phím tắt từ tổ hợp phím
 function generateHotkeyFromKeys() {
   const modifiers: string[] = [];
   let regularKey = '';
   
-  // 提取修饰键
+  // Trích xuất các phím bổ trợ
   if (pressedKeys.value.has('ctrl')) modifiers.push('Ctrl');
   if (pressedKeys.value.has('alt')) modifiers.push('Alt');
   if (pressedKeys.value.has('shift')) modifiers.push('Shift');
   if (pressedKeys.value.has('meta')) modifiers.push('Meta');
   
-  // 提取普通按键（找到最后一个非修饰键）
+  // Trích xuất các khóa thông thường (tìm khóa không sửa đổi cuối cùng)
   for (const key of pressedKeys.value) {
     if (!['ctrl', 'alt', 'shift', 'meta'].includes(key)) {
       regularKey = key.toUpperCase();
@@ -297,14 +297,14 @@ function generateHotkeyFromKeys() {
   pressedKeys.value.clear();
 }
 
-// 选择预设快捷键
+// Chọn một phím tắt cài sẵn
 function selectPreset(value: string) {
   currentHotkey.value = value;
   isRecording.value = false;
   pressedKeys.value.clear();
 }
 
-// 清除快捷键
+// Xóa phím tắt
 function clearHotkey() {
   currentHotkey.value = '';
   isRecording.value = false;
@@ -313,7 +313,7 @@ function clearHotkey() {
   conflictWarning.value = '';
 }
 
-// 确认
+// Xác nhận
 function handleConfirm() {
   if (!canConfirm.value) return;
   
@@ -321,7 +321,7 @@ function handleConfirm() {
   dialogVisible.value = false;
 }
 
-// 取消
+// Hủy
 function handleCancel() {
   currentHotkey.value = props.currentValue || '';
   isRecording.value = false;

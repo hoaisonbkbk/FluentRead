@@ -1,6 +1,6 @@
 /**
- * 翻译API代理模块
- * 整合翻译队列管理，作为翻译函数和后台翻译服务之间的中间层
+ * Mô-đun proxy API dịch thuật
+ * Tích hợp quản lý hàng đợi dịch như một lớp trung gian giữa các chức năng dịch và dịch vụ dịch nền
  */
 
 import { enqueueTranslation, clearTranslationQueue, getQueueStatus } from './translateQueue';
@@ -10,17 +10,17 @@ import { cache } from './cache';
 import { detectlang } from './common';
 import { storage } from '@wxt-dev/storage';
 
-// 调试相关
+// Gỡ lỗi liên quan
 const isDev = process.env.NODE_ENV === 'development';
 
 /**
- * 翻译API的统一入口
- * 所有翻译请求都应该通过此函数发送，以便集中管理队列和重试逻辑
+ * Lối vào thống nhất vào API dịch thuật
+ * Tất cả các yêu cầu dịch phải được gửi qua chức năng này để quản lý tập trung hàng đợi và thử lại logic
  * 
- * @param origin 原始文本
- * @param context 上下文信息，通常是页面标题
- * @param options 翻译选项
- * @returns 翻译结果的Promise
+ * @param nguồn gốc văn bản gốc
+ * @param thông tin ngữ cảnh ngữ cảnh, thường là tiêu đề trang
+ * tùy chọn @param tùy chọn dịch
+ * @returns Lời hứa về kết quả dịch thuật
  */
 export async function translateText(origin: string, context: string = document.title, options: TranslateOptions = {}): Promise<string> {
   const {
@@ -30,101 +30,101 @@ export async function translateText(origin: string, context: string = document.t
     useCache = config.useCache,
   } = options;
 
-  // 如果目标语言与当前文本语言相同，直接返回原文
+  // Nếu ngôn ngữ đích giống với ngôn ngữ văn bản hiện tại, hãy trả lại trực tiếp văn bản gốc.
   if (detectlang(origin.replace(/[\s\u3000]/g, '')) === config.to) {
     return origin;
   }
 
-  // 检查缓存
+  // Kiểm tra bộ đệm
   if (useCache) {
     const cachedResult = cache.localGet(origin);
     if (cachedResult) {
       if (isDev) {
-        console.log('[翻译API] 命中缓存，直接返回缓存结果');
+        console.log('[TranslationAPI] Trúng bộ nhớ đệm, trả về kết quả ngay');
       }
       return cachedResult;
     }
   }
 
-  // 增加翻译计数
+  // Tăng số lượng dịch
   config.count++;
-  // 保存配置以确保计数持久化
+  // Lưu cấu hình để đảm bảo tính bền vững
   storage.setItem('local:config', JSON.stringify(config));
 
-  // 使用队列处理翻译请求
+  // Sử dụng hàng đợi để xử lý các yêu cầu dịch
   return enqueueTranslation(async () => {
-    // 创建翻译任务
+    // Tạo tác vụ dịch
     const translationTask = async (retryCount: number = 0): Promise<string> => {
       try {
-        // 发送翻译请求给background脚本处理
+        // Gửi yêu cầu dịch tới tập lệnh nền để xử lý
         const result = await Promise.race([
           browser.runtime.sendMessage({ context, origin }),
           new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('翻译请求超时')), timeout)
+            setTimeout(() => reject(new Error('Hết thời gian chờ yêu cầu dịch')), timeout)
           )
         ]) as string;
 
-        // 如果翻译结果为空或与原文完全相同，直接返回原文
+        // Nếu kết quả dịch trống hoặc giống hệt văn bản gốc thì trả về trực tiếp văn bản gốc.
         if (!result || result === origin) {
           return origin;
         }
 
-        // 缓存翻译结果
+        // Kết quả dịch được lưu vào bộ nhớ đệm
         if (useCache) {
           cache.localSet(origin, result);
         }
 
         return result;
       } catch (error) {
-        // 处理错误，根据重试策略决定是否重试
+        // Xử lý lỗi và quyết định có thử lại hay không dựa trên chiến lược thử lại
         if (retryCount < maxRetries) {
           if (isDev) {
-            console.log(`[翻译API] 翻译失败，${retryCount + 1}/${maxRetries} 次重试，原因:`, error);
+            console.log(`[TranslationAPI] Dịch thất bại, thử lại ${retryCount + 1}/${maxRetries}, lý do:`, error);
           }
           
-          // 等待一段时间后重试
+          // Đợi một lúc và thử lại
           await new Promise(resolve => setTimeout(resolve, retryDelay));
           return translationTask(retryCount + 1);
         }
         
-        // 超过最大重试次数，抛出异常
+        // Nếu vượt quá số lần thử lại tối đa, một ngoại lệ sẽ được đưa ra.
         throw error;
       }
     };
 
-    // 开始执行翻译任务
+    // Bắt đầu tác vụ dịch
     return translationTask();
   });
 }
 
 /**
- * 当用户离开页面或主动取消翻译时，清空翻译队列
+ * Xóa hàng đợi dịch khi người dùng rời khỏi trang hoặc chủ động hủy bản dịch.
  */
 export function cancelAllTranslations() {
   if (isDev) {
-    console.log('[翻译API] 取消所有等待中的翻译任务');
+    console.log('[TranslationAPI] Đã hủy tất cả tác vụ dịch đang chờ');
   }
   clearTranslationQueue();
 }
 
 /**
- * 获取当前翻译队列的状态
- * 可用于UI显示翻译进度等
+ * Nhận trạng thái của hàng đợi dịch hiện tại
+ * Có thể được sử dụng trong giao diện người dùng để hiển thị tiến trình dịch thuật, v.v.
  */
 export function getTranslationStatus() {
   return getQueueStatus();
 }
 
 /**
- * 翻译参数接口
+ * Giao diện tham số dịch
  */
 export interface TranslateOptions {
-  /** 最大重试次数 */
+  /** Số lần thử lại tối đa */
   maxRetries?: number;
-  /** 重试间隔(毫秒) */
+  /** Khoảng thời gian thử lại (mili giây) */
   retryDelay?: number;
-  /** 超时时间(毫秒) */
+  /** Thời gian chờ (mili giây) */
   timeout?: number;
-  /** 是否使用缓存 */
+  /** Có nên sử dụng bộ nhớ đệm hay không */
   useCache?: boolean;
 } 

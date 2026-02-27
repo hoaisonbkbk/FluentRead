@@ -12,19 +12,19 @@ import TranslationStatus from '@/components/TranslationStatus.vue';
 import { mountNewApiComponent } from "@/entrypoints/utils/newApi";
 
 export default defineContentScript({
-    matches: ['<all_urls>'],  // 匹配所有页面
-    runAt: 'document_end',  // 在页面加载完成后运行
+    matches: ['<all_urls>'],  // khớp tất cả các trang
+    runAt: 'document_end',  // Chạy sau khi trang tải xong
     async main() {
-        await configReady // 等待配置加载完成
-        if (config.on === false) return; // 如果配置关闭，则不执行任何操作
-        // 添加手动翻译事件监听器
+        await configReady // Đợi quá trình tải cấu hình hoàn tất
+        if (config.on === false) return; // Nếu Tắt được định cấu hình, không làm gì cả
+        // Thêm trình xử lý sự kiện dịch thủ công
         setupManualTranslationTriggers();
-        // 添加悬浮球快捷键事件监听器
+        // Thêm trình xử lý sự kiện phím tắt bóng nổi
         setupFloatingBallHotkey();
-        // 当悬浮球关闭时，仍然允许使用快捷键进行全文翻译的独立开关
+        // Khi đánh bóng Tắt, vẫn được phép Tắt độc lập bằng phím tắt cho Dịch toàn trang
         let isFullPageTranslating = false;
         document.addEventListener('fluentread-toggle-translation', () => {
-            // 仅在悬浮球被禁用（未挂载）时由内容脚本接管快捷键
+            // Các phím tắt chỉ được nội dung script tiếp quản khi bóng nổi bị Tắt (không được gắn)
             if (config.disableFloatingBall === true) {
                 isFullPageTranslating = !isFullPageTranslating;
                 if (isFullPageTranslating) {
@@ -34,28 +34,28 @@ export default defineContentScript({
                 }
             }
         });
-        // 添加自动翻译事件监听器
+        // Thêm trình xử lý sự kiện dịch tự động
         if (config.autoTranslate) autoTranslationEvent();
 
-        // 挂载悬浮球（如果配置未禁用）
+        // Gắn bóng nổi (nếu được cấu hình không có Tắt)
         if (config.disableFloatingBall !== true) {
-            // 使用配置中的位置
+            // Sử dụng vị trí từ cấu hình
             mountFloatingBall();
         }
         
-        // 挂载划词翻译组件（如果配置未禁用）
+        // Gắn thành phần Dịch khi bôi trơn (nếu được định cấu hình không có Tắt)
         if (config.disableSelectionTranslator !== true) {
             mountSelectionTranslator();
         }
         
-        // 挂载翻译状态组件（可配置禁用）
+        // Gắn kết thành phần trạng thái dịch (Tắt cấu hình)
         if (config.translationStatus === true) {
             mountTranslationStatusComponent();
         }
 
         mountNewApiComponent();
 
-        cache.cleaner();    // 检测是否清理缓存
+        cache.cleaner();    // Kiểm tra xem có xóa bộ nhớ đệm không
 
         // background.ts
         browser.runtime.onMessage.addListener((message: { message: string; }, sender: any, sendResponse: () => void) => {
@@ -64,7 +64,7 @@ export default defineContentScript({
             return true;
         });
         
-        // 处理悬浮球控制消息
+        // Xử lý tin nhắn kiểm soát bóng nổi
         browser.runtime.onMessage.addListener((message: any, sender: any, sendResponse: () => void) => {
             if (message.type === 'toggleFloatingBall') {
                 if (message.isEnabled) {
@@ -78,16 +78,16 @@ export default defineContentScript({
             return false;
         });
         
-        // 处理划词翻译控制消息
+        // Xử lý dịch khi bôi các thông báo điều khiển
         browser.runtime.onMessage.addListener((message: any, sender: any, sendResponse: () => void) => {
             if (message.type === 'updateSelectionTranslatorMode') {
-                // 更新配置
+                // Cập nhật cấu hình
                 config.selectionTranslatorMode = message.mode;
                 
                 if (message.mode === 'disabled') {
                     unmountSelectionTranslator();
                 } else {
-                    // 如果之前没有挂载，现在挂载
+                    // Nếu nó chưa được gắn trước đó, hãy gắn nó ngay bây giờ
                     if (!document.getElementById('fluent-read-selection-translator-container')) {
                         mountSelectionTranslator();
                     }
@@ -98,22 +98,22 @@ export default defineContentScript({
             return false;
         });
         
-        // 处理右键菜单触发的全文翻译和撤销
+        // Xử lý Dịch toàn trang và Hoàn tác kích hoạt bằng menu chuột phải
         browser.runtime.onMessage.addListener((message: any, sender: any, sendResponse: (response?: any) => void) => {
             if (message.type === 'contextMenuTranslate') {
-                // 检查插件是否已启用
+                // Kiểm tra xem plugin có được kích hoạt không
                 if (config.on === false) {
                     sendResponse({ status: 'disabled' });
                     return true;
                 }
                 
                 if (message.action === 'fullPage') {
-                    // 触发全文翻译
+                    // Trigger toàn trang
                     autoTranslateEnglishPage();
                     sendResponse({ status: 'success', action: 'translated' });
                     return true;
                 } else if (message.action === 'restore') {
-                    // 撤销翻译，恢复原文
+                    // Hoàn tác bản dịch, khôi phục Nguyên văn
                     restoreOriginalContent();
                     sendResponse({ status: 'success', action: 'restored' });
                     return true;
@@ -122,26 +122,26 @@ export default defineContentScript({
             return false;
         });
         
-        // 在页面卸载时清理资源
+        // Dọn dẹp nội dung khi trang được tải xuống
         window.addEventListener('beforeunload', () => {
-            // 取消所有待处理的翻译任务
+            // Tất cả các tác vụ dịch đang chờ xử lý tại Hủy
             cancelAllTranslations();
-            // 移除悬浮球
+            // Loại bỏ bóng nổi
             unmountFloatingBall();
-            // 移除划词翻译组件
+            // Loại bỏ thành phần Dịch khi áp dụng
             unmountSelectionTranslator();
         });
     }
 })
 
-// 注册所有手动翻译触发事件监听器
+// Đăng ký tất cả trình xử lý sự kiện kích hoạt dịch thủ công
 function setupManualTranslationTriggers() {
     const screen = { mouseX: 0, mouseY: 0, hotkeyPressed: false, otherKeyPressed: false, hasSlideTranslation: false };
     let mouseHotkeysPressed = new Set<string>();
     
-    // 获取当前配置的鼠标悬浮快捷键
+    // Lấy rê chuột Phím tắt được cấu hình hiện tại
     const getConfiguredMouseHotkeyParts = () => {
-        // 如果选择了自定义快捷键，使用自定义的
+        // Nếu tùy chọn tắt phím được chọn, hãy sử dụng tùy chọn tùy chỉnh
         const hotkeyString = config.hotkey === 'custom' 
             ? config.customHotkey 
             : config.hotkey;
@@ -150,26 +150,26 @@ function setupManualTranslationTriggers() {
             return [];
         }
         
-        // 如果是旧的单个按键格式，直接返回
+        // Nếu là định dạng khóa đơn cũ, hãy quay lại trực tiếp
         if (!hotkeyString.includes('+')) {
             const k = hotkeyString.toLowerCase();
-            // 标准化修饰键名称
+            // Tên khóa sửa đổi được tiêu chuẩn hóa
             if (k === 'ctrl') return ['control'];
             if (k === 'option') return ['alt'];
             return [k];
         }
         
-        // 组合键格式
+        // Định dạng tổ hợp phím
         return hotkeyString.split('+').map(key => {
             const k = key.toLowerCase();
-            // 标准化修饰键名称
+            // Tên khóa sửa đổi được tiêu chuẩn hóa
             if (k === 'ctrl') return 'control';
             if (k === 'option') return 'alt';
             return k;
         });
     };
     
-    // 检查是否匹配鼠标悬浮快捷键
+    // Kiểm tra xem có khớp với Phím tắt rê chuột không
     const checkMouseHotkey = () => {
         const hotkeyParts = getConfiguredMouseHotkeyParts();
         if (hotkeyParts.length === 0) return false;
@@ -180,7 +180,7 @@ function setupManualTranslationTriggers() {
         return exactMatch;
     };
 
-    // 1. 失去焦点时
+    // 1. Khi mất tập trung
     window.addEventListener('blur', () => {
         screen.hotkeyPressed = false;
         screen.otherKeyPressed = false;
@@ -188,39 +188,39 @@ function setupManualTranslationTriggers() {
         mouseHotkeysPressed.clear();
     });
 
-    // 2. 按下按键时
+    // 2. Khi nhấn nút
     window.addEventListener('keydown', event => {
-        // 防止重复事件
+        // Ngăn chặn sự cố trùng lặp
         if (event.repeat) return;
         
-        // 在 Mac 上禁止 cmd 键参与快捷键
+        // Vô hiệu hóa phím cmd tham gia phím tắt trên Mac
         const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
         if (isMac && event.metaKey) {
             return;
         }
         
-        // 记录修饰键
+        // Ghi lại các phím bổ trợ
         if (event.altKey) mouseHotkeysPressed.add('alt');
         if (event.ctrlKey) mouseHotkeysPressed.add('control');
-        if (event.metaKey && !isMac) mouseHotkeysPressed.add('control'); // 非Mac系统上metaKey映射到control
+        if (event.metaKey && !isMac) mouseHotkeysPressed.add('control'); // MetaKey được ánh xạ để điều khiển trên các hệ thống không phải Mac
         if (event.shiftKey) mouseHotkeysPressed.add('shift');
         
-        // 处理普通按键
+        // Xử lý các phím thông thường
         const key = event.key.toLowerCase();
         const code = event.code?.toLowerCase();
         
-        // 处理字母键
+        // Xử lý các phím chữ cái
         if (code && code.startsWith('key')) {
             const letter = code.slice(3).toLowerCase();
             mouseHotkeysPressed.add(letter);
         } else if (key.length === 1) {
-            // 单个字符的按键
+            // Phím ký tự đơn
             mouseHotkeysPressed.add(key);
         } else if (/^f\d+$/.test(key)) {
-            // 功能键 F1-F12
+            // Phím chức năng F1-F12
             mouseHotkeysPressed.add(key);
         } else {
-            // 特殊键映射
+            // Ánh xạ khóa đặc biệt
             const specialKeys: Record<string, string> = {
                 'escape': 'escape',
                 'enter': 'enter',
@@ -243,7 +243,7 @@ function setupManualTranslationTriggers() {
             }
         }
         
-        // 检查是否匹配鼠标悬浮快捷键
+        // Kiểm tra xem có khớp với Phím tắt rê chuột không
         if (checkMouseHotkey()) {
             screen.hotkeyPressed = true;
             screen.otherKeyPressed = false;
@@ -252,9 +252,9 @@ function setupManualTranslationTriggers() {
         }
     });
 
-    // 3. 抬起按键时
+    // 3. Khi nhấc nút
     window.addEventListener('keyup', event => {
-        // 清除字母键状态（在检查前先清除）
+        // Xóa trạng thái phím chữ (Xóa trước khi kiểm tra)
         const releasedKey = event.key.toLowerCase();
         const releasedCode = event.code?.toLowerCase();
         if (releasedCode && releasedCode.startsWith('key')) {
@@ -265,7 +265,7 @@ function setupManualTranslationTriggers() {
         } else if (/^f\d+$/.test(releasedKey)) {
             mouseHotkeysPressed.delete(releasedKey);
         } else {
-            // 特殊键
+            // Phím đặc biệt
             const specialKeys: Record<string, string> = {
                 'escape': 'escape',
                 'enter': 'enter',
@@ -288,24 +288,24 @@ function setupManualTranslationTriggers() {
             }
         }
         
-        // 清除修饰键状态
+        // Xóa trạng thái phím bổ trợ
         if (!event.altKey) mouseHotkeysPressed.delete('alt');
         if (!event.ctrlKey) mouseHotkeysPressed.delete('control');
         if (!event.metaKey) mouseHotkeysPressed.delete('control');
         if (!event.shiftKey) mouseHotkeysPressed.delete('shift');
         
-        // 获取当前配置的快捷键
+        // Nhận các phím tắt hiện được cấu hình
         const hotkeyParts = getConfiguredMouseHotkeyParts();
         
-        // 如果当前按键集合为空，且之前激活了快捷键，且配置的快捷键不包含当前释放的键，则触发翻译
+        // Nếu tập hợp khóa hiện tại trống và phím tắt đã được kích hoạt trước đó cũng như phím tắt được định cấu hình không chứa khóa hiện được phát hành thì quá trình dịch sẽ được kích hoạt.
         if (screen.hotkeyPressed && mouseHotkeysPressed.size === 0 && !screen.otherKeyPressed && !screen.hasSlideTranslation) {
-            // 检查插件是否开启
+            // Kiểm tra xem plug-in đã được bật chưa
             if (config.on) {
                 handleTranslation(screen.mouseX, screen.mouseY);
             }
         }
         
-        // 如果所有按键都释放了，重置状态
+        // Nếu tất cả các phím được giải phóng, hãy đặt lại trạng thái
         if (mouseHotkeysPressed.size === 0) {
             screen.hotkeyPressed = false;
             screen.otherKeyPressed = false;
@@ -313,7 +313,7 @@ function setupManualTranslationTriggers() {
         }
     });
 
-    // 4. 鼠标移动时更新位置，并根据 hotkeyPressed 决定是否触发翻译
+    // 4. Cập nhật vị trí khi chuột di chuyển và quyết định có kích hoạt dịch hay không dựa trên hotkeyPressed
     document.body.addEventListener('mousemove', event => {
         screen.mouseX = event.clientX;
         screen.mouseY = event.clientY;
@@ -323,7 +323,7 @@ function setupManualTranslationTriggers() {
         }
     });
 
-    // 5、手机端触摸事件，取中心点翻译
+    // 5. Đối với sự kiện chạm trên điện thoại di động, lấy điểm trung tâm để dịch
     document.body.addEventListener('touchstart', event => {
         let coordinate;
         switch (config.hotkey) {
@@ -340,31 +340,31 @@ function setupManualTranslationTriggers() {
                 return
         }
 
-        // 检查插件是否开启
+        // Kiểm tra xem plug-in đã được bật chưa
         if (config.on) {
             handleTranslation(coordinate!.x, coordinate!.y);
         }
     });
 
-    // 6、双击鼠标翻译事件
+    // 6. Sự kiện dịch click đúp chuột
     document.body.addEventListener('dblclick', event => {
         if (config.hotkey == constants.DoubleClick && config.on) {
-            // 通过双击事件获取鼠标位置
+            // Nhận vị trí chuột thông qua sự kiện nhấp đúp
             let mouseX = event.clientX;
             let mouseY = event.clientY;
-            // 调用 handleTranslation 函数进行翻译
+            // Gọi hàm handTranslation để dịch
             handleTranslation(mouseX, mouseY);
         }
     });
 
-    // 7、长按鼠标翻译事件（长按事件时鼠标不能移动）
+    // 7. Nhấn và giữ sự kiện dịch chuột (chuột không thể di chuyển trong sự kiện nhấn và giữ)
     let timer: number;
-    let startPos = { x: 0, y: 0 }; // startPos 记录鼠标按下时的位置
+    let startPos = { x: 0, y: 0 }; // startPos ghi lại vị trí khi nhấn chuột
     document.body.addEventListener('mouseup', () => clearTimeout(timer));
     document.body.addEventListener('mousedown', event => {
         if (config.hotkey === constants.LongPress) {
-            clearTimeout(timer); // 清除之前的计时器
-            startPos.x = event.clientX; // 记录鼠标按下时的初始位置
+            clearTimeout(timer); // Xóa bộ đếm thời gian trước đó của
+            startPos.x = event.clientX; // Ghi lại vị trí ban đầu của chuột khi nhấn
             startPos.y = event.clientY;
             timer = setTimeout(() => {
                 if (config.on) {
@@ -376,13 +376,13 @@ function setupManualTranslationTriggers() {
         }
     });
     document.body.addEventListener('mousemove', event => {
-        // 如果鼠标移动超过10像素，取消长按事件
+        // Hủy sự kiện nhấn giữ nếu chuột di chuyển quá 10 pixels
         if (Math.abs(event.clientX - startPos.x) > 10 || Math.abs(event.clientY - startPos.y) > 10) {
             clearTimeout(timer);
         }
     });
     document.body.addEventListener('mousemove', event => {
-        // 检测鼠标是否移动，如果鼠标移动超过10像素，取消长按事件
+        // Phát hiện chuột có di chuyển hay không, nếu chuột di chuyển quá 10 pixels, Hủy sự kiện nhấn giữ
         if (config.hotkey === constants.LongPress
             && Math.abs(event.clientX - startPos.x) > 10 || Math.abs(event.clientY - startPos.y) > 10) {
             clearTimeout(timer);
@@ -390,7 +390,7 @@ function setupManualTranslationTriggers() {
     });
 
 
-    // 8、鼠标中键翻译事件
+    // 8. Sự kiện dịch nút chuột giữa
     document.body.addEventListener('mousedown', event => {
         if (config.hotkey === constants.MiddleClick && config.on) {
             if (event.button === 1) {
@@ -402,24 +402,24 @@ function setupManualTranslationTriggers() {
     });
 
 
-    // 9、触屏设备双击/三击翻译事件
+    // 9. Nhấp đúp chuột vào thiết bị màn hình cảm ứng/nhấp chuột ba lần
     let touchCount = 0;
     let touchTimer: any;
     document.body.addEventListener('touchstart', event => {
-        // 检查是否为有效的热键配置，并且只处理单指触摸事件
+        // Kiểm tra xem đó có phải là cấu hình phím nóng hợp lệ hay không và chỉ xử lý các sự kiện chạm bằng một ngón tay
         if (![constants.DoubleClickScreen, constants.TripleClickScreen].includes(config.hotkey)
             || event.touches.length !== 1) return;
 
-        // 确定需要的点击次数
+        // Xác nhậnSố lần nhấp chuột được yêu cầu
         const requiredTouches = config.hotkey === constants.DoubleClickScreen ? 2 : 3;
 
-        touchCount++; // 记录触摸次数
+        touchCount++; // Ghi lại số lần chạm
 
         if (touchCount === 1) {
-            // 如果是第一次触摸，设置定时器，500ms内没有达到所需的触摸次数则重置
+            // Nếu đây là lần chạm đầu tiên, hãy đặt bộ hẹn giờ và đặt lại nếu không đạt được số lần chạm yêu cầu trong vòng 500 mili giây.
             touchTimer = setTimeout(() => touchCount = 0, 500);
         } else if (touchCount === requiredTouches) {
-            // 如果达到了所需的触摸次数，清除定时器并调用翻译处理函数
+            // Nếu đạt số lần chạm yêu cầu, Xóa bộ đếm thời gian và gọi hàm xử lý dịch thuật
             clearTimeout(touchTimer);
             touchCount = 0;
             if (config.on) {
@@ -429,24 +429,24 @@ function setupManualTranslationTriggers() {
     });
 }
 
-        // 设置全文翻译快捷键（与悬浮球解耦）
+        // Đặt Khóa tắt dịch toàn trang (tách rời khỏi quả bóng lơ lửng)
 function setupFloatingBallHotkey() {
-    // 如果快捷键设置为 "none"，则禁用快捷键
+    // Nếu Cài đặt phím tắt là "không", thì Tắt phím tắt
     if (config.floatingBallHotkey === 'none') return;
 
-    // 添加全局键盘事件监听
+    // Thêm tính năng nghe sự kiện bàn phím toàn cầu
     let hotkeysPressed = new Set<string>();
-    let lastKeyDownTime = 0; // 用于防止按键事件重复触发
+    let lastKeyDownTime = 0; // Được sử dụng để ngăn chặn các sự kiện quan trọng được kích hoạt nhiều lần
     
-    // 开发环境标志
+    // Kích hoạt vấn đề về nhãn môi trường
     const isDev = process.env.NODE_ENV === 'development';
     
-    // 检测操作系统类型
+    // Phát hiện loại hệ điều hành
     const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
     
-    // 获取当前配置的快捷键
+    // Nhận các phím tắt hiện được cấu hình
     const getConfiguredHotkeyParts = () => {
-        // 如果选择了自定义快捷键，使用自定义的
+        // Nếu tùy chọn tắt phím được chọn, hãy sử dụng tùy chọn tùy chỉnh
         const hotkeyString = config.floatingBallHotkey === 'custom' 
             ? config.customFloatingBallHotkey 
             : config.floatingBallHotkey;
@@ -457,7 +457,7 @@ function setupFloatingBallHotkey() {
         
         return hotkeyString.split('+').map(key => {
             const k = key.toLowerCase();
-            // 标准化修饰键名称
+            // Tên khóa sửa đổi được tiêu chuẩn hóa
             if (k === 'ctrl') return 'control';
             if (k === 'option') return 'alt';
             return k;
@@ -465,43 +465,43 @@ function setupFloatingBallHotkey() {
     };
     
     if (isDev) {
-        console.log(`[FluentRead] 设置悬浮球快捷键: ${config.floatingBallHotkey}, 系统: ${isMac ? 'macOS' : '其他'}`);
+        console.log(`[FluentRead] Đặt phím tắt bóng nổi: ${config.floatingBallHotkey}, Hệ điều hành: ${isMac ? 'macOS' : 'Khác'}`);
     }
     
-    // 监听按键按下事件
+    // Nghe các sự kiện nhấn phím
     document.addEventListener('keydown', (event) => {
-        // 防止事件重复触发（某些浏览器可能会重复触发keydown事件）
+        // Ngăn chặn sự kiện được kích hoạt nhiều lần (một số trình duyệt có thể kích hoạt sự kiện keydown nhiều lần)
         const now = Date.now();
         if (now - lastKeyDownTime < 50) return;
         lastKeyDownTime = now;
         
-        // 在 Mac 上禁止 cmd 键参与快捷键
+        // Vô hiệu hóa phím cmd tham gia phím tắt trên Mac
         if (isMac && event.metaKey) {
             return;
         }
         
-        // 记录修饰键状态
+        // Ghi lại trạng thái phím sửa đổi
         if (event.altKey) hotkeysPressed.add('alt');
         if (event.ctrlKey) hotkeysPressed.add('control');
-        if (event.metaKey && !isMac) hotkeysPressed.add('control'); // 非Mac系统上metaKey映射到control
+        if (event.metaKey && !isMac) hotkeysPressed.add('control'); // MetaKey được ánh xạ để điều khiển trên các hệ thống không phải Mac
         if (event.shiftKey) hotkeysPressed.add('shift');
         
-        // 处理普通按键
+        // Xử lý các phím thông thường
         const key = event.key.toLowerCase();
         const code = event.code?.toLowerCase();
         
-        // 处理字母键
+        // Xử lý các phím chữ cái
         if (code && code.startsWith('key')) {
             const letter = code.slice(3).toLowerCase();
             hotkeysPressed.add(letter);
         } else if (key.length === 1) {
-            // 单个字符的按键
+            // Phím ký tự đơn
             hotkeysPressed.add(key);
         } else if (/^f\d+$/.test(key)) {
-            // 功能键 F1-F12
+            // Phím chức năng F1-F12
             hotkeysPressed.add(key);
         } else {
-            // 特殊按键
+            // Phím đặc biệt
             const specialKeys: Record<string, string> = {
                 'escape': 'escape',
                 'enter': 'enter',
@@ -525,43 +525,43 @@ function setupFloatingBallHotkey() {
             }
         }
         
-        // 获取当前配置的快捷键
+        // Nhận các phím tắt hiện được cấu hình
         const hotkeyParts = getConfiguredHotkeyParts();
         
-        // 如果没有配置快捷键，不处理
+        // Nếu không có phím tắt nào được cấu hình, nó sẽ không được xử lý.
         if (hotkeyParts.length === 0) {
             return;
         }
         
-        // 检查当前按下的键是否完全匹配配置的快捷键
+        // Kiểm tra xem phím hiện được nhấn có khớp chính xác với phím tắt đã định cấu hình hay không
         const allKeysPressed = hotkeyParts.every(key => hotkeysPressed.has(key));
         const exactMatch = allKeysPressed && hotkeyParts.length === hotkeysPressed.size;
         
-        // 如果按键组合完全匹配配置的快捷键
-        // 无论悬浮球是否启用，都派发统一事件，由对应处理方接管
+        // Nếu tổ hợp phím khớp chính xác với phím tắt đã định cấu hình
+        // Bất kể quả bóng nổi có được kích hoạt hay không, một sự kiện thống nhất sẽ được gửi đi và người xử lý tương ứng sẽ tiếp quản
         if (exactMatch) {
-            // 检查插件是否开启
+            // Kiểm tra xem plug-in đã được bật chưa
             if (!config.on) return;
             
-            // 防止事件继续传播和默认行为
+            // Ngăn chặn sự lan truyền sự kiện và hành vi mặc định
             event.preventDefault();
             event.stopPropagation();
             
-            // 通过自定义事件来触发翻译
+            // Kích hoạt dịch thông qua các sự kiện tùy chỉnh
             document.dispatchEvent(new CustomEvent('fluentread-toggle-translation'));
             
             if (isDev) {
                 const activeHotkey = config.floatingBallHotkey === 'custom' 
                     ? config.customFloatingBallHotkey 
                     : config.floatingBallHotkey;
-                console.log(`[FluentRead] 触发悬浮球翻译，快捷键: ${activeHotkey}`);
+                console.log(`[FluentRead] Kích hoạt dịch bằng bóng nổi, phím tắt: ${activeHotkey}`);
             }
         }
     });
     
-    // 监听按键释放事件
+    // Lắng nghe các sự kiện phát hành chính
     document.addEventListener('keyup', (event) => {
-        // 清除字母键状态
+        // Xóa trạng thái phím chữ cái
         const releasedKey = event.key.toLowerCase();
         const releasedCode = event.code?.toLowerCase();
         if (releasedCode && releasedCode.startsWith('key')) {
@@ -572,7 +572,7 @@ function setupFloatingBallHotkey() {
         } else if (/^f\d+$/.test(releasedKey)) {
             hotkeysPressed.delete(releasedKey);
         } else {
-            // 特殊键
+            // Phím đặc biệt
             const specialKeys: Record<string, string> = {
                 'escape': 'escape',
                 'enter': 'enter',
@@ -595,95 +595,93 @@ function setupFloatingBallHotkey() {
             }
         }
         
-        // 清除修饰键状态
+        // Xóa trạng thái phím bổ trợ
         if (!event.altKey) hotkeysPressed.delete('alt');
         if (!event.ctrlKey) hotkeysPressed.delete('control');
         if (!event.metaKey) hotkeysPressed.delete('control');
         if (!event.shiftKey) hotkeysPressed.delete('shift');
     });
     
-    // 页面失焦或切换标签页时，清除所有按键状态
+    // Trạng thái của tất cả các phím Xóa khi mất trang hoặc chuyển tab
     window.addEventListener('blur', () => {
         hotkeysPressed.clear();
     });
 }
 
-// 注册自动翻译事件
+// Đăng ký sự kiện dịch tự động
 function autoTranslationEvent() {
-    // 自动翻译英文页面
+    // Tự động dịch trang tiếng Anh
     autoTranslateEnglishPage();
 }
 
-// 清除所有翻译的函数
+// Xóa tất cả các chức năng đã dịch
 function clearAllTranslations() {
-    // 1. 移除所有翻译结果元素
+    // 1. Loại bỏ tất cả các thành phần dịch kết quả
     document.querySelectorAll('.fluent-read-translation').forEach(el => el.remove());
 
-    // 2. 移除所有加载状态
+    // 2. Xóa tất cả trạng thái tải
     document.querySelectorAll('.fluent-read-loading').forEach(el => el.remove());
 
-    // 3. 移除所有错误状态
+    // 3. Loại bỏ tất cả các trạng thái lỗi
     document.querySelectorAll('.fluent-read-failure').forEach(el => el.remove());
 
-    // 4. 移除所有翻译相关的类名
+    // 4. Xóa tất cả các tên lớp có cách dịch tương tự với Tắt
     document.querySelectorAll('.fluent-read-processed').forEach(el => {
         el.classList.remove('fluent-read-processed');
     });
 
-    // 5. 清除内存中的缓存
+    // 5. Xóa bộ nhớ cache trong bộ nhớ
     cache.clean();
 
-    console.log('已清除所有翻译缓存');
+    console.log('Đã xóa toàn bộ bộ nhớ đệm dịch');
 }
 
 /**
- * 挂载翻译状态组件
- */
+ * Gắn kết thành phần trạng thái dịch  */
 function mountTranslationStatusComponent() {
-    // 创建容器元素
+    // Tạo phần tử vùng chứa
     const container = document.createElement('div');
     container.id = 'fluent-read-translation-status-container';
     document.body.appendChild(container);
     
-    // 创建并挂载组件
+    // Tạo và gắn kết các thành phần
     const app = createApp(TranslationStatus);
     app.mount(container);
 }
 
 /**
- * 输入框翻译功能
- */
+ * Dịch trong hàm nhập ô  */
 function setupInputBoxTranslation() {
     let keyPressCount = 0;
     let keyPressTimer: NodeJS.Timeout | null = null;
     let lastTriggerKey = '';
-    const TRIPLE_KEY_TIMEOUT = 1000; // 1秒内连续按三下才生效
+    const TRIPLE_KEY_TIMEOUT = 1000; // Nó có hiệu lực sau ba lần nhấn liên tiếp trong vòng 1 giây.
     
-    // 监听键盘事件
+    // Nghe các sự kiện bàn phím
     document.addEventListener('keydown', async (event) => {
-        // 检查功能是否启用
+        // Kiểm tra xem chức năng có bật không
         if (config.inputBoxTranslationTrigger === 'disabled') {
             return;
         }
         
-        // 检查当前焦点元素是否为输入框
+        // Kiểm tra xem phần tử hiện đang tập trung có phải là hộp nhập liệu hay không
         const activeElement = document.activeElement as HTMLElement;
         if (!isInputElement(activeElement)) {
             return;
         }
         
-        // 处理不同的触发方式
+        // Xử lý các phương pháp kích hoạt khác nhau
         const triggerType = config.inputBoxTranslationTrigger;
         
         if (triggerType === 'ctrl_enter') {
-            // Ctrl+Enter 触发
+            // Ctrl+Enter kích hoạt
             if (event.ctrlKey && event.key === 'Enter') {
                 event.preventDefault();
                 await handleInputBoxTranslation(activeElement);
                 return;
             }
         } else if (triggerType === 'triple_space' || triggerType === 'triple_equal' || triggerType === 'triple_dash') {
-            // 连按三次触发
+            // Nhấn ba lần để kích hoạt
             let targetKey = '';
             switch (triggerType) {
                 case 'triple_space':
@@ -697,9 +695,9 @@ function setupInputBoxTranslation() {
                     break;
             }
             
-            // 只响应目标按键
+            // Chỉ phản hồi khi nhấn phím đích
             if (event.key !== targetKey) {
-                // 如果按的不是目标键，重置计数器
+                // Nếu nhấn phím khác với phím đích, hãy đặt lại bộ đếm
                 keyPressCount = 0;
                 lastTriggerKey = '';
                 if (keyPressTimer) {
@@ -709,7 +707,7 @@ function setupInputBoxTranslation() {
                 return;
             }
             
-            // 检查是否是同一个按键的连续按下
+            // Kiểm tra xem phím đó có được nhấn liên tục không
             if (lastTriggerKey !== targetKey) {
                 keyPressCount = 1;
                 lastTriggerKey = targetKey;
@@ -717,15 +715,15 @@ function setupInputBoxTranslation() {
                 keyPressCount++;
             }
             
-            // 如果是第三次按下目标键
+            // Nếu là lần thứ ba nhấn phím đích
             if (keyPressCount === 3) {
-                event.preventDefault(); // 阻止默认输入
+                event.preventDefault(); // Chặn đầu vào mặc định
                 await handleInputBoxTranslation(activeElement);
-                keyPressCount = 0; // 重置计数器
+                keyPressCount = 0; // đặt lại bộ đếm
                 lastTriggerKey = '';
             }
             
-            // 设置超时，如果在指定时间内没有连续按满三次，就重置计数器
+            // Đặt thời gian chờ. Nếu bạn không nhấn liên tục ba lần trong thời gian quy định, bộ đếm sẽ được đặt lại.
             if (keyPressTimer) {
                 clearTimeout(keyPressTimer);
             }
@@ -738,8 +736,7 @@ function setupInputBoxTranslation() {
 }
 
 /**
- * 检查元素是否为输入元素
- */
+ * Kiểm tra xem phần tử có phải là phần tử đầu vào không  */
 function isInputElement(element: HTMLElement): boolean {
     if (!element) return false;
     
@@ -748,7 +745,7 @@ function isInputElement(element: HTMLElement): boolean {
     const isTextarea = tagName === 'textarea';
     const isContentEditable = element.contentEditable === 'true';
     
-    // 对于input元素，还需要检查type属性
+    // Đối với các phần tử đầu vào, bạn cũng cần kiểm tra thuộc tính type
     if (isInput) {
         const inputType = (element as HTMLInputElement).type.toLowerCase();
         const textInputTypes = ['text', 'search', 'url', 'email', 'password'];
@@ -759,8 +756,7 @@ function isInputElement(element: HTMLElement): boolean {
 }
 
 /**
- * 获取输入框中的文本
- */
+ * Lấy văn bản vào hộp nhập liệu  */
 function getInputBoxText(element: HTMLElement): string {
     const tagName = element.tagName.toLowerCase();
     
@@ -774,8 +770,7 @@ function getInputBoxText(element: HTMLElement): string {
 }
 
 /**
- * 根据触发方式去除末尾的触发符号
- */
+ * Loại bỏ biểu tượng kích hoạt ở cuối theo phương pháp kích hoạt  */
 function removeTriggerSymbols(text: string, triggerType: string): string {
     if (!text || triggerType === 'disabled' || triggerType === 'ctrl_enter') {
         return text;
@@ -796,7 +791,7 @@ function removeTriggerSymbols(text: string, triggerType: string): string {
             return text;
     }
     
-    // 去除末尾所有的触发符号
+    // Xóa tất cả các ký hiệu kích hoạt ở cuối
     let cleanedText = text;
     while (cleanedText.endsWith(triggerSymbol)) {
         cleanedText = cleanedText.slice(0, -1);
@@ -806,8 +801,7 @@ function removeTriggerSymbols(text: string, triggerType: string): string {
 }
 
 /**
- * 设置输入框中的文本
- */
+ * Đặt văn bản vào hộp nhập  */
 function setInputBoxText(element: HTMLElement, text: string): void {
     const tagName = element.tagName.toLowerCase();
     
@@ -815,33 +809,32 @@ function setInputBoxText(element: HTMLElement, text: string): void {
         const inputElement = element as HTMLInputElement | HTMLTextAreaElement;
         inputElement.value = text;
         
-        // 触发input事件，以便网页能感知到值的变化
+        // Kích hoạt sự kiện đầu vào để trang web có thể cảm nhận được sự thay đổi về giá trị
         inputElement.dispatchEvent(new Event('input', { bubbles: true }));
         inputElement.dispatchEvent(new Event('change', { bubbles: true }));
     } else if (element.contentEditable === 'true') {
         element.innerText = text;
         
-        // 触发input事件
+        // kích hoạt sự kiện đầu vào
         element.dispatchEvent(new Event('input', { bubbles: true }));
     }
 }
 
 /**
- * 创建并显示翻译提示弹窗
- */
+ * Tạo và hiển thị cửa sổ bật lên nhắc dịch  */
 function createTranslationTooltip(element: HTMLElement, message: string, type: 'translating' | 'success' | 'error'): HTMLElement {
-    // 移除已存在的提示
+    // Xóa các mẹo hiện có
     removeExistingTooltip();
     
     const tooltip = document.createElement('div');
     tooltip.className = `fluent-input-tooltip ${type}`;
     tooltip.id = 'fluent-input-translation-tooltip';
     
-    // 添加图标和文字
+    // Thêm biểu tượng và văn bản
     const icon = getTooltipIcon(type);
     tooltip.innerHTML = `${icon} ${message}`;
     
-    // 计算位置
+    // Tính toán vị trí
     const rect = element.getBoundingClientRect();
     const tooltipTop = rect.bottom + window.scrollY + 12;
     const tooltipLeft = rect.left + window.scrollX + (rect.width / 2);
@@ -850,7 +843,7 @@ function createTranslationTooltip(element: HTMLElement, message: string, type: '
     tooltip.style.left = `${tooltipLeft}px`;
     tooltip.style.transform = 'translateX(-50%)';
     
-    // 如果禁用动画，直接显示，否则使用淡入效果
+    // Nếu Tắt hoạt ảnh, hiển thị trực tiếp, nếu không thì sử dụng hiệu ứng mờ dần
     if (!config.animations) {
         tooltip.style.opacity = '1';
         tooltip.style.transform = 'translateX(-50%) translateY(0)';
@@ -866,8 +859,7 @@ function createTranslationTooltip(element: HTMLElement, message: string, type: '
 }
 
 /**
- * 获取提示图标
- */
+ * Nhận biểu tượng nhắc nhở  */
 function getTooltipIcon(type: 'translating' | 'success' | 'error'): string {
     const icons = {
         translating: '•',
@@ -878,16 +870,15 @@ function getTooltipIcon(type: 'translating' | 'success' | 'error'): string {
 }
 
 /**
- * 移除现有的提示弹窗
- */
+ * Loại bỏ các cửa sổ bật lên nhắc nhở hiện có  */
 function removeExistingTooltip(): void {
     const existing = document.getElementById('fluent-input-translation-tooltip');
     if (existing) {
         if (!config.animations) {
-            // 如果禁用动画，直接移除
+            // Nếu Tắt ảnh động thì gỡ trực tiếp
             existing.remove();
         } else {
-            // 使用淡出动画
+            // Sử dụng hoạt ảnh mờ dần
             existing.classList.add('hide');
             setTimeout(() => existing.remove(), 300);
         }
@@ -895,21 +886,20 @@ function removeExistingTooltip(): void {
 }
 
 /**
- * 添加输入框动画效果
- */
+ * Thêm ô nhập Hiệu ứng  */
 function addInputBoxAnimation(element: HTMLElement, animationType: 'translating' | 'success' | 'error'): void {
-    // 如果禁用了动画，则不添加动画效果
+    // Nếu Tắt là hoạt ảnh, Hiệu ứng không được thêm vào
     if (!config.animations) {
         return;
     }
     
-    // 移除已存在的动画类
+    // Xóa lớp hoạt hình hiện có
     element.classList.remove('fluent-input-translating', 'fluent-input-success', 'fluent-input-error');
     
-    // 添加新的动画类
+    // Thêm lớp hoạt hình mới
     element.classList.add(`fluent-input-${animationType}`);
     
-    // 如果不是翻译中的动画，在动画完成后移除类
+    // Nếu đó không phải là hoạt ảnh trong bản dịch, hãy xóa lớp sau khi hoạt ảnh hoàn tất
     if (animationType !== 'translating') {
         setTimeout(() => {
             element.classList.remove(`fluent-input-${animationType}`);
@@ -918,12 +908,10 @@ function addInputBoxAnimation(element: HTMLElement, animationType: 'translating'
 }
 
 /**
- * 专门用于输入框翻译的微软翻译函数（不使用缓存）
- * 通过background脚本调用，避免Firefox的CORS问题
- */
+ * Hàm Microsoft Translate dành riêng cho Dịch trong ô nhập (không sử dụng bộ nhớ đệm)  * Được gọi thông qua tập lệnh nền để tránh sự cố CORS của Firefox  */
 async function translateWithMicrosoft(text: string, targetLang: string): Promise<string> {
     try {
-        // 发送消息给background脚本进行翻译
+        // Gửi tin nhắn đến tập lệnh nền để dịch
         const result = await browser.runtime.sendMessage({
             type: 'inputBoxTranslation',
             text: text,
@@ -933,17 +921,16 @@ async function translateWithMicrosoft(text: string, targetLang: string): Promise
         if (result && result.success) {
             return result.translatedText;
         } else {
-            throw new Error(result?.error || '微软翻译失败');
+            throw new Error(result?.error || 'Dịch Microsoft thất bại');
         }
     } catch (error) {
-        console.error('微软翻译请求失败:', error);
+        console.error('Yêu cầu dịch Microsoft thất bại:', error);
         throw error;
     }
 }
 
 /**
- * 处理输入框翻译
- */
+ * Xử lý dịch trong ô nhập  */
 async function handleInputBoxTranslation(element: HTMLElement): Promise<void> {
     let tooltip: HTMLElement | null = null;
     
@@ -954,66 +941,66 @@ async function handleInputBoxTranslation(element: HTMLElement): Promise<void> {
             return;
         }
         
-        // 根据触发方式去除末尾的触发符号
+        // Bỏ ký hiệu trigger ở cuối theo cách trigger
         const cleanedText = removeTriggerSymbols(originalText, config.inputBoxTranslationTrigger);
         
         if (!cleanedText) {
             return;
         }
         
-        // 显示翻译中的动画和提示
+        // Hiển thị hình ảnh động và lời nhắc trong bản dịch
         addInputBoxAnimation(element, 'translating');
-        tooltip = createTranslationTooltip(element, '微软翻译中', 'translating');
+        tooltip = createTranslationTooltip(element, 'Đang dịch bằng Microsoft', 'translating');
         
         try {
-            // 直接调用微软翻译API，不使用缓存
+            // Gọi trực tiếp Microsoft Dịch API mà không cần sử dụng bộ đệm
             const translatedText = await translateWithMicrosoft(cleanedText, config.inputBoxTranslationTarget);
             
             if (translatedText && translatedText !== cleanedText) {
-                // 移除翻译中的动画
+                // Xóa hoạt ảnh khỏi bản dịch
                 element.classList.remove('fluent-input-translating');
                 
-                // 设置翻译结果
+                // SET kết quả dịch
                 setInputBoxText(element, translatedText);
                 
-                // 显示成功动画和提示
+                // Hiển thị hình ảnh động và lời nhắc thành công
                 addInputBoxAnimation(element, 'success');
                 removeExistingTooltip();
-                tooltip = createTranslationTooltip(element, '翻译成功', 'success');
+                tooltip = createTranslationTooltip(element, 'Dịch thành công', 'success');
             } else {
-                // 翻译结果与原文相同或为空
+                // Kết quả dịch giống với Nguyên văn hoặc trống
                 element.classList.remove('fluent-input-translating');
                 addInputBoxAnimation(element, 'error');
                 removeExistingTooltip();
-                tooltip = createTranslationTooltip(element, '内容无需翻译', 'error');
+                tooltip = createTranslationTooltip(element, 'Nội dung không cần dịch', 'error');
             }
         } catch (translationError) {
-            // 翻译失败
+            // Dịch thất bại
             element.classList.remove('fluent-input-translating');
             addInputBoxAnimation(element, 'error');
             removeExistingTooltip();
-            tooltip = createTranslationTooltip(element, '微软翻译失败', 'error');
-            console.error('微软翻译失败:', translationError);
+            tooltip = createTranslationTooltip(element, 'Dịch Microsoft thất bại', 'error');
+            console.error('Dịch Microsoft thất bại:', translationError);
         }
         
-        // 自动隐藏提示
+        // Tự động ẩn lời nhắc
         setTimeout(() => removeExistingTooltip(), 2500);
         
     } catch (error) {
-        console.error('输入框翻译失败:', error);
+        console.error('Dịch trong ô nhập thất bại:', error);
         
-        // 移除翻译中的动画
+        // Xóa hoạt ảnh khỏi bản dịch
         element.classList.remove('fluent-input-translating');
         
-        // 显示错误动画和提示
+        // Hiển thị hình ảnh động và lời nhắc lỗi
         addInputBoxAnimation(element, 'error');
         removeExistingTooltip();
-        tooltip = createTranslationTooltip(element, '翻译服务暂时不可用', 'error');
+        tooltip = createTranslationTooltip(element, 'Dịch vụ dịch tạm thời không khả dụng', 'error');
         
-        // 自动隐藏错误提示
+        // Tự động ẩn thông báo lỗi
         setTimeout(() => removeExistingTooltip(), 3000);
     }
 }
 
-// 初始化输入框翻译功能
+// Khởi tạo Dịch trong hàm nhập ô
 setupInputBoxTranslation();

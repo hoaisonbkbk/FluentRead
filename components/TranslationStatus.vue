@@ -2,16 +2,16 @@
   <div class="translation-status-container" v-if="isVisible && isFloatingBallTranslating && !userClosed">
     <div class="translation-status-card">
       <div class="translation-status-header">
-        <div class="translation-status-title">翻译进度</div>
+        <div class="translation-status-title">Tiến độ dịch</div>
         <div class="translation-status-close" @click="close">×</div>
       </div>
       <div class="translation-status-content">
         <div class="translation-status-row">
-          <div class="translation-status-label">当前活跃任务:</div>
+          <div class="translation-status-label">Tác vụ đang chạy:</div>
           <div class="translation-status-value">{{ status.activeTranslations }} / {{ status.maxConcurrent }}</div>
         </div>
         <div class="translation-status-row">
-          <div class="translation-status-label">等待中的任务:</div>
+          <div class="translation-status-label">Tác vụ chờ:</div>
           <div class="translation-status-value">{{ status.pendingTranslations }}</div>
         </div>
         <div class="translation-status-progress">
@@ -26,10 +26,10 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { getTranslationStatus } from '../entrypoints/utils/translateApi';
 
-// 组件状态
+// Trạng thái thành phần
 const isVisible = ref(false);
 const isFloatingBallTranslating = ref(false);
-const userClosed = ref(false); // 用户是否关闭了状态框
+const userClosed = ref(false); // Liệu người dùng có nhấp vào hộp trạng thái hay không
 const status = ref({
   activeTranslations: 0,
   pendingTranslations: 0,
@@ -38,7 +38,7 @@ const status = ref({
   totalTasksInProcess: 0
 });
 
-// 计算进度条样式
+// Tính toán kiểu thanh tiến trình
 const progressStyle = computed(() => {
   const percent = status.value.activeTranslations / status.value.maxConcurrent * 100;
   return {
@@ -47,24 +47,24 @@ const progressStyle = computed(() => {
   };
 });
 
-// 关闭状态卡片
+// Tắt thẻ trạng thái
 const close = () => {
-  userClosed.value = true; // 标记用户已关闭
+  userClosed.value = true; // Người dùng gắn cờ đã Tắt
 };
 
-// 重置关闭状态 - 当用户离开页面后重置
+// Đặt lại trạng thái Tắt - đặt lại khi người dùng rời khỏi trang Kích hoạt
 const resetClosedState = () => {
-  // 监听页面可见性变化
+  // Theo dõi các thay đổi về khả năng hiển thị của trang
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
-      // 当页面不可见时（用户切换标签页或最小化），重置状态
+      // Đặt lại trạng thái khi trang trở nên ẩn (người dùng chuyển tab hoặc thu nhỏ)
       setTimeout(() => {
         userClosed.value = false;
       }, 1000);
     }
   });
   
-  // 监听 URL 变化
+  // Lắng nghe các thay đổi URL
   const lastUrl = location.href;
   const urlObserver = new MutationObserver(() => {
     if (location.href !== lastUrl) {
@@ -72,7 +72,7 @@ const resetClosedState = () => {
     }
   });
   
-  // 观察 document 的子节点变化，这可能发生在 URL 变化时
+  // Quan sát những thay đổi trong các nút con của tài liệu, điều này có thể xảy ra khi URL thay đổi
   urlObserver.observe(document, { subtree: true, childList: true });
   
   return () => {
@@ -81,39 +81,39 @@ const resetClosedState = () => {
   };
 };
 
-// 更新状态的定时器
+// Hẹn giờ cập nhật trạng thái
 let statusUpdateTimer: number;
 
-// 创建更新状态的函数
+// Tạo hàm cập nhật trạng thái
 const updateStatus = () => {
   const currentStatus = getTranslationStatus();
   status.value = currentStatus;
   
-  // 只有当有活跃任务或等待任务时才显示状态卡片
+  // Chỉ hiển thị thẻ trạng thái khi có nhiệm vụ đang hoạt động hoặc nhiệm vụ đang chờ
   isVisible.value = currentStatus.activeTranslations > 0 || currentStatus.pendingTranslations > 0;
 };
 
-// 监听悬浮球翻译状态变化
+// Theo dõi sự thay đổi trạng thái dịch của bóng nổi
 const listenToFloatingBallState = () => {
-  // 监听自定义事件: 翻译开始
+  // Đang nghe sự kiện tùy chỉnh: Bắt đầu dịch Kích hoạt
   const handleTranslationStarted = () => {
     isFloatingBallTranslating.value = true;
-    // 当新的翻译开始时，如果是同一页面内重新开始翻译，也要重置用户关闭状态
+    // Khi một bản dịch mới được bắt đầu, nếu bản dịch được bắt đầu lại trên cùng một trang thì trạng thái người dùng cũng phải được đặt lại.
     if (!isVisible.value) {
       userClosed.value = false;
     }
   };
   
-  // 监听自定义事件: 翻译结束
+  // Nghe sự kiện tùy chỉnh: Dịch kết thúc
   const handleTranslationEnded = () => {
     isFloatingBallTranslating.value = false;
   };
   
-  // 添加事件监听器
+  // Thêm người nghe sự kiện
   document.addEventListener('fluentread-translation-started', handleTranslationStarted);
   document.addEventListener('fluentread-translation-ended', handleTranslationEnded);
   
-  // 返回清理函数
+  // Trở lại chức năng làm sạch
   return {
     cleanup: () => {
       document.removeEventListener('fluentread-translation-started', handleTranslationStarted);
@@ -122,19 +122,19 @@ const listenToFloatingBallState = () => {
   };
 };
 
-// 存储事件监听器的清理函数
+// Chức năng dọn dẹp cho trình xử lý sự kiện lưu trữ
 let eventListenerCleanup: { cleanup: () => void };
 let resetClosedStateCleanup: () => void;
 
-// 组件挂载时启动定时器和事件监听
+// Kích hoạt tính năng hẹn giờ và giám sát sự kiện khi các thành phần được lắp đặt
 onMounted(() => {
-  updateStatus(); // 立即执行一次更新
+  updateStatus(); // Thực hiện cập nhật lần ngay lập tức
   statusUpdateTimer = window.setInterval(updateStatus, 500);
   eventListenerCleanup = listenToFloatingBallState();
   resetClosedStateCleanup = resetClosedState();
 });
 
-// 组件卸载时清理定时器和事件监听
+// Dọn dẹp bộ hẹn giờ và trình xử lý sự kiện khi gỡ cài đặt các thành phần
 onUnmounted(() => {
   clearInterval(statusUpdateTimer);
   eventListenerCleanup.cleanup();
@@ -220,7 +220,7 @@ onUnmounted(() => {
   transition: width 0.3s ease, background-color 0.3s ease;
 }
 
-/* 暗黑模式支持 - 使用 :root[class="dark"] 选择器匹配 FluentRead 的主题系统 */
+/* Hỗ trợ chế độ tối - sử dụng bộ chọn :root[class="dark"] để phù hợp với hệ thống chủ đề của FluentRead */
 :root[class="dark"] .translation-status-card {
   background-color: #2d3436;
   border-color: #4d4d4d;
@@ -243,7 +243,7 @@ onUnmounted(() => {
   background-color: #3d3d3d;
 }
 
-/* 保留媒体查询以支持自动模式 */
+/* Giữ các truy vấn phương tiện để hỗ trợ chế độ tự động */
 @media (prefers-color-scheme: dark) {
   :root:not([class="light"]) .translation-status-card {
     background-color: #2d3436;

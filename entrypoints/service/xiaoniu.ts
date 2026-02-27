@@ -3,10 +3,10 @@ import {services} from "../utils/option";
 import {config} from "@/entrypoints/utils/config";
 
 async function xiaoniu(message: any) {
-    // 根据需要调整目标语言
+    // Điều chỉnh ngôn ngữ đích khi cần thiết
     let targetLang = config.to === 'zh-Hans' ? 'zh' : config.to;
 
-    // 判断是否使用代理
+    // Xác định xem có nên sử dụng proxy hay không
     let url: string = config.proxy[config.service] ? config.proxy[config.service] : urls[services.xiaoniu]
 
     const resp = await fetch(url, {
@@ -20,7 +20,7 @@ async function xiaoniu(message: any) {
         return result.tgt_text
     } else {
         console.log(resp)
-        throw new Error(`翻译失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+        throw new Error(`Dịch thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
     }
 }
 

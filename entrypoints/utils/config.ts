@@ -1,35 +1,35 @@
 import { Config } from "@/entrypoints/utils/model";
 
-// 声明 config 类型, new Config() 会设置好所有默认值
+// Khai báo loại cấu hình, new Config() sẽ đặt tất cả các giá trị mặc định
 export let config: Config = new Config();
 export const configReady = loadConfig();
 
-// 检查从存储中解析出的对象是否是有效的Config对象
+// Kiểm tra xem đối tượng được phân tích cú pháp từ bộ lưu trữ có phải là đối tượng Cấu hình hợp lệ hay không
 function isConfigObjectValid(obj: any): obj is Config {
     if (typeof obj !== 'object' || obj === null) {
         return false;
     }
-    // 检查一些关键属性是否存在，以判断配置是否有效
+    // Kiểm tra xem một số thuộc tính chính có tồn tại hay không để xác định xem cấu hình có hợp lệ không
     return 'on' in obj && 'service' in obj && 'from' in obj && 'to' in obj;
 }
 
-// 异步加载配置并应用
+// Tải cấu hình không đồng bộ và áp dụng
 async function loadConfig() {
     try {
         const value = await storage.getItem('local:config');
         if (typeof value === 'string' && value.trim().length > 0) {
             const parsedConfig = JSON.parse(value);
             if (isConfigObjectValid(parsedConfig)) {
-                // 如果配置有效，合并到当前 config 中
+                // Nếu cấu hình hợp lệ, hãy hợp nhất nó vào cấu hình hiện tại
                 Object.assign(config, parsedConfig);
-                return; // 加载成功，直接返回
+                return; // Đang tải thành công, quay lại trực tiếp
             }
         }
-        // 如果存储中没有配置、配置为空或无效，则将当前带有默认值的 config 对象存入存储
+        // Nếu không có cấu hình trong bộ lưu trữ, cấu hình trống hoặc không hợp lệ, đối tượng cấu hình hiện tại có giá trị mặc định sẽ được lưu trong bộ lưu trữ
         await storage.setItem('local:config', JSON.stringify(config));
     } catch (error) {
         console.error('Error loading or validating config:', error);
-        // 出错时也尝试保存一次默认配置
+        // Đồng thời cố gắng lưu cấu hình mặc định một lần khi xảy ra lỗi
         try {
             await storage.setItem('local:config', JSON.stringify(new Config()));
         } catch (saveError) {
@@ -38,13 +38,13 @@ async function loadConfig() {
     }
 }
 
-// 监控配置变化并更新 config
+// Theo dõi thay đổi cấu hình và cập nhật cấu hình
 storage.watch('local:config', (newValue: any, oldValue: any) => {
     if (typeof newValue === 'string' && newValue.trim().length > 0) {
         try {
             const parsedConfig = JSON.parse(newValue);
             if (isConfigObjectValid(parsedConfig)) {
-                // 如果新的配置有效，更新 config
+                // Nếu cấu hình mới hợp lệ, hãy cập nhật cấu hình
                 Object.assign(config, parsedConfig);
             } else {
                 console.warn('An invalid configuration was detected in storage.watch. Ignoring.');

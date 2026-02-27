@@ -19,7 +19,7 @@ async function google(message: any) {
         return sentence;
     } else {
         console.log(resp);
-        throw new Error(`翻译失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+        throw new Error(`Dịch thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
     }
 }
 

@@ -32,7 +32,7 @@ import {
 
 const app = createApp(App);
 
-// 按需注册组件
+// Đăng ký linh kiện theo yêu cầu
 const components = [
   ElRow,
   ElCol,
@@ -64,7 +64,7 @@ components.forEach(component => {
   }
 })
 
-// 注册使用到的图标
+// Các biểu tượng được sử dụng để đăng ký
 app.component('ChatDotRound', ChatDotRound)
 app.component('Setting', Setting)
 app.component('Refresh', Refresh)

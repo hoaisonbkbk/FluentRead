@@ -1,13 +1,13 @@
-// 消息模板工具
+// Công cụ mẫu tin nhắn
 import {customModelString, defaultOption, services} from "./option";
 import {config} from "@/entrypoints/utils/config";
 
-// openai 格式的消息模板（通用模板）
+// Mẫu tin nhắn ở định dạng openai (mẫu chung)
 export function commonMsgTemplate(origin: string) {
-    // 检测是否使用自定义模型
+    // Phát hiện xem một mô hình tùy chỉnh có được sử dụng hay không
     let model = config.model[config.service] === customModelString ? config.customModel[config.service] : config.model[config.service]
 
-    // 删除模型名称中的中文括号及其内容，如"gpt-4（推荐）" -> "gpt-4"
+    // Xóa dấu ngoặc bằng tiếng Trung và nội dung của chúng trong tên model, chẳng hạn như "gpt-4 (được khuyến nghị)" -> "gpt-4"
     model = model.replace(/（.*）/g, "");
 
     let system = config.system_role[config.service] || defaultOption.system_role;
@@ -26,10 +26,10 @@ export function commonMsgTemplate(origin: string) {
 
 // deepseek
 export function deepseekMsgTemplate(origin: string) {
-    // 检测是否使用自定义模型
+    // Phát hiện xem một mô hình tùy chỉnh có được sử dụng hay không
     let model = config.model[config.service] === customModelString ? config.customModel[config.service] : config.model[config.service]
 
-    // 删除模型名称中的中文括号及其内容，如"gpt-4（推荐）" -> "gpt-4"
+    // Xóa dấu ngoặc bằng tiếng Trung và nội dung của chúng trong tên model, chẳng hạn như "gpt-4 (được khuyến nghị)" -> "gpt-4"
     model = model.replace(/（.*）/g, "");
 
     let system = config.system_role[config.service] || defaultOption.system_role;
@@ -44,7 +44,7 @@ export function deepseekMsgTemplate(origin: string) {
         ]
     };
 
-    // 如果不是 deepseek-reasoner 模型,则添加 temperature
+    // Nếu đó không phải là mô hình tìm kiếm sâu, hãy thêm nhiệt độ
     if (model !== 'deepseek-reasoner') {
         payload.temperature = 0.7;
     }
@@ -86,7 +86,7 @@ export function claudeMsgTemplate(origin: string) {
     })
 }
 
-// 通义千问
+// Tongyi Qianwen
 export function tongyiMsgTemplate(origin: string) {
     let model = config.model[config.service] === customModelString ? config.customModel[config.service] : config.model[config.service]
     const normalTemplate = () => {
@@ -103,9 +103,10 @@ export function tongyiMsgTemplate(origin: string) {
             ]
         })
     }
-    // 翻译模型qwen-mt-plus和qwen-mt-turbo的格式和通用的不同
+    // Định dạng của mô hình dịch qwen-mt-plus và qwen-mt-turbo khác với định dạng chung
     const mtModelTemplate = () => {
         const langMap = [
+            {value: "vi"},
             {value: "zh-Hans", target: "zh"},
             {value: "en"},
             {value: "ja"},
@@ -130,14 +131,14 @@ export function tongyiMsgTemplate(origin: string) {
 
 }
 
-// 文心一言
+// Wenxinyiyan
 export function yiyanMsgTemplate(origin: string) {
     let user = (config.user_role[config.service] || defaultOption.user_role)
         .replace('{{to}}', config.to).replace('{{origin}}', origin);
 
     return JSON.stringify({
         'temperature': 0.7,
-        'disable_search': true, // 禁用搜索
+        'disable_search': true, // Tắt tìm kiếm
         'messages': [
             {"role": "user", "content": user},
         ],

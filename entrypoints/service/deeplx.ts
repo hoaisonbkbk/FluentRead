@@ -3,19 +3,19 @@ import {services} from "../utils/option";
 import {config} from "@/entrypoints/utils/config";
 
 async function deeplx(message: any) {
-    // deeplx 不支持 zh-Hans，需要转换为 zh
+    // deeplx không hỗ trợ zh-Hans và cần được chuyển đổi sang zh
     let targetLang = config.to === 'zh-Hans' ? 'zh' : config.to;
     let sourceLang = config.from === 'auto' ? 'auto' : config.from;
     
-    // 判断是否使用代理或自定义URL
+    // Xác định xem nên sử dụng proxy hay URL tùy chỉnh
     let url: string = config.proxy[config.service] ? config.proxy[config.service] : config.deeplx || 'http://localhost:1188/translate';
 
-    // 构建请求头
+    // Xây dựng tiêu đề yêu cầu
     let headers: HeadersInit = {
         'Content-Type': 'application/json'
     };
 
-    // 如果有 token，则添加 Authorization 头
+    // Nếu có mã thông báo, hãy thêm tiêu đề Ủy quyền
     if (config.token[services.deeplx] && config.token[services.deeplx].trim() !== '') {
         headers['Authorization'] = `Bearer ${config.token[services.deeplx]}`;
     }
@@ -32,15 +32,15 @@ async function deeplx(message: any) {
 
     if (resp.ok) {
         let result = await resp.json();
-        // DeepLX 返回格式通常是 { code: 200, data: "translated text" }
+        // Định dạng trả về DeepLX thường là { code: 200, data: "transltext" }
         if (result.code === 200) {
             return result.data;
         } else {
-            throw new Error(`DeepLX 翻译失败: ${result.message || '未知错误'}`);
+            throw new Error(`Dịch DeepLX thất bại: ${result.message || 'Lỗi không xác định'}`);
         }
     } else {
-        console.log("DeepLX 翻译失败：", resp);
-        throw new Error(`DeepLX 翻译失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+        console.log("DeepLX Dịch thất bại: ", resp);
+        throw new Error(`Dịch DeepLX thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
     }
 }
 

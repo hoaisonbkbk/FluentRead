@@ -7,42 +7,42 @@ let selectionTranslatorInstance: any = null;
 let app: any = null;
 
 /**
- * 挂载选词翻译组件
+ * Gắn kết thành phần dịch lựa chọn từ
  */
 export function mountSelectionTranslator() {
-  // 如果已存在实例或配置禁用了此功能，则不创建
+  // Nếu một phiên bản đã tồn tại hoặc cấu hình tắt tính năng này thì nó sẽ không được tạo
   if (selectionTranslatorInstance || config.disableSelectionTranslator || config.selectionTranslatorMode === 'disabled') {
     return;
   }
 
-  // 创建容器元素
+  // Tạo phần tử vùng chứa
   const container = document.createElement('div');
   container.id = 'fluent-read-selection-translator-container';
   document.body.appendChild(container);
 
-  // 创建Vue应用实例
+  // Tạo một phiên bản ứng dụng Vue
   app = createApp(SelectionTranslator);
 
-  // 挂载应用
+  // Gắn kết ứng dụng
   selectionTranslatorInstance = app.mount(container);
 
   return selectionTranslatorInstance;
 }
 
 /**
- * 卸载选词翻译组件
+ * Gỡ bỏ thành phần dịch chọn từ
  */
 export function unmountSelectionTranslator() {
   if (selectionTranslatorInstance && app) {
-    // 获取容器
+    // Nhận container
     const container = document.getElementById('fluent-read-selection-translator-container');
     
-    // 卸载Vue应用
+    // Gỡ cài đặt ứng dụng Vue
     app.unmount();
     selectionTranslatorInstance = null;
     app = null;
     
-    // 移除容器
+    // Xóa vùng chứa
     if (container) {
       container.remove();
     }
@@ -50,7 +50,7 @@ export function unmountSelectionTranslator() {
 }
 
 /**
- * 切换选词翻译组件的启用状态
+ * Chuyển đổi trạng thái kích hoạt của thành phần dịch chọn từ
  */
 export function toggleSelectionTranslator() {
   if (selectionTranslatorInstance) {
@@ -61,15 +61,15 @@ export function toggleSelectionTranslator() {
     mountSelectionTranslator();
   }
   
-  // 保存配置到存储
+  // Lưu cấu hình vào bộ nhớ
   saveConfig();
 }
 
 /**
- * 保存配置到存储
+ * Lưu cấu hình vào bộ nhớ
  */
 function saveConfig() {
-  // 使用插件提供的存储API保存配置
+  // Lưu cấu hình bằng API lưu trữ do plugin cung cấp
   storage.setItem('local:config', JSON.stringify(config)).catch((error) => {
     console.error('Failed to save config:', error);
   });

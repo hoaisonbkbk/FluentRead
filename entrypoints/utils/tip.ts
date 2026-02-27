@@ -12,6 +12,6 @@ function _sendSuccessMessage(message: string) {
     ElMessage({message: prefix + message, type: 'success'});
 }
 
-// 使用防抖函数包装，1s 内只能发送一次消息
+// Sử dụng gói chức năng chống rung, tin nhắn chỉ có thể được gửi một lần trong vòng 1 giây.
 export const sendErrorMessage = throttle(_sendErrorMessage, 1000);
 export const sendSuccessMessage = throttle(_sendSuccessMessage, 1000);

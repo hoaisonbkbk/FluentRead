@@ -1,6 +1,6 @@
 <template>
   <teleport to="body">
-    <!-- 小红点指示器 -->
+    <!-- Chỉ báo chấm đỏ nhỏ -->
     <div v-if="showIndicator" 
          class="fr-selection-indicator" 
          :style="indicatorStyle" 
@@ -8,7 +8,7 @@
          @mouseleave="handleMouseLeave">
     </div>
     
-    <!-- 翻译结果弹窗 -->
+    <!-- Cửa sổ bật lên dịch kết quả -->
     <div v-if="showTooltip" 
          class="fr-translation-tooltip" 
          :class="{ 'fr-dark-theme': isDarkTheme }"
@@ -16,9 +16,9 @@
          @mouseenter="handleMouseEnterTooltip"
          @mouseleave="handleMouseLeaveTooltip">
       <div class="fr-tooltip-header">
-        <span>翻译结果<small>（via 流畅阅读）</small></span>
+        <span>Kết quả dịch<small>(qua FluentRead)</small></span>
         <div class="fr-tooltip-actions">
-          <button class="fr-action-btn" @click="copyTranslation" title="复制译文">
+          <button class="fr-action-btn" @click="copyTranslation" title="Sao chép bản dịch">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -31,10 +31,10 @@
         <div v-if="isLoading" :class="['fr-loading-spinner', { 'fr-static': !config.animations }]"></div>
         <div v-else-if="error" class="fr-error-message">{{ error }}</div>
         <div v-else class="fr-translation-container">
-          <!-- 原文显示（双语模式才显示） -->
+          <!-- Hiển thị nguyên văn (chỉ hiển thị ở chế độ song ngữ) -->
           <div v-if="config.selectionTranslatorMode === 'bilingual'" class="fr-original-text fr-no-select">
             <pre>{{ selectedText }}</pre>
-            <button class="fr-text-audio-btn" @click="(e) => toggleAudio(selectedText, e)" title="播放/停止原文">
+            <button class="fr-text-audio-btn" @click="(e) => toggleAudio(selectedText, e)" title="Phát/dừng nguyên văn">
               <svg v-if="isPlaying && currentPlayingText === selectedText" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="6" y="4" width="4" height="16"></rect>
                 <rect x="14" y="4" width="4" height="16"></rect>
@@ -45,10 +45,10 @@
               </svg>
             </button>
           </div>
-          <!-- 译文显示（双语模式和只显示译文模式都显示） -->
+          <!-- Hiển thị bản dịch (hiển thị ở cả chế độ song ngữ và Chỉ hiển thị chế độ dịch) -->
           <div v-if="config.selectionTranslatorMode === 'bilingual' || config.selectionTranslatorMode === 'translation-only'" class="fr-translation-result fr-no-select">
             <pre>{{ translationResult }}</pre>
-            <button class="fr-text-audio-btn" @click="(e) => toggleAudio(translationResult, e)" title="播放/停止译文">
+            <button class="fr-text-audio-btn" @click="(e) => toggleAudio(translationResult, e)" title="Phát/dừng bản dịch">
               <svg v-if="isPlaying && currentPlayingText === translationResult" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="6" y="4" width="4" height="16"></rect>
                 <rect x="14" y="4" width="4" height="16"></rect>
@@ -60,7 +60,7 @@
             </button>
           </div>
           
-          <!-- 播放状态提示 - 显示在弹窗内部 -->
+          <!-- Lời nhắc trạng thái phát lại - hiển thị bên trong cửa sổ bật lên -->
           <div v-if="isPlaying" class="fr-playing-status">
             <div class="fr-playing-status-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -68,7 +68,7 @@
                 <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
               </svg>
             </div>
-            <span>正在播放: {{ currentPlayingText === selectedText ? '原文' : '译文' }}</span>
+            <span>Đang phát: {{ currentPlayingText === selectedText ? 'Nguyên văn' : 'Bản dịch' }}</span>
             <button class="fr-stop-audio-btn" @click="(e) => stopAudio(e)">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="6" y="4" width="4" height="16"></rect>
@@ -80,14 +80,14 @@
       </div>
     </div>
     
-    <!-- 复制成功提示 -->
+    <!-- Sao chép các mẹo thành công -->
     <div v-if="copySuccess" class="fr-copy-success-toast" :class="{ 'fr-dark-theme': isDarkTheme }">
       <div class="fr-copy-success-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
       </div>
-      <span>复制译文成功!</span>
+      <span>Sao chép bản dịch thành công!</span>
     </div>
   </teleport>
 </template>
@@ -97,7 +97,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { translateText } from '@/entrypoints/utils/translateApi';
 import { config } from '@/entrypoints/utils/config';
 
-// 状态变量
+// biến trạng thái
 const selectedText = ref('');
 const translationResult = ref('');
 const selectionRect = ref<DOMRect | null>(null);
@@ -110,14 +110,14 @@ const isHoveringTooltip = ref(false);
 const copySuccess = ref(false);
 const isPlaying = ref(false);
 const audioElement = ref<HTMLAudioElement | null>(null);
-const lastSelectedText = ref(''); // 用于存储上一次选择的文本
-const isSelecting = ref(false); // 标记用户是否正在选择文本中
-const debounceTimer = ref<number | null>(null); // 防抖定时器
-const currentPlayingText = ref(''); // 当前正在播放的文本
-const isFirefox = ref(false); // 是否为Firefox浏览器
-const isDarkTheme = ref(false); // 主题状态
+const lastSelectedText = ref(''); // Dùng để lưu trữ nội dung của lần lựa chọn trước đó
+const isSelecting = ref(false); // Đánh dấu xem người dùng có đang chọn văn bản hay không
+const debounceTimer = ref<number | null>(null); // Hẹn giờ chống rung
+const currentPlayingText = ref(''); // Văn bản hiện đang phát
+const isFirefox = ref(false); // Cho dù đó là trình duyệt Firefox
+const isDarkTheme = ref(false); // trạng thái chủ đề
 
-// 计算小红点指示器的样式
+// Tính toán kiểu dáng của chỉ báo chấm đỏ nhỏ
 const indicatorStyle = computed(() => {
   if (!selectionRect.value) return {};
   
@@ -128,25 +128,25 @@ const indicatorStyle = computed(() => {
   };
 });
 
-// 计算弹窗的样式
+// Tính toán kiểu cửa sổ bật lên
 const tooltipStyle = computed(() => {
   if (!selectionRect.value) return {};
   
-  // 确保弹窗不会超出视口
+  // Đảm bảo cửa sổ bật lên không vượt quá khung nhìn
   const left = Math.min(
     selectionRect.value.right + 15,
-    window.innerWidth - 350 // 稍微增加宽度，适应换行文本
+    window.innerWidth - 350 // Tăng chiều rộng một chút để phù hợp với văn bản được gói
   );
   
   return {
     left: `${left}px`,
     top: `${selectionRect.value.top}px`,
-    maxWidth: '350px', // 增加宽度以适应更多内容
-    maxHeight: '400px' // 增加最大高度以支持更多内容
+    maxWidth: '350px', // Tăng chiều rộng để phù hợp với nhiều nội dung hơn
+    maxHeight: '400px' // Tăng chiều cao tối đa để hỗ trợ nhiều nội dung hơn
   };
 });
 
-// 防抖函数
+// Chức năng chống rung
 const debounce = (fn: Function, delay: number) => {
   if (debounceTimer.value) {
     clearTimeout(debounceTimer.value);
@@ -157,9 +157,9 @@ const debounce = (fn: Function, delay: number) => {
   }, delay);
 };
 
-// 处理文本选择事件 (使用防抖优化)
+// Xử lý các sự kiện chọn văn bản (sử dụng tính năng tối ưu hóa chống rung)
 const handleTextSelection = () => {
-  // 如果用户正在选择中，不立即处理
+  // Nếu người dùng đang thực hiện lựa chọn, đừng xử lý nó ngay lập tức
   if (isSelecting.value) return;
   
   debounce(() => {
@@ -171,14 +171,14 @@ const handleTextSelection = () => {
     
     const selectedTextContent = selection.toString().trim();
     
-    // 如果选中的文本为空，则不处理
+    // Nếu văn bản đã chọn trống, nó sẽ không được xử lý
     if (!selectedTextContent) {
       return;
     }
     
-    // 如果选中的文本与上次相同，重新显示指示器（避免因为相同文本而不显示的问题）
+    // Nếu văn bản đã chọn giống với lần ở trên thì hiển thị lại chỉ báo (để tránh hiện tượng không hiển thị văn bản giống nhau)
     if (selectedTextContent === lastSelectedText.value) {
-      // 重新显示指示器，但不重新获取翻译
+      // Hiển thị lại chỉ báo mà không tìm nạp lại bản dịch
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
       selectionRect.value = rect;
@@ -186,73 +186,73 @@ const handleTextSelection = () => {
       return;
     }
     
-    // 忽略过短的选择（避免意外触发）
+    // Bỏ qua các lựa chọn quá ngắn (để tránh vô tình kích hoạt)
     if (selectedTextContent.length < 2) {
       hideIndicator();
       return;
     }
     
-    // 忽略过长的选择（避免处理大段文本导致性能问题）
-    const maxTextLength = 4096; // 设置最大字符数限制
+    // Bỏ qua các lựa chọn dài (để tránh các vấn đề về hiệu suất do xử lý khối văn bản lớn)
+    const maxTextLength = 4096; // Đặt giới hạn ký tự tối đa
     if (selectedTextContent.length > maxTextLength) {
       hideIndicator();
       return;
     }
     
-    // 获取选中文本位置信息
+    // Nhận thông tin vị trí cho Tiếng Trung đã chọn
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
     
-    // 保存选中文本和位置
+    // Lưu chọn sách Tiếng Trung và địa điểm
     selectedText.value = selectedTextContent;
     lastSelectedText.value = selectedTextContent;
     selectionRect.value = rect;
     showIndicator.value = true;
-  }, 200); // 200ms防抖延迟，减少延迟提高响应性
+  }, 200); // Độ trễ chống rung 200ms, giảm độ trễ và cải thiện khả năng phản hồi
 };
 
-// 鼠标进入指示器
+// chỉ báo nhập chuột
 const handleMouseEnter = () => {
   clearHideTooltipTimer();
   showTooltip.value = true;
 };
 
-// 鼠标离开指示器
+// Chỉ báo Kích hoạt Di chuột
 const handleMouseLeave = () => {
-  // 如果鼠标不在tooltip上，则设置定时器隐藏tooltip
+  // Nếu chuột không ở trên chú giải công cụ, hãy đặt hẹn giờ để ẩn chú giải công cụ
   if (!isHoveringTooltip.value) {
     setHideTooltipTimer();
   }
 };
 
-// 鼠标进入弹窗
+// Chuột vào cửa sổ bật lên
 const handleMouseEnterTooltip = () => {
   isHoveringTooltip.value = true;
   clearHideTooltipTimer();
 };
 
-// 鼠标离开弹窗
+// Chuột trái Kích hoạt cửa sổ bật lên
 const handleMouseLeaveTooltip = () => {
   isHoveringTooltip.value = false;
   
-  // 如果当前正在播放音频，不自动隐藏弹窗
+  // Nếu âm thanh hiện đang phát, cửa sổ bật lên sẽ không tự động ẩn.
   if (isPlaying.value) return;
   
   setHideTooltipTimer();
 };
 
-// 设置隐藏弹窗的定时器
+// Đặt hẹn giờ để ẩn cửa sổ bật lên
 const setHideTooltipTimer = () => {
   clearHideTooltipTimer();
   hideTooltipTimer.value = window.setTimeout(() => {
-    // 如果当前正在播放音频，不隐藏弹窗
+    // Nếu âm thanh hiện đang phát, đừng ẩn cửa sổ bật lên
     if (isPlaying.value) return;
     
     showTooltip.value = false;
-  }, 250); // 250毫秒后隐藏
+  }, 250); // Ẩn sau 250 mili giây
 };
 
-// 清除隐藏弹窗的定时器
+// Xóa bộ hẹn giờ để ẩn cửa sổ bật lên
 const clearHideTooltipTimer = () => {
   if (hideTooltipTimer.value !== null) {
     clearTimeout(hideTooltipTimer.value);
@@ -260,20 +260,20 @@ const clearHideTooltipTimer = () => {
   }
 };
 
-// 隐藏指示器
+// ẩn chỉ báo
 const hideIndicator = () => {
   showIndicator.value = false;
   setHideTooltipTimer();
 };
 
-// 关闭翻译弹窗
+// Tắt cửa sổ bật lên dịch
 const closeTooltip = () => {
   showTooltip.value = false;
-  // 当关闭弹窗时停止音频播放
+  // Dừng phát lại âm thanh khi Tắt bật lên
   stopAudio();
 };
 
-// 获取翻译结果
+// Nhận kết quả dịch
 const getTranslation = async () => {
   if (!selectedText.value) return;
   
@@ -281,42 +281,42 @@ const getTranslation = async () => {
   error.value = '';
   
   try {
-    // 使用当前配置的翻译服务进行翻译
+    // Sử dụng dịch vụ Dịch vụ được cấu hình hiện tại để dịch
     const result = await translateText(selectedText.value);
     translationResult.value = result;
   } catch (err) {
-    error.value = '翻译失败，请重试';
+    error.value = 'Dịch thất bại, vui lòng thử lại';
     console.error('Translation error:', err);
   } finally {
     isLoading.value = false;
   }
 };
 
-// 复制翻译文本
+// Sao chépchuyển Bản dịch
 const copyTranslation = () => {
   if (!translationResult.value) return;
   
-  // 使用navigator.clipboard API复制文本
+  // Sử dụng API navigator.clipboardSao chép văn bản
   navigator.clipboard.writeText(translationResult.value)
     .then(() => {
-      // 显示复制成功消息
+      // Hiển thị thông báo Sao chép thành công
       copySuccess.value = true;
-      // 1.5秒后隐藏消息
+      // Ẩn tin nhắn sau 1,5 giây
       setTimeout(() => {
         copySuccess.value = false;
       }, 1500);
     })
     .catch(err => {
-      console.error('复制失败:', err);
+      console.error('Sao chép thất bại:', err);
     });
 };
 
-// 播放或停止文本语音
+// Phát hoặc dừng chuyển văn bản thành giọng nói
 const toggleAudio = (text: string, e?: Event) => {
   if (!text) return;
 
-  // 阻止事件冒泡，避免触发外部点击事件导致弹窗关闭
-  // 针对Firefox兼容性问题，优先使用传入的事件对象，否则使用全局event
+  // Ngăn chặn sự kiện sủi bọt và tránh kích hoạt các sự kiện nhấp chuột bên ngoài gây ra cửa sổ bật lên Tắt
+  // Đối với các sự cố tương thích với Firefox, đối tượng sự kiện đến sẽ được sử dụng trước tiên, nếu không thì sự kiện chung sẽ được sử dụng.
   if (e) {
     e.stopPropagation();
     e.preventDefault();
@@ -325,80 +325,80 @@ const toggleAudio = (text: string, e?: Event) => {
     event.preventDefault();
   }
   
-  // 确保弹窗不会消失
+  // Đảm bảo cửa sổ bật lên không biến mất
   clearHideTooltipTimer();
   isHoveringTooltip.value = true;
 
-  // 如果当前正在播放同一文本，则停止播放
+  // Dừng phát nếu văn bản tương tự hiện đang phát
   if (isPlaying.value && currentPlayingText.value === text) {
     stopAudio(e);
     return;
   }
   
-  // 如果正在播放其他文本，先停止
+  // Nếu văn bản khác đang phát, hãy dừng nó trước
   if (isPlaying.value) {
     stopAudio(e);
   }
   
-  // 检测语言
+  // Phát hiện ngôn ngữ
   const language = detectLanguage(text);
   
-  // 创建语音合成URL
+  // Tạo URL tổng hợp giọng nói
   const speechUrl = createSpeechUrl(text, language);
   
-  // 创建音频元素前先设置状态，解决Firefox中状态更新不及时的问题
+  // Đặt trạng thái trước khi tạo thành phần âm thanh để giải quyết vấn đề cập nhật trạng thái chậm trên Firefox
   isPlaying.value = true;
   currentPlayingText.value = text;
   
-  // 创建音频元素
+  // Tạo các phần tử âm thanh
   const audio = new Audio(speechUrl);
   audioElement.value = audio;
   
-  // 监听播放开始事件
+  // Giám sát sự kiện bắt đầu phát lại
   audio.onplay = () => {
-    // 确保状态已更新
+    // Đảm bảo trạng thái được cập nhật
     isPlaying.value = true;
     currentPlayingText.value = text;
   };
   
-  // 监听播放结束事件
+  // Nghe các sự kiện kết thúc phát lại
   audio.onended = () => {
     isPlaying.value = false;
     audioElement.value = null;
     currentPlayingText.value = '';
   };
   
-  // 监听错误事件
+  // Lắng nghe các sự kiện lỗi
   audio.onerror = (e) => {
-    console.error('音频播放失败:', e);
+    console.error('Phát âm thanh thất bại:', e);
     isPlaying.value = false;
     audioElement.value = null;
     currentPlayingText.value = '';
     
-    // 不要尝试使用Web Speech API作为备选，避免重复播放
+    // Đừng cố gắng sử dụng API Web Speech làm phương án dự phòng để tránh phát lại trùng lặp
     // tryWebSpeechAPI(text, language);
   };
   
-  // 开始播放
+  // Bật bắt đầu phát
   const playPromise = audio.play();
   
-  // 处理播放Promise
+  // Xử lý việc chơi Promise
   if (playPromise !== undefined) {
     playPromise.catch(err => {
-      console.error('音频播放出错:', err);
+      console.error('Lỗi phát âm thanh:', err);
       isPlaying.value = false;
       audioElement.value = null;
       currentPlayingText.value = '';
       
-      // 尝试使用Web Speech API作为备选，只在Google TTS失败时使用
+      // Hãy thử sử dụng API Web Speech làm phương án thay thế, chỉ khi Google TTS không thành công
       tryWebSpeechAPI(text, language);
     });
   }
 };
 
-// 停止音频播放
+// Dừng phát lại âm thanh
 const stopAudio = (e?: Event) => {
-  // 阻止事件冒泡
+  // Ngăn chặn sự kiện nổi lên
   if (e) {
     e.stopPropagation();
     e.preventDefault();
@@ -412,7 +412,7 @@ const stopAudio = (e?: Event) => {
     audioElement.value = null;
   }
   
-  // 停止Web Speech API
+  // Dừng API giọng nói trên web
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
@@ -421,67 +421,67 @@ const stopAudio = (e?: Event) => {
   currentPlayingText.value = '';
 };
 
-// 检测语言
+// Phát hiện ngôn ngữ
 const detectLanguage = (text: string): string => {
-  // 简单的语言检测，可根据实际需求完善
-  // 检测是否包含中文字符
+  // Phát hiện ngôn ngữ đơn giản, có thể được cải thiện theo nhu cầu thực tế
+  // Phát hiện xem nó có chứa ký tự Tiếng Trung không
   const hasChinese = /[\u4e00-\u9fa5]/.test(text);
   if (hasChinese) return 'zh-CN';
   
-  // 检测是否包含日文字符
+  // Kiểm tra xem nó có chứa ký tự tiếng Nhật không
   const hasJapanese = /[\u3040-\u30ff]/.test(text);
   if (hasJapanese) return 'ja-JP';
   
-  // 检测是否包含韩文字符
+  // Phát hiện xem nó có chứa các ký tự tiếng Hàn hay không
   const hasKorean = /[\uAC00-\uD7A3]/.test(text);
   if (hasKorean) return 'ko-KR';
   
-  // 检测是否包含俄文字符
+  // Kiểm tra xem nó có chứa các ký tự tiếng Nga không
   const hasRussian = /[\u0400-\u04FF]/.test(text);
   if (hasRussian) return 'ru-RU';
   
-  // 检测是否包含德文特殊字符
+  // Phát hiện xem nó có chứa các ký tự đặc biệt của Đức hay không
   const hasGerman = /[äöüßÄÖÜ]/.test(text);
   if (hasGerman) return 'de-DE';
   
-  // 检测是否包含法文特殊字符
+  // Phát hiện xem nó có chứa các ký tự đặc biệt của Pháp hay không
   const hasFrench = /[àâçéèêëîïôùûüÿæœÀÂÇÉÈÊËÎÏÔÙÛÜŸÆŒ]/.test(text);
   if (hasFrench) return 'fr-FR';
   
-  // 检测是否包含西班牙文特殊字符
+  // Phát hiện xem có bao gồm các ký tự đặc biệt tiếng Tây Ban Nha không
   const hasSpanish = /[áéíóúüñÁÉÍÓÚÜÑ]/.test(text);
   if (hasSpanish) return 'es-ES';
   
-  // 默认返回英语
+  // Trả về mặc định Tiếng Anh
   return 'en-US';
 };
 
-// 创建语音合成URL
+// Tạo URL tổng hợp giọng nói
 const createSpeechUrl = (text: string, language: string): string => {
-  // 使用Google Text-to-Speech API
+  // Sử dụng API chuyển văn bản thành giọng nói của Google
   const encodedText = encodeURIComponent(text);
   return `https://translate.google.com/translate_tts?ie=UTF-8&tl=${language}&client=tw-ob&q=${encodedText}`;
 };
 
-// 使用Web Speech API作为备选方案
+// Sử dụng API Web Speech thay thế
 const tryWebSpeechAPI = (text: string, language: string) => {
-  // 如果已经在播放，不要重复播放
+  // Nếu đã chơi rồi thì đừng chơi lại
   if (isPlaying.value) return;
   
-  // 检查浏览器是否支持Web Speech API
+  // Kiểm tra xem trình duyệt có hỗ trợ API Web Speech không
   if ('speechSynthesis' in window) {
-    // 停止任何可能正在播放的内容
+    // Dừng mọi thứ có thể đang phát
     window.speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language;
     
-    // 设置状态
+    // Đặt trạng thái
     isPlaying.value = true;
     currentPlayingText.value = text;
     
     utterance.onstart = () => {
-      // 确保状态已更新
+      // Đảm bảo trạng thái được cập nhật
       isPlaying.value = true;
       currentPlayingText.value = text;
     };
@@ -498,42 +498,42 @@ const tryWebSpeechAPI = (text: string, language: string) => {
     
     window.speechSynthesis.speak(utterance);
   } else {
-    console.error('此浏览器不支持语音合成');
+    console.error('Trình duyệt này không hỗ trợ tổng hợp giọng nói');
   }
 };
 
-// 检测是否为Firefox浏览器
+// Phát hiện xem đó có phải là trình duyệt Firefox không
 const detectFirefox = () => {
   return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 };
 
-// 获取当前主题状态
+// Nhận trạng thái chủ đề hiện tại
 const getCurrentTheme = () => {
   const currentTheme = config.theme || 'auto';
   if (currentTheme === 'auto') {
-    // 自动模式下检测系统主题
+    // Phát hiện chủ đề hệ thống ở chế độ tự động
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
   return currentTheme === 'dark';
 };
 
-// 更新主题状态
+// Cập nhật trạng thái chủ đề
 const updateTheme = () => {
   isDarkTheme.value = getCurrentTheme();
 };
 
-// 监听事件
+// Lắng nghe sự kiện
 onMounted(() => {
-  // 检测浏览器类型
+  // Phát hiện loại trình duyệt
   isFirefox.value = detectFirefox();
   
-  // 初始化主题状态
+  // Khởi tạo trạng thái chủ đề
   updateTheme();
   
-  // 监听主题变化
+  // Theo dõi thay đổi chủ đề
   watch(() => config.theme, updateTheme, { immediate: true });
   
-  // 监听系统主题变化（用于自动模式）
+  // Lắng nghe các thay đổi của chủ đề hệ thống (đối với chế độ tự động)
   const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   const handleSystemThemeChange = () => {
     if (config.theme === 'auto') {
@@ -542,10 +542,10 @@ onMounted(() => {
   };
   darkModeMediaQuery.addEventListener('change', handleSystemThemeChange);
   
-  // 保存系统主题监听器引用供清理使用
+  // Lưu tài liệu tham khảo của người nghe chủ đề hệ thống để sử dụng dọn dẹp
   systemThemeHandler = handleSystemThemeChange;
   
-  // 定义事件监听器函数
+  // Xác định chức năng nghe sự kiện
   mouseDownHandler = () => {
     isSelecting.value = true;
   };
@@ -555,20 +555,20 @@ onMounted(() => {
     handleTextSelection();
   };
   
-  // 鼠标按下时，标记开始选择
+  // Đánh dấu Bật bắt đầu lựa chọn khi nhấn chuột
   document.addEventListener('mousedown', mouseDownHandler);
   
-  // 鼠标抬起时，标记选择结束，并处理选中文本
+  // Khi chuột giơ lên, vùng chọn được đánh dấu và vùng chọn Tiếng Trung được xử lý.
   document.addEventListener('mouseup', mouseUpHandler);
   
-  // 添加selectionchange事件作为备用机制（使用节流限制频率）
+  // Thêm sự kiện thay đổi lựa chọn làm cơ chế dự phòng (sử dụng điều chỉnh để giới hạn tần suất)
   let lastSelectionChangeTime = 0;
   selectionChangeHandler = () => {
     const now = Date.now();
-    // 节流：只有在500ms内没有处理过selectionchange且不在选择过程中时才处理
+    // Điều chỉnh: chỉ xử lý lựa chọn thay đổi nếu nó chưa được xử lý trong vòng 500 mili giây và không nằm trong quá trình lựa chọn
     if (now - lastSelectionChangeTime > 500 && !isSelecting.value) {
       lastSelectionChangeTime = now;
-      // 延迟处理，确保选择操作完成
+      // Trì hoãn xử lý để đảm bảo hoạt động lựa chọn được hoàn thành
       setTimeout(() => {
         if (!isSelecting.value) {
           handleTextSelection();
@@ -579,34 +579,34 @@ onMounted(() => {
   
   document.addEventListener('selectionchange', selectionChangeHandler);
   
-  // 更新clickHandler定义，添加selectionchange的清理
+  // Cập nhật định nghĩa clickHandler và thêm tính năng dọn dẹp thay đổi lựa chọn
   const originalClickHandler = clickHandler;
   clickHandler = (e: Event) => {
     originalClickHandler(e);
   };
   
-  // 监听翻译显示状态的变化
+  // Theo dõi những thay đổi về trạng thái hiển thị bản dịch
   watch(showTooltip, async (newValue: boolean) => {
     if (newValue) {
-      // 当显示弹窗时，加载翻译结果
+      // Khi cửa sổ bật lên được hiển thị, hãy tải Kết quả dịch
       await getTranslation();
     } else if (isPlaying.value) {
-      // 当关闭弹窗时，停止播放
+      // Dừng chơi khi Tắt bật lên
       stopAudio();
     }
   });
   
-  // 定义点击事件处理函数
+  // Xác định chức năng xử lý sự kiện nhấp chuột
   clickHandler = (e: Event) => {
-    // 检查点击事件是否发生在指示器或弹窗之外
+    // Kiểm tra xem sự kiện nhấp chuột có xảy ra bên ngoài chỉ báo hoặc cửa sổ bật lên không
     const target = e.target as HTMLElement;
     const isOutsideIndicator = !target.closest('.fr-selection-indicator');
     const isOutsideTooltip = !target.closest('.fr-translation-tooltip');
     
-    // 检查点击事件是否发生在音频按钮上
+    // Kiểm tra xem sự kiện nhấp chuột có xảy ra trên nút âm thanh không
     const isAudioButton = target.closest('.fr-text-audio-btn') || target.closest('.fr-stop-audio-btn');
     
-    // 如果点击在音频按钮上，不要隐藏弹窗
+    // Đừng ẩn cửa sổ bật lên nếu bạn nhấp vào nút âm thanh
     if (isAudioButton) {
       return;
     }
@@ -617,20 +617,20 @@ onMounted(() => {
     }
   };
   
-  // 添加点击页面其他区域时隐藏指示器和弹窗
+  // Đã thêm các chỉ báo ẩn và cửa sổ bật lên khi nhấp vào các khu vực khác của trang
   document.addEventListener('click', clickHandler);
 });
 
-// 存储事件监听器函数的引用，用于正确移除
+// Lưu trữ một tham chiếu đến chức năng xử lý sự kiện để loại bỏ chính xác
 let mouseDownHandler: () => void;
 let mouseUpHandler: () => void;
 let clickHandler: (e: Event) => void;
 let selectionChangeHandler: () => void;
 let systemThemeHandler: () => void;
 
-// 清理事件监听 (修复清理逻辑)
+// Nghe sự kiện dọn dẹp (sửa logic dọn dẹp)
 onBeforeUnmount(() => {
-  // 正确移除事件监听器
+  // Loại bỏ chính xác trình xử lý sự kiện
   if (mouseDownHandler) {
     document.removeEventListener('mousedown', mouseDownHandler);
   }
@@ -644,26 +644,26 @@ onBeforeUnmount(() => {
     document.removeEventListener('selectionchange', selectionChangeHandler);
   }
   
-  // 移除系统主题监听器
+  // Xóa trình nghe chủ đề hệ thống
   if (systemThemeHandler) {
     const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     darkModeMediaQuery.removeEventListener('change', systemThemeHandler);
   }
   
-  // 清理所有定时器
+  // Xóa tất cả bộ tính giờ
   clearHideTooltipTimer();
   if (debounceTimer.value) {
     clearTimeout(debounceTimer.value);
     debounceTimer.value = null;
   }
   
-  // 停止所有音频播放
+  // Dừng tất cả phát lại âm thanh
   if (audioElement.value) {
     audioElement.value.pause();
     audioElement.value = null;
   }
   
-  // 停止Web Speech API
+  // Dừng API giọng nói trên web
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
@@ -708,7 +708,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  width: 350px; /* 增加宽度 */
+  width: 350px; /* tăng chiều rộng */
   transition: opacity 0.2s ease;
 }
 
@@ -719,7 +719,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #e8e8e8;
-  position: sticky; /* 使header粘性定位 */
+  position: sticky; /* Tạo vị trí cố định cho tiêu đề */
   top: 0;
   z-index: 1;
 }
@@ -766,9 +766,9 @@ onBeforeUnmount(() => {
 .fr-tooltip-content {
   padding: 12px;
   background-color: white !important;
-  overflow-y: auto; /* 添加垂直滚动 */
-  max-height: 350px; /* 增加最大高度 */
-  scrollbar-width: thin; /* 细滚动条 */
+  overflow-y: auto; /* Thêm cuộn dọc */
+  max-height: 350px; /* Tăng chiều cao tối đa */
+  scrollbar-width: thin; /* Thanh cuộn mỏng */
   scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
@@ -817,7 +817,7 @@ onBeforeUnmount(() => {
   border-top: 2px solid #69c0ff;
 }
 
-/* 静态加载样式 */
+/* Kiểu tải tĩnh */
 .fr-loading-spinner.fr-static {
   animation: none;
   background: radial-gradient(circle, rgb(230, 151, 171) 30%, rgba(230, 151, 171, 0.6) 70%);
@@ -826,7 +826,7 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
-/* 添加光泽效果 */
+/* Thêm hiệu ứng bóng */
 .fr-loading-spinner.fr-static::before {
   content: '';
   position: absolute;
@@ -854,7 +854,7 @@ onBeforeUnmount(() => {
   color: #ff7875;
 }
 
-/* 文本内播放按钮 */
+/* Nút phát trong văn bản */
 .fr-text-audio-btn {
   position: absolute;
   right: 4px;
@@ -882,7 +882,7 @@ onBeforeUnmount(() => {
   background-color: rgba(24, 144, 255, 0.1);
 }
 
-/* 自定义滚动条样式 */
+/* Kiểu thanh cuộn tùy chỉnh */
 .fr-tooltip-content::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -897,7 +897,7 @@ onBeforeUnmount(() => {
   background-color: transparent;
 }
 
-/* 暗黑模式适配 */
+/* Thích ứng chế độ tối */
 .fr-translation-tooltip.fr-dark-theme {
   background-color: #1f1f1f !important;
   border: 1px solid #333;
@@ -958,7 +958,7 @@ onBeforeUnmount(() => {
   cursor: default;
 }
 
-/* 移除不需要的选择样式 */
+/* Loại bỏ các kiểu lựa chọn không mong muốn */
 .user-select-text::selection {
   background-color: #409eff;
   color: white;
@@ -1005,7 +1005,7 @@ onBeforeUnmount(() => {
   justify-content: center;
 }
 
-/* 内部播放状态提示 */
+/* Lời nhắc trạng thái phát lại nội bộ */
 .fr-playing-status {
   margin-top: 10px;
   padding: 8px 12px;
@@ -1019,7 +1019,7 @@ onBeforeUnmount(() => {
   animation: pulse-light 1.5s infinite;
 }
 
-/* 修复Firefox浏览器中动画丢失的问题 */
+/* Sửa lỗi thiếu ảnh động trong trình duyệt Firefox */
 @-moz-document url-prefix() {
   .fr-playing-status {
     animation-name: moz-pulse-light;
@@ -1074,7 +1074,7 @@ onBeforeUnmount(() => {
   background-color: rgba(24, 144, 255, 0.2);
 }
 
-/* 暗黑模式适配 */
+/* Thích ứng chế độ tối */
 .fr-translation-tooltip.fr-dark-theme .fr-playing-status {
   background-color: rgba(64, 169, 255, 0.15);
   color: #ffffff;
@@ -1088,7 +1088,7 @@ onBeforeUnmount(() => {
   background-color: rgba(64, 169, 255, 0.2);
 }
 
-/* 移除外部播放提示样式，改为内部显示 */
+/* Xóa kiểu lời nhắc phát lại bên ngoài và thay đổi nó thành màn hình bên trong */
 .fr-audio-playing-toast {
   display: none;
 }

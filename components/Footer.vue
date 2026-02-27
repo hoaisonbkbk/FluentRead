@@ -1,11 +1,11 @@
 <template>
   <div class="footer-container footer-size">
-    <p class="translation-count">你已经翻译
+    <p class="translation-count">Bạn đã dịch
       <el-text class="count-number" type="primary">{{ computedCount }}</el-text>
-      次
+      lần
     </p>
     <div class="footer-links">
-      <el-link class="action-link left" :class="{ 'failed': buttonText === '清除失败', 'success': buttonText === '清除成功' }" @click="clearCache"
+      <el-link class="action-link left" :class="{ 'failed': buttonText === 'Xóa thất bại', 'success': buttonText === 'Xóa thành công' }" @click="clearCache"
         :disabled="buttonDisabled">
         <el-icon v-if="showLoading">
           <Loading class="el-icon-loading" />
@@ -17,14 +17,14 @@
           <el-icon class="github-icon">
             <Star />
           </el-icon>
-          GitHub开源
+          Mã nguồn mở GitHub
         </el-link>
       </div>
     </div>
     
-    <!-- 赞赏码弹窗 -->
+    <!-- Mã hỗ trợ cửa sổ bật lên -->
     <div
-      title="赞赏作者"
+      title="Ủng hộ tác giả"
       width="300px"
       align-center
       :show-close="true"
@@ -33,12 +33,12 @@
       class="donate-dialog"
     >
       <div class="donate-content">
-        <p class="donate-text">如果你觉得这个插件对您有帮助，<br>可以通过微信👇🏻赞赏作者一杯咖啡
+        <p class="donate-text">Nếu bạn thấy tiện ích này hữu ích,<br>bạn có thể ủng hộ tác giả một ly cà phê qua WeChat 👇🏻
           <el-icon class="donate-icon"><Coffee /></el-icon> </p>
         <div class="qrcode-container">
-          <img src="/misc/approve.jpg" alt="赞赏码" class="qrcode-image" />
+          <img src="/misc/approve.jpg" alt="Mã ủng hộ" class="qrcode-image" />
         </div>
-        <p class="donate-thanks">感谢你的支持！❤️</p>
+        <p class="donate-thanks">Cảm ơn bạn đã ủng hộ! ❤️</p>
       </div>
     </div>
   </div>
@@ -51,50 +51,50 @@ import { Config } from "../entrypoints/utils/model";
 import { storage } from '@wxt-dev/storage';
 import browser from 'webextension-polyfill';
 
-// 实际上是 el-link 而不是 el-button
+// Thực ra el-link không phải el-button
 const buttonDisabled = ref(false);
-const buttonText = ref('清除翻译缓存');
+const buttonText = ref('Xóa bộ nhớ đệm dịch');
 
 const showLoading = ref(false);
 async function clearCache() {
   try {
     buttonDisabled.value = true;
-    buttonText.value = "正在清除...";
+    buttonText.value = "Đang xóa...";
     showLoading.value = true;
 
-    // 获取当前标签页
+    // Nhận tab hiện tại
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     if (!tabs[0]?.id) {
       throw new Error('No active tab found');
     }
 
-    // 发送消息到 content.js
+    // Gửi tin nhắn đến content.js
     await browser.tabs.sendMessage(tabs[0].id, { message: 'clearCache' });
 
-    // 显示成功状态
-    buttonText.value = "清除成功";
+    // Hiển thị trạng thái thành công
+    buttonText.value = "Xóa thành công";
 
-    // 恢复按钮状态
+    // Khôi phục trạng thái nút
     setTimeout(() => {
       buttonDisabled.value = false;
-      buttonText.value = '清除翻译缓存';
+      buttonText.value = 'Xóa bộ nhớ đệm dịch';
       showLoading.value = false;
     }, 1500);
 
   } catch (error) {
-    console.error('清除缓存失败:', error);
-    buttonText.value = "清除失败";
+    console.error('Xóa bộ nhớ đệm thất bại:', error);
+    buttonText.value = "Xóa thất bại";
 
-    // 恢复按钮状态
+    // Khôi phục trạng thái nút
     setTimeout(() => {
       buttonDisabled.value = false;
-      buttonText.value = '清除翻译缓存';
+      buttonText.value = 'Xóa bộ nhớ đệm dịch';
       showLoading.value = false;
     }, 1500);
   }
 }
 
-// 获取配置，用于显示翻译次数
+// Nhận cấu hình hiển thị số lần dịch
 let localConfig = reactive(new Config());
 
 storage.getItem('local:config').then((value) => {
@@ -194,12 +194,12 @@ const computedCount = computed(() => localConfig.count);
   color: var(--el-color-danger) !important;
 }
 
-/* 添加成功状态样式 */
+/* Thêm kiểu trạng thái thành công */
 .action-link.success {
   color: var(--el-color-success) !important;
 }
 
-/* 赞赏码弹窗样式 */
+/* Mã ủng hộ phong cách pop-up */
 .donate-dialog :deep(.el-dialog__header) {
   padding-bottom: 10px;
   margin-right: 0;
@@ -254,7 +254,7 @@ const computedCount = computed(() => localConfig.count);
   font-weight: bold;
 }
 
-/* 暗色主题适配 */
+/* Adaptor tối giao diện */
 @media (prefers-color-scheme: dark) {
   .footer-container {
     background: var(--fr-bg-color-darker);

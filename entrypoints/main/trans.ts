@@ -9,25 +9,25 @@ import { getMainDomain, replaceCompatFn } from "@/entrypoints/main/compat";
 import { config } from "@/entrypoints/utils/config";
 import { translateText, cancelAllTranslations } from '@/entrypoints/utils/translateApi';
 
-let hoverTimer: any; // 鼠标悬停计时器
-let htmlSet = new Set(); // 防抖
-export let originalContents = new Map(); // 保存原始内容
-let isAutoTranslating = false; // 控制是否继续翻译新内容
-let observer: IntersectionObserver | null = null; // 保存观察器实例
-let mutationObserver: MutationObserver | null = null; // 保存 DOM 变化观察器实例
+let hoverTimer: any; // Hẹn giờ di chuột
+let htmlSet = new Set(); // Chống rung
+export let originalContents = new Map(); // LưuNội dung gốc
+let isAutoTranslating = false; // Kiểm soát xem có tiếp tục dịch nội dung mới hay không
+let observer: IntersectionObserver | null = null; // Lưu phiên bản quan sát
+let mutationObserver: MutationObserver | null = null; // Lưu ví dụ về người quan sát thay đổi DOM
 
-// 使用自定义属性标记已翻译的节点
+// Đánh dấu các nút đã dịch bằng thuộc tính tùy chỉnh
 const TRANSLATED_ATTR = 'data-fr-translated';
-const TRANSLATED_ID_ATTR = 'data-fr-node-id'; // 添加节点ID属性
+const TRANSLATED_ID_ATTR = 'data-fr-node-id'; // Thêm thuộc tính ID nút
 
-let nodeIdCounter = 0; // 节点ID计数器
+let nodeIdCounter = 0; // Bộ đếm ID nút
 
-// 恢复原文内容
+// Khôi phục nội dung văn bản Nguyên
 export function restoreOriginalContent() {
-    // 取消所有等待中的翻译任务
+    // Tất cả các tác vụ dịch đang chờ xử lý tại Hủy
     cancelAllTranslations();
     
-    // 1. 遍历所有已翻译的节点
+    // 1. Duyệt qua tất cả các nút đã dịch
     document.querySelectorAll(`[${TRANSLATED_ATTR}="true"]`).forEach(node => {
         const nodeId = node.getAttribute(TRANSLATED_ID_ATTR);
         if (nodeId && originalContents.has(nodeId)) {
@@ -36,25 +36,25 @@ export function restoreOriginalContent() {
             node.removeAttribute(TRANSLATED_ATTR);
             node.removeAttribute(TRANSLATED_ID_ATTR);
             
-            // 移除可能添加的翻译相关类
+            // Loại bỏ lớp dịch có thể được thêm vào Lớp Tắt
             node.classList.remove('fluent-read-bilingual');
         }
     });
     
-    // 2. 移除所有翻译内容元素
+    // 2. Loại bỏ tất cả các thành phần nội dung đã dịch
     document.querySelectorAll('.fluent-read-bilingual-content').forEach(element => {
         element.remove();
     });
     
-    // 3. 移除所有翻译过程中添加的加载动画和错误提示
+    // 3. Xóa tất cả hình động tải và thông báo lỗi được thêm vào trong quá trình dịch
     document.querySelectorAll('.fluent-read-loading, .fluent-read-retry-wrapper').forEach(element => {
         element.remove();
     });
     
-    // 4. 清空存储的原始内容
+    // 4. Xóa nội dung được lưu trữ ban đầu
     originalContents.clear();
     
-    // 5. 停止所有观察器
+    // 5. Dừng tất cả người quan sát
     if (observer) {
         observer.disconnect();
         observer = null;
@@ -64,56 +64,56 @@ export function restoreOriginalContent() {
         mutationObserver = null;
     }
     
-    // 6. 重置所有翻译相关的状态
+    // 6. Đặt lại trạng thái tất cả các giai đoạn dịch Tắt
     isAutoTranslating = false;
-    htmlSet.clear(); // 清空防抖集合
-    nodeIdCounter = 0; // 重置节点ID计数器
+    htmlSet.clear(); // Bộ sưu tập chống rung rõ ràng
+    nodeIdCounter = 0; // Đặt lại bộ đếm ID nút
     
-    // 7. 消除可能存在的全局样式污染
+    // 7. Loại bỏ ô nhiễm kiểu toàn cầu có thể xảy ra
     const tempStyleElements = document.querySelectorAll('style[data-fr-temp-style]');
     tempStyleElements.forEach(el => el.remove());
 }
 
-// 自动翻译整个页面的功能
+// Khả năng tự động dịch toàn bộ trang
 export function autoTranslateEnglishPage() {
-    // 如果已经在翻译中，则返回
+    // Nếu đã dịch rồi thì quay lại
     if (isAutoTranslating) return;
     
-    // 获取当前页面的语言（暂时注释，存在识别问题）
+    // Lấy ngôn ngữ của trang hiện tại (nhận xét tạm thời, có vấn đề về nhận dạng)
     // const text = document.documentElement.innerText || '';
     // const cleanText = text.replace(/[\s\u3000]+/g, ' ').trim().slice(0, 500);
     // const language = detectlang(cleanText);
-    // console.log('当前页面语言：', language);
+    // console.log('Ngôn ngữ trang hiện tại:', ngôn ngữ);
     // const to = config.to;
     // if (to.includes(language)) {
-    //     console.log('目标语言与当前页面语言相同，不进行翻译');
+    //     console.log('Ngôn ngữ đích có cùng ngôn ngữ với trang hiện tại và sẽ không được dịch');
     //     return;
     // }
-    // console.log('当前页面非目标语言，开始翻译');
+    // console.log('Trang hiện tại không phải là ngôn ngữ đích, Kích hoạt chưa được dịch');
 
-    // 获取所有需要翻译的节点
+    // Nhận tất cả các nút cần dịch
     const nodes = grabAllNode(document.body);
     if (!nodes.length) return;
 
     isAutoTranslating = true;
 
-    // 创建观察器
+    // Tạo người quan sát
     observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting && isAutoTranslating) {
                 const node = entry.target as Element;
 
-                // 去重
+                // Xóa trùng lặp
                 if (node.hasAttribute(TRANSLATED_ATTR)) return;
                 
-                // 为节点分配唯一ID
+                // Gán ID duy nhất cho nút
                 const nodeId = `fr-node-${nodeIdCounter++}`;
                 node.setAttribute(TRANSLATED_ID_ATTR, nodeId);
                 
-                // 保存原始内容
+                // LưuNội dung gốc
                 originalContents.set(nodeId, node.innerHTML);
                 
-                // 标记为已翻译
+                // Đánh dấu là đã dịch
                 node.setAttribute(TRANSLATED_ATTR, 'true');
 
                 if (config.display === styles.bilingualTranslation) {
@@ -122,29 +122,29 @@ export function autoTranslateEnglishPage() {
                     handleSingleTranslation(node, false);
                 }
 
-                // 停止观察该节点
+                // Dừng quan sát nút này
                 observer.unobserve(node);
             }
         });
     }, {
         root: null,
         rootMargin: '50px',
-        threshold: 0.1 // 只要出现10%就开始翻译
+        threshold: 0.1 // Kích hoạt bắt đầu dịch ngay khi 10% xuất hiện
     });
 
-    // 开始观察所有节点
+    // Kích hoạt bắt đầu quan sát tất cả các nút
     nodes.forEach(node => {
         observer?.observe(node);
     });
 
-    // 创建 MutationObserver 监听 DOM 变化
+    // Tạo MutationObserver để theo dõi các thay đổi của DOM
     mutationObserver = new MutationObserver((mutations) => {
         if (!isAutoTranslating) return;
         
         mutations.forEach(mutation => {
             mutation.addedNodes.forEach(node => {
-                if (node.nodeType === 1) { // 元素节点
-                    // 只处理未翻译的新节点
+                if (node.nodeType === 1) { // nút phần tử
+                    // Chỉ xử lý các nút mới chưa được dịch
                     const newNodes = grabAllNode(node as Element).filter(
                         n => !n.hasAttribute(TRANSLATED_ATTR)
                     );
@@ -154,16 +154,16 @@ export function autoTranslateEnglishPage() {
         });
     });
 
-    // 监听整个 body 的变化
+    // Theo dõi những thay đổi trong toàn bộ cơ thể
     mutationObserver.observe(document.body, {
         childList: true,
         subtree: true
     });
 }
 
-// 处理鼠标悬停翻译的主函数
+// Chức năng chính xử lý dịch khi di chuột qua
 export function handleTranslation(mouseX: number, mouseY: number, delayTime: number = 0) {
-    // 检查配置
+    // Kiểm tra cấu hình
     if (!checkConfig()) return;
 
     clearTimeout(hoverTimer);
@@ -171,27 +171,27 @@ export function handleTranslation(mouseX: number, mouseY: number, delayTime: num
 
         let node = grabNode(document.elementFromPoint(mouseX, mouseY));
 
-        // 判断是否跳过节点
+        // Xác định xem có nên bỏ qua nút hay không
         if (skipNode(node)) return;
 
-        // 防抖
+        // Chống rung
         let nodeOuterHTML = node.outerHTML;
         if (htmlSet.has(nodeOuterHTML)) return;
         htmlSet.add(nodeOuterHTML);
 
-        // 根据翻译模式进行翻译
+        // Dịch dựa trên chế độ dịch
         if (config.display === styles.bilingualTranslation) {
-            handleBilingualTranslation(node, delayTime > 0);  // 根据 delayTime 可判断是否为滑动翻译
+            handleBilingualTranslation(node, delayTime > 0);  // Xác định xem đó có phải là dịch trượt dựa trên delayTime không
         } else {
             handleSingleTranslation(node, delayTime > 0);
         }
     }, delayTime);
 }
 
-// 双语翻译
+// dịch song ngữ
 export function handleBilingualTranslation(node: any, slide: boolean) {
     let nodeOuterHTML = node.outerHTML;
-    // 如果已经翻译过，250ms 后删除翻译结果
+    // Nếu nó đã được dịch, hãy xóa nó sau 250ms. Kết quả dịch
     let bilingualNode = searchClassName(node, 'fluent-read-bilingual');
     if (bilingualNode) {
         if (slide) {
@@ -209,7 +209,7 @@ export function handleBilingualTranslation(node: any, slide: boolean) {
         return;
     }
 
-    // 检查是否有缓存
+    // Kiểm tra xem có bộ đệm không
     let cached = cache.localGet(node.textContent);
     if (cached) {
         let spinner = insertLoadingSpinner(node, true);
@@ -221,24 +221,24 @@ export function handleBilingualTranslation(node: any, slide: boolean) {
         return;
     }
 
-    // 翻译
+    // Dịch
     bilingualTranslate(node, nodeOuterHTML);
 }
 
-// 单语翻译
+// Dịch đơn ngữ
 export function handleSingleTranslation(node: any, slide: boolean) {
     let nodeOuterHTML = node.outerHTML;
     let outerHTMLCache = cache.localGet(node.outerHTML);
 
 
     if (outerHTMLCache) {
-        // handleTranslation 已处理防抖 故删除判断 原bug 在保存完成后 刷新页面 可以取得缓存 直接return并没有翻译
+        // handTranslation đã được xử lý chống rung nên được đánh giá là sẽ bị xóa. Lỗi ban đầu là sau khi Lưu hoàn thành. Làm mới trang có thể lấy bộ nhớ đệm và quay lại trực tiếp mà không cần dịch.
         let spinner = insertLoadingSpinner(node, true);
         setTimeout(() => {
             spinner.remove();
             htmlSet.delete(nodeOuterHTML);
 
-            // 兼容部分网站独特的 DOM 结构
+            // Tương thích với cấu trúc DOM độc đáo của một số trang web
             let fn = replaceCompatFn[getMainDomain(document.location.hostname)];
             if (fn) fn(node, outerHTMLCache);
             else node.outerHTML = outerHTMLCache;
@@ -257,7 +257,7 @@ function bilingualTranslate(node: any, nodeOuterHTML: any) {
     let origin = node.textContent;
     let spinner = insertLoadingSpinner(node);
     
-    // 使用队列管理的翻译API
+    // Sử dụng API dịch được quản lý hàng đợi
     translateText(origin, document.title)
         .then((text: string) => {
             spinner.remove();
@@ -266,7 +266,7 @@ function bilingualTranslate(node: any, nodeOuterHTML: any) {
         })
         .catch((error: Error) => {
             spinner.remove();
-            insertFailedTip(node, error.toString() || "翻译失败", spinner);
+            insertFailedTip(node, error.toString() || "Dịch thất bại", spinner);
         });
 }
 
@@ -277,7 +277,7 @@ export function singleTranslate(node: any) {
     let origin = servicesType.isMachine(config.service) ? node.innerHTML : LLMStandardHTML(node);
     let spinner = insertLoadingSpinner(node);
     
-    // 使用队列管理的翻译API
+    // Sử dụng API dịch được quản lý hàng đợi
     translateText(origin, document.title)
         .then((text: string) => {
             spinner.remove();
@@ -290,14 +290,14 @@ export function singleTranslate(node: any) {
             node.innerHTML = text;
             let newOuterHtml = node.outerHTML;
             
-            // 缓存翻译结果
+            // Lưu đệm kết quả dịch
             cache.localSetDual(oldOuterHtml, newOuterHtml);
             cache.set(htmlSet, newOuterHtml, 250);
             htmlSet.delete(oldOuterHtml);
         })
         .catch((error: Error) => {
             spinner.remove();
-            insertFailedTip(node, error.toString() || "翻译失败", spinner);
+            insertFailedTip(node, error.toString() || "Dịch thất bại", spinner);
         });
 }
 
@@ -315,7 +315,7 @@ export const handleBtnTranslation = throttle((node: any) => {
         .then((text: string) => {
             cache.localSetDual(origin, text);
             node.innerText = text;
-        }).catch((error: any) => console.error('调用失败:', error))
+        }).catch((error: any) => console.error('Gọi API thất bại:', error))
 }, 250)
 
 

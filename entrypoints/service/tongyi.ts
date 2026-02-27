@@ -3,14 +3,14 @@ import {method, urls} from "../utils/constant";
 import {tongyiMsgTemplate} from "../utils/template";
 import {config} from "@/entrypoints/utils/config";
 
-// 文档：https://help.aliyun.com/zh/dashscope/developer-reference/tongyi-thousand-questions-metering-and-billing
+// Tài liệu: https://help.aliyun.com/zh/dashscope/developer-reference/tongyi-thousand-questions-metering-and-billing
 async function tongyi(message: any) {
-    // 构建请求头
+    // Xây dựng tiêu đề yêu cầu
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     headers.append('Authorization', `Bearer ${config.token[services.tongyi]}`);
 
-    // 判断是否使用代理
+    // Xác định xem có nên sử dụng proxy hay không
     let url: string = config.proxy[config.service] ? config.proxy[config.service] : urls[services.tongyi]
 
     const resp = await fetch(url, {
@@ -24,7 +24,7 @@ async function tongyi(message: any) {
         return result.choices[0].message.content;
     } else {
         console.log(resp)
-        throw new Error(`翻译失败: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
+        throw new Error(`Dịch thất bại: ${resp.status} ${resp.statusText} body: ${await resp.text()}`);
     }
 }
 
