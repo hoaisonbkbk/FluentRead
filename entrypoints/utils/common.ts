@@ -1,5 +1,5 @@
 // Chức năng hạn chế dòng điện chống rung, có thể truyền các thông số
-import {franc} from "franc-min";
+import { franc } from "franc-min";
 
 // Chức năng hạn chế dòng điện chống rung, có thể truyền các thông số
 export function throttle(fn: (...args: any[]) => void, interval: number) {
@@ -16,10 +16,12 @@ export function throttle(fn: (...args: any[]) => void, interval: number) {
 
 // Xuất ra các loại ngôn ngữ tiêu chuẩn, franc chỉ trả về kết quả đáng tin cậy nhất, francAll trả về tất cả kết quả bao gồm cả mức độ chắc chắn
 export function detectlang(origin: string): string {
-    const find = franc(origin, {minLength: 0});
+    const find = franc(origin, { minLength: 0 });
     // Trả về mã ngôn ngữ tiêu chuẩn tương ứng
     switch (find) {
         case "cmn":
+            return "zh-Hans";
+        case "vie":
             return "vi";
         case "eng":
             return "en";
@@ -52,7 +54,7 @@ export function getCenterPoint(touches: TouchList, point: number): { x: number, 
     centerX /= touches.length;
     centerY /= touches.length;
 
-    return {x: centerX, y: centerY};
+    return { x: centerX, y: centerY };
 }
 
 // Tìm các phần tử khớp bằng bộ chọn, trả về các phần tử khớp hoặc sai

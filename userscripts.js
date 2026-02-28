@@ -80,7 +80,7 @@ const regex = {
     verifyDomain: /To verify ownership of (.*), navigate to your DNS provider and add a TXT record with this value:/,
     autoSavedRegex: /Auto-saved (\d{2}):(\d{2}):(\d{2})/,
     // 辅助变量
-    typeMap: {'Test': '测试', 'Provided': '提供', 'Compile': '编译'},
+    typeMap: { 'Test': 'Kiểm tra', 'Provided': 'Cung cấp', 'Compile': 'Biên dịch' },
 }
 
 // 精确翻译特例适配
@@ -146,18 +146,17 @@ const LLM = new Set(
 
 // 翻译模型名称
 const transModelName = {
-    ['machine']: '---【Dịch Máy】---',
-    [transModel.microsoft]: 'Microsoft Dịch (Khuyên dùng)',
-    [transModel.deepL]: 'DeepL Dịch (Cần Token)',
-    ['llm']: '---【Dịch AI】---',
-    [transModel.moonshot]: 'Moonshot',
-    [transModel.zhipu]: 'Zhipu Qingyan',
-    [transModel.tongyi]: 'Alibaba Tongyi',
-    [transModel.yiyan]: 'Baidu ERNIE',
-    [transModel.openai]: 'ChatGPT',
+    [transModel.microsoft]: 'Microsoft Dịch',
+    [transModel.google]: 'Google Dịch',
+    [transModel.deepL]: 'DeepL',
+    [transModel.openai]: 'OpenAI',
+    [transModel.azureOpenai]: 'Azure OpenAI',
     [transModel.gemini]: 'Gemini',
-    ['native']: '---【Mô hình Cục bộ】---',
-    [transModel.ollama]: 'ollama',
+    [transModel.yiyan]: 'Baidu ERNIE (Văn Tâm Nhất Ngôn)',
+    [transModel.tongyi]: 'Alibaba Tongyi (Thông Nghĩa Thiên Vấn)',
+    [transModel.zhipu]: 'Zhipu AI (Trí Phổ)',
+    [transModel.moonshot]: 'Moonshot (Kimi)',
+    [transModel.ollama]: 'Mô hình tùy chỉnh (ví dụ: Ollama)',
 }
 
 // 错误类型
@@ -226,10 +225,10 @@ let LLMFormat = {
             'model': option,
             "temperature": 0.3,
             'messages': [
-                {'role': 'system', 'content': chatMgs.getSystemMsg()},
-                {'role': 'user', 'content': chatMgs.getUserMsg('hello')},
-                {'role': "assistant", 'content': 'Xin chào'},
-                {'role': 'user', 'content': origin}
+                { 'role': 'system', 'content': chatMgs.getSystemMsg() },
+                { 'role': 'user', 'content': chatMgs.getUserMsg('hello') },
+                { 'role': "assistant", 'content': 'Xin chào' },
+                { 'role': 'user', 'content': origin }
             ]
         })
     },
@@ -239,8 +238,8 @@ let LLMFormat = {
             "stream": false,
             "temperature": 0.1,
             'messages': [
-                {'role': 'system', 'content': chatMgs.getSystemMsg()},
-                {'role': 'user', 'content': chatMgs.getUserMsg(origin)},
+                { 'role': 'system', 'content': chatMgs.getSystemMsg() },
+                { 'role': 'user', 'content': chatMgs.getUserMsg(origin) },
             ]
         })
     }
@@ -354,8 +353,8 @@ const langManager = {
     hi: 'hi',         // 印地语
     per: 'fa',        // 波斯语
     // from、to 源、目标
-    from: {auto: '自动检测'},
-    to: {'vi': 'Tiếng Việt', 'zh-Hans': 'Tiếng Trung', 'en': 'Tiếng Anh',},
+    from: { auto: '自动检测' },
+    to: { 'vi': 'Tiếng Việt', 'zh-Hans': 'Tiếng Trung', 'en': 'Tiếng Anh', },
     // 解析种类
     parseLanguage(language) {
         return langManager[language] || language || 'en';
@@ -376,7 +375,7 @@ const langManager = {
 // 快捷键
 const shortcutManager = {
     currentShortcut: null,
-    hotkeyOptions: {Control: 'Control', Alt: 'Alt', Shift: 'Shift', '`': '反引号键'},
+    hotkeyOptions: { Control: 'Control', Alt: 'Alt', Shift: 'Shift', '`': '反引号键' },
     hotkeyPressed: false,
 }
 // 自定义 GPT地址
@@ -428,9 +427,9 @@ const settingManager = {
     
     <!--支持 ollama 等自定义模型名称-->
     <label class="instant-setting-label" id="fluent-read-custom-type-label" style="display: none;">
-    <span class="fluent-read-tooltip">自定义模型类型
+    <span class="fluent-read-tooltip">Kiểu mô hình tùy chỉnh
             <span class="fluent-read-tooltiptext">
-            请填写模型类型全称，如：gemma:7b、llama2:7b
+            Vui lòng điền tên đầy đủ của mô hình, ví dụ: gemma:7b, llama2:7b
             </span>
         </span>
     <input type="text" class="instant-setting-input" id="fluent-read-custom-type" value="${optionsManager.getOption(util.getValue('model'))}" ></label>
@@ -438,25 +437,25 @@ const settingManager = {
     <label class="instant-setting-label" id="fluent-read-option-label" style="display: none;">模型类型<select id="fluent-read-option" class="instant-setting-select"></select></label> 
     <!-- custom 输入框-->
     <label class="instant-setting-label" id="fluent-read-custom-label" style="display: none;">
-        <span class="fluent-read-tooltip">自定义 GPT 地址
+        <span class="fluent-read-tooltip">Địa chỉ GPT tùy chỉnh
             <span class="fluent-read-tooltiptext">
-            1、支持 OpenAI 官方地址，如：https://api.openai.com/v1/chat/completions
+            1. Hỗ trợ địa chỉ OpenAI chính thức, ví dụ: https://api.openai.com/v1/chat/completions
             </br>
-            2、支持 Cloudflare 代理，如：https://gateway.ai.cloudflare.com/.../openai/chat/completions
+            2. Hỗ trợ proxy Cloudflare, ví dụ: https://gateway.ai.cloudflare.com/.../openai/chat/completions
             </br>
-            3、支持国内开源代理，如：https://api.chatanywhere.com.cn/v1/chat/completions
+            3. Hỗ trợ proxy mã nguồn mở tại Trung Quốc, ví dụ: https://api.chatanywhere.com.cn/v1/chat/completions
             </br>
-            4、支持本地代理，如：http://localhost:11434/v1/chat/completions
+            4. Hỗ trợ proxy cục bộ, ví dụ: http://localhost:11434/v1/chat/completions
             </br>
-            5、由于浏览器安全限制，如需支持其他代理，请于 GitHub 提 issue.
+            5. Do giới hạn bảo mật trình duyệt, nếu cần hỗ trợ proxy khác, vui lòng tạo issue trên GitHub.
             </span>
         </span>
         <input type="text" class="instant-setting-input" id="fluent-read-custom" value="${customGPT.getGPTUrl()}" >
     </label>
     <!-- 令牌区域 -->
-    <label class="instant-setting-label" id="fluent-read-token-label" style="display: none;">token令牌<input type="text" class="instant-setting-input" id="fluent-read-token" value="" ></label>
-    <label class="instant-setting-label" id="fluent-read-ak-label" style="display: none;">ak令牌<input type="text" class="instant-setting-input" id="fluent-read-ak" value="" ></label>
-    <label class="instant-setting-label" id="fluent-read-sk-label" style="display: none;">sk令牌<input type="text" class="instant-setting-input" id="fluent-read-sk" value="" ></label>
+    <label class="instant-setting-label" id="fluent-read-token-label" style="display: none;">Token<input type="text" class="instant-setting-input" id="fluent-read-token" value="" ></label>
+    <label class="instant-setting-label" id="fluent-read-ak-label" style="display: none;">Token AK<input type="text" class="instant-setting-input" id="fluent-read-ak" value="" ></label>
+    <label class="instant-setting-label" id="fluent-read-sk-label" style="display: none;">Token SK<input type="text" class="instant-setting-input" id="fluent-read-sk" value="" ></label>
     <!-- 添加的输入区域 -->
     <label class="instant-setting-label" id="fluent-read-system-label" style="display: none;">
         <span class="fluent-read-tooltip">Thiết lập vai trò (system)<span class="fluent-read-tooltiptext">Thiết lập vai trò mô hình, ví dụ: Bạn là một nhà dịch thuật chuyên nghiệp</span></span>
@@ -468,64 +467,64 @@ const settingManager = {
     </label>
   </div>`;
         Swal.fire({
-                title: '设置中心',
-                html: dom,
-                showCancelButton: true,
-                confirmButtonText: '保存并刷新页面',
-                cancelButtonText: '取消',
-                customClass: toastClass
-            },
+            title: 'Trung tâm cài đặt',
+            html: dom,
+            showCancelButton: true,
+            confirmButtonText: 'Lưu và làm mới trang',
+            cancelButtonText: 'Hủy',
+            customClass: toastClass
+        },
         ).then(async (result) => {
-                if (result.isConfirmed) {
-                    let model = util.getElementValue('fluent-read-model');
+            if (result.isConfirmed) {
+                let model = util.getElementValue('fluent-read-model');
 
-                    // 0、设置自定义 GPT 地址
-                    if ([transModel.openai, transModel.ollama].includes(model)) {
-                        let ok = customGPT.setGPTUrl(model, util.getElementValue('fluent-read-custom'));
-                        if (!ok) {
-                            toast.fire({
-                                icon: 'error',
-                                title: '自定义地址不合法，请检查后Thử lại！'
-                            });
-                            return
-                        }
+                // 0、Cài đặt địa chỉ GPT tùy chỉnh
+                if ([transModel.openai, transModel.ollama].includes(model)) {
+                    let ok = customGPT.setGPTUrl(model, util.getElementValue('fluent-read-custom'));
+                    if (!ok) {
+                        toast.fire({
+                            icon: 'error',
+                            title: 'Địa chỉ tùy chỉnh không hợp lệ, vui lòng kiểm tra và thử lại!'
+                        });
+                        return
                     }
-
-                    // 1、设置
-                    util.setValue('from', util.getElementValue('fluent-read-from'));
-                    util.setValue('to', util.getElementValue('fluent-read-to'));
-                    // 2、设置快捷键
-                    util.setValue('hotkey', util.getElementValue('fluent-read-hotkey'));
-                    // 3、设置Dịch vụ dịch thuật
-                    util.setValue('model', model);
-                    // 4、设置模型类型
-                    if (model === transModel.ollama) {
-                        optionsManager.setOption(model, util.getElementValue('fluent-read-custom-type'));
-                    } else {
-                        optionsManager.setOption(model, util.getElementValue('fluent-read-option'));
-                    }
-                    // 5、存储 token
-                    let token = util.getElementValue('fluent-read-token');
-                    let ak = util.getElementValue('fluent-read-ak');
-                    let sk = util.getElementValue('fluent-read-sk');
-                    switch (model) {
-                        case transModel.yiyan:
-                            tokenManager.setToken(model, {ak: ak, sk: sk});
-                            break;
-                        case transModel.zhipu:
-                            tokenManager.setToken(model, {apikey: token});
-                            break;
-                        default:
-                            tokenManager.setToken(model, token);
-                    }
-                    // 6、设置 chatGPT 消息模板
-                    chatMgs.setSystemMsg(util.getElementValue('fluent-read-system-message'));
-                    chatMgs.setUserMsg(util.getElementValue('fluent-read-user-message'));
-
-                    toast.fire({icon: 'success', title: '设置成功！'});
-                    history.go(0); // 刷新页面
                 }
+
+                // 1、Cài đặt
+                util.setValue('from', util.getElementValue('fluent-read-from'));
+                util.setValue('to', util.getElementValue('fluent-read-to'));
+                // 2、Cài đặt phím tắt
+                util.setValue('hotkey', util.getElementValue('fluent-read-hotkey'));
+                // 3、Cài đặt dịch vụ dịch thuật
+                util.setValue('model', model);
+                // 4、Cài đặt kiểu mô hình
+                if (model === transModel.ollama) {
+                    optionsManager.setOption(model, util.getElementValue('fluent-read-custom-type'));
+                } else {
+                    optionsManager.setOption(model, util.getElementValue('fluent-read-option'));
+                }
+                // 5、Lưu token
+                let token = util.getElementValue('fluent-read-token');
+                let ak = util.getElementValue('fluent-read-ak');
+                let sk = util.getElementValue('fluent-read-sk');
+                switch (model) {
+                    case transModel.yiyan:
+                        tokenManager.setToken(model, { ak: ak, sk: sk });
+                        break;
+                    case transModel.zhipu:
+                        tokenManager.setToken(model, { apikey: token });
+                        break;
+                    default:
+                        tokenManager.setToken(model, token);
+                }
+                // 6、Cài đặt mẫu tin nhắn chatGPT
+                chatMgs.setSystemMsg(util.getElementValue('fluent-read-system-message'));
+                chatMgs.setUserMsg(util.getElementValue('fluent-read-user-message'));
+
+                toast.fire({ icon: 'success', title: 'Cài đặt thành công!' });
+                history.go(0); // Làm mới trang
             }
+        }
         )
         // 设置中心打开时需判断是否展示 token 选项
         let model = util.getElementValue('fluent-read-model');
@@ -618,50 +617,50 @@ const settingManager = {
     ,
     setHotkey() {
         Swal.fire({
-            title: '快捷键设置',
-            text: '请选择鼠标快捷键',
+            title: 'Cài đặt phím tắt',
+            text: 'Vui lòng chọn phím tắt chuột',
             input: 'select',
             inputValue: util.getValue('hotkey'),
             inputOptions: shortcutManager.hotkeyOptions,
-            confirmButtonText: '保存并刷新页面',
-            cancelButtonText: '取消',
+            confirmButtonText: 'Lưu và làm mới trang',
+            cancelButtonText: 'Hủy',
             showCancelButton: true,
             customClass: toastClass,
         }).then(async (result) => {
             if (result.isConfirmed) {
                 util.setValue('hotkey', result.value);
                 setShortcut(result.value);
-                toast.fire({icon: 'success', title: '快捷键设置成功！'});
-                history.go(0); // 刷新页面
+                toast.fire({ icon: 'success', title: 'Cài đặt phím tắt thành công!' });
+                history.go(0); // Làm mới trang
             }
         });
     }
     ,
     setLanguage(lang) {
         let args = lang === 'from' ? {
-            notion: "源",
+            notion: "Nguồn",
             inputValue: langManager.getFrom(),
             inputOptions: langManager.from,
         } : {
-            notion: "目标",
+            notion: "Đích",
             inputValue: langManager.getTo(),
             inputOptions: langManager.to,
         }
         Swal.fire({
-            title: args.notion + '设置',
-            text: 'Vui lòng chọn ngôn ngữ dịch ' + args.notion + '',
+            title: 'Cài đặt ' + args.notion,
+            text: 'Vui lòng chọn ngôn ngữ ' + args.notion + ' để dịch',
             input: 'select',
             inputValue: args.inputValue,
             inputOptions: args.inputOptions,
-            confirmButtonText: '保存并刷新页面',
-            cancelButtonText: '取消',
+            confirmButtonText: 'Lưu và làm mới trang',
+            cancelButtonText: 'Hủy',
             showCancelButton: true,
             customClass: toastClass,
         }).then(async (result) => {
             if (result.isConfirmed) {
                 langManager.setFromTo(langManager.getFrom(), result.value);
-                toast.fire({icon: 'success', title: args.notion + '设置成功！'});
-                history.go(0); // 刷新页面
+                toast.fire({ icon: 'success', title: 'Cài đặt ' + args.notion + ' thành công!' });
+                history.go(0); // Làm mới trang
             }
         });
     }
@@ -725,7 +724,7 @@ const settingManager = {
                 }
             });
         });
-        observer.observe(document.body, {childList: true, subtree: true});
+        observer.observe(document.body, { childList: true, subtree: true });
         // 2、手动开启一 lần解析 DOM 树
         handleDOMUpdate(document.body);
     });
@@ -814,8 +813,8 @@ const getTransNodeCompat = new Map([
         if (node.tagName.toLowerCase() === 'div' && node.classList.contains('im-description')) return true
     },
         "www.aozora.gr.jp", node => {
-        if (node.tagName.toLowerCase() === 'div' && node.classList.contains('main_text')) return true
-    },
+            if (node.tagName.toLowerCase() === 'div' && node.classList.contains('main_text')) return true
+        },
     ],
 ]);
 
@@ -1035,7 +1034,7 @@ function microsoft(origin) {
                 method: POST,
                 url: "https://api-edge.cognitive.microsofttranslator.com/translate?from=" + from + "&to=" + langManager.getTo() + "&api-version=3.0&includeSentenceLength=true&textType=html",
                 headers: LLMFormat.getStdHeader(jwtString),
-                data: JSON.stringify([{Text: origin}]),
+                data: JSON.stringify([{ Text: origin }]),
                 onload: resp => {
                     try {
                         let resultJson = JSON.parse(resp.responseText);
@@ -1182,7 +1181,7 @@ function ollama(origin) {
         GM_xmlhttpRequest({
             method: POST,
             url: customGPT.getGPTUrl(),
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             data: LLMFormat.getOllamaData(origin, option),
             onload: resp => {
                 try {
@@ -1216,20 +1215,20 @@ function gemini(origin) {
         GM_xmlhttpRequest({
             method: POST,
             url: "https://generativelanguage.googleapis.com/v1beta/models/" + option + ":generateContent?key=" + token,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             data: JSON.stringify({
                 "contents": [
                     {
                         "role": "user",
-                        "parts": [{"text": chatMgs.getSystemMsg() + chatMgs.getUserMsg("hello")}]
+                        "parts": [{ "text": chatMgs.getSystemMsg() + chatMgs.getUserMsg("hello") }]
                     },
                     {
                         "role": "model",
-                        "parts": [{"text": "Xin chào"}]
+                        "parts": [{ "text": "Xin chào" }]
                     },
                     {
                         "role": "user",
-                        "parts": [{"text": origin}]
+                        "parts": [{ "text": origin }]
                     }]
             }),
             onload: response => {
@@ -1289,15 +1288,15 @@ function yiyan(origin) {
             GM_xmlhttpRequest({
                 method: POST,
                 url: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/' + option + '?access_token=' + token,
-                headers: {"Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 system: chatMgs.getSystemMsg(),
                 data: JSON.stringify({
                     'temperature': 0.3, // 随机度
                     'disable_search': true, // 禁用搜索
                     'messages': [
-                        {"role": "user", "content": chatMgs.getUserMsg("hello")},
-                        {"role": "assistant", "content": "Xin chào"},
-                        {"role": "user", "content": origin}
+                        { "role": "user", "content": chatMgs.getUserMsg("hello") },
+                        { "role": "assistant", "content": "Xin chào" },
+                        { "role": "user", "content": origin }
                     ],
                 }),
                 onload: resp => {
@@ -1372,10 +1371,10 @@ function tongyi(origin) {
                 "model": option,
                 "input": {
                     "messages": [
-                        {"role": "system", "content": chatMgs.getSystemMsg()},
-                        {"role": "user", "content": chatMgs.getUserMsg("hello")},
-                        {"role": "assistant", "content": "Xin chào"},
-                        {"role": "user", "content": origin}
+                        { "role": "system", "content": chatMgs.getSystemMsg() },
+                        { "role": "user", "content": chatMgs.getUserMsg("hello") },
+                        { "role": "assistant", "content": "Xin chào" },
+                        { "role": "user", "content": origin }
                     ]
                 },
                 "parameters": {}
@@ -1435,14 +1434,14 @@ function generateToken(apiKey) {
     let duration = 3600000 * 24; // 生成的 token 默认24小时后过期
 
     const [key, secret] = apiKey.split('.');
-    let token = generateJWT(secret, {alg: "HS256", sign_type: "SIGN", typ: "JWT"}, {
+    let token = generateJWT(secret, { alg: "HS256", sign_type: "SIGN", typ: "JWT" }, {
         api_key: key,
         exp: Math.floor(Date.now() / 1000) + (duration / 1000),
         timestamp: Math.floor(Date.now() / 1000)
     });
     if (!token) return  // 失败则提前返回
     // 存储
-    tokenManager.setToken(transModel.zhipu, {apikey: apiKey, token: token, expiration: Date.now() + duration});
+    tokenManager.setToken(transModel.zhipu, { apikey: apiKey, token: token, expiration: Date.now() + duration });
 
     return token;
 }
@@ -1691,18 +1690,18 @@ function initApplication() {
     localStorageManager.clearLocalStorageIfNewSession()
     // 初始化菜单栏配置
     let commonConfig = [
-        {name: 'hotkey', value: 'Control'},
-        {name: 'from', value: 'auto'},
-        {name: 'to', value: 'vi'},
-        {name: 'model', value: transModel.microsoft}
+        { name: 'hotkey', value: 'Control' },
+        { name: 'from', value: 'auto' },
+        { name: 'to', value: 'vi' },
+        { name: 'model', value: transModel.microsoft }
     ]
     let modelConfig = [
-        {openai: "gpt-3.5-turbo"},
-        {yiyan: "completions"},
-        {tongyi: "qwen-turbo"},
-        {zhipu: "glm-3-turbo"},
-        {moonshot: "moonshot-v1-8"},
-        {gemini: "gemini-pro"},
+        { openai: "gpt-3.5-turbo" },
+        { yiyan: "completions" },
+        { tongyi: "qwen-turbo" },
+        { zhipu: "glm-3-turbo" },
+        { moonshot: "moonshot-v1-8" },
+        { gemini: "gemini-pro" },
     ]
     commonConfig.forEach(v => !util.getValue(v.name) ? util.setValue(v.name, v.value) : null);
     modelConfig.forEach(option => {
@@ -1851,7 +1850,7 @@ function observeDOM() {
     GM_xmlhttpRequest({
         method: POST,
         url: read,
-        data: JSON.stringify({page: url.origin}),   // 请求参数
+        data: JSON.stringify({ page: url.origin }),   // 请求参数
         onload: function (response) {
             console.log("Yêu cầu đọc mới:", url.host);
 
@@ -1887,7 +1886,7 @@ function parseDfs(node, respMap) {
             }
             break;
         // 2、文本节点
-        case  Node.TEXT_NODE:
+        case Node.TEXT_NODE:
             let fn = adapterFnMap[url.host];    // 根据 host 获取 adapter 函数，判断是否需要特殊处理
             isEmpty(fn) ? processNode(node, textType.textContent, respMap) : fn(node, respMap);
             return; // 文本节点无子节点，return
@@ -2027,7 +2026,7 @@ function procDockerhub(node, respMap) {
         if (timeMatch) {
             let [_, quantity, unit, isPlural] = timeMatch;
             quantity = (quantity === 'a' || quantity === 'an') ? ' 1' : ` ${quantity}`; // 将 'a' 或 'an' 转换为 '1'
-            const unitMap = {'minute': '分钟', 'hour': '小时', 'day': '天', 'month': '月',};  // 单位转换
+            const unitMap = { 'minute': '分钟', 'hour': '小时', 'day': '天', 'month': '月', };  // 单位转换
             unit = unitMap[unit] || unit;
             node.textContent = `${quantity} ${unit} trước`;
             return;
